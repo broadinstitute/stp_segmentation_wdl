@@ -1,0 +1,5 @@
+version: 1.2
+workflows:
+name: example_1
+  subclass: WDL
+  tile_cellpose_baysor_jupyter.wdl
