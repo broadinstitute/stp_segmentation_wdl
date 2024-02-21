@@ -62,14 +62,6 @@ workflow tile_cellpose_baysor_merge_Workflow {
         segmentation_stats=run_baysor.baysor_stat
     }
 
-    call run_jupyter_ngrok { input: baysor_out=merge_segmentation_dfs.merged_segmentation,
-        baysor_counts=merge_segmentation_dfs.merged_segmentation_counts,
-        baysor_stat=merge_segmentation_dfs.merged_segmentation_stats,
-        image_path=image_path,
-        jupyter_run_time=jupyter_run_time,
-        ngrok_auth_token=ngrok_auth_token
-    }
-
 }
 
 
@@ -300,33 +292,6 @@ task run_cellpose_nuclear {
     
 }
 
-task run_jupyter_ngrok {
-
-	input {
-        File baysor_out 
-        File baysor_counts 
-        File baysor_stat 
-        File image_path
-        Int jupyter_run_time
-        String ngrok_auth_token   
-        }
-
-     command {
-     curl -o explore_baysor.ipynb https://raw.githubusercontent.com/ayeaton/jupyter_vitessce_tmp/main/explore_baysor.ipynb
-     /script.sh ${jupyter_run_time} ${ngrok_auth_token}
-    }
-
-    output {
-        File explore_baysor = "explore_baysor.ipynb"
-    }
-
-    runtime {
-        docker: "oppdataanalysis/ngrok_jupyter:V1.0"
-        memory: "10GB"
-        disks: "local-disk 200 HDD"
-    }
-
-}
 
 task merge_segmentation_dfs {
 
