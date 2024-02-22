@@ -1,5 +1,5 @@
 version 1.0
-workflow tile_cellpose_baysor_merge_Workflow {
+workflow tile_dc_cellpose_baysor_merge_Workflow {
     input {
         Int ntiles_width # number of tiles on X axis
         Int ntiles_height # number of tiles on Y axis
