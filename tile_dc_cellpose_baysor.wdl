@@ -15,8 +15,6 @@ workflow tile_cellpose_baysor_merge_Workflow {
         File transform # path to micron to mosaic transform file 
         Int size # baysor: scale, or radius of cell
         Float prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
-        Int jupyter_run_time # seconds
-        String ngrok_auth_token # ngrok auth token for jupyter 
     }
 
 
