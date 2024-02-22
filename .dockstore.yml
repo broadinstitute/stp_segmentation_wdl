@@ -1,4 +1,4 @@
 version: 1.2
 workflows:
    - subclass: WDL
-     primaryDescriptorPath: /tile_cellpose_baysor_jupyter.wdl
+     primaryDescriptorPath: /tile_dc_cellpose_baysor.wdl
