@@ -46,6 +46,7 @@ task get_tile {
         python /opt/tiling_script.py --tif_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
+                                    --out_path="/cromwell_root/" \
                                     --interval=${interval} \
                                     --show="False"
     }
