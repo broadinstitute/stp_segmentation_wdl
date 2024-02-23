@@ -52,7 +52,7 @@ workflow MAIN_WORKFLOW {
 
     Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
 
-    scatter(interval in calling_intervals) {
+    scatter (interval in calling_intervals) {
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
