@@ -2,6 +2,8 @@ version 1.0
 
 import "tile.wdl" as TILE
 import "transcripts_per_cell.wdl" as TRANSCRIPTS
+import "cellpose.wdl" as CELLPOSE
+import "deepcell.wdl" as DEEPCELL
 import "baysor.wdl" as BAYSOR
 import "merge.wdl" as MERGE
 
@@ -59,7 +61,6 @@ workflow MAIN_WORKFLOW {
         
 
         if (segmentation_algorithm == "CELLPOSE") {
-          import "cellpose.wdl" as CELLPOSE
           call CELLPOSE.run_cellpose_nuclear {input: image_path=get_tile.tiled_image,
                                 diameter=diameter, 
                                 flow_thresh=flow_thresh, 
@@ -70,7 +71,6 @@ workflow MAIN_WORKFLOW {
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
-          import "deepcell.wdl" as DEEPCELL
           call DEEPCELL.run_deepcell_nuclear {input: image_path=get_tile.tiled_image,
                                     image_mpp=image_mpp, 
                                     pad_mode=pad_mode, 
