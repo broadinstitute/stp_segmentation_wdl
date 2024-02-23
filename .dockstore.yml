@@ -1,4 +1,4 @@
 version: 1.2
 workflows:
    - subclass: WDL
-     primaryDescriptorPath: /tile_dc_cellpose_baysor.wdl
+     primaryDescriptorPath: /main_script.wdl
