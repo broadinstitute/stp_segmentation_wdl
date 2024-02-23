@@ -97,6 +97,7 @@ workflow MAIN_WORKFLOW {
                             prior_confidence=prior_confidence
                     }
     }
+    
     call MERGE.merge_segmentation_dfs { input: segmentation=BAYSOR.run_baysor.baysor_out,
         segmentation_stats=BAYSOR.run_baysor.baysor_stat
     }
