@@ -41,7 +41,7 @@ workflow MAIN_WORKFLOW {
     }
 
 
-    call TILE.get_tile_intervals {input: image_path=image_path,
+    call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     detected_transcripts=detected_transcripts,
                                     transform=transform,
                                     ntiles_width=ntiles_width,
@@ -54,14 +54,14 @@ workflow MAIN_WORKFLOW {
 
     scatter(interval in calling_intervals) {
 
-        call TILE.get_tile {input: image_path=image_path,
+        call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
 								interval=interval        }
         
 
         if (segmentation_algorithm == "CELLPOSE") {
-          call CELLPOSE.run_cellpose_nuclear {input: image_path=get_tile.tiled_image,
+          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: image_path=get_tile.tiled_image,
                                 diameter=diameter, 
                                 flow_thresh=flow_thresh, 
                                 cell_prob_thresh=cell_prob_thresh,
@@ -69,14 +69,14 @@ workflow MAIN_WORKFLOW {
                                 segment_channel=segment_channel
                             }
 
-          call TRANSCRIPTS.get_transcripts_per_cell {input: mask=run_cellpose_nuclear.imageout,
+          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: mask=run_cellpose_nuclear.imageout,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
-          call DEEPCELL.run_deepcell_nuclear {input: image_path=get_tile.tiled_image,
+          call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: image_path=get_tile.tiled_image,
                                     image_mpp=image_mpp, 
                                     pad_mode=pad_mode, 
                                     radius=radius, 
@@ -86,13 +86,13 @@ workflow MAIN_WORKFLOW {
                                     small_objects_threshold=small_objects_threshold
                                     }
 
-         call TRANSCRIPTS.get_transcripts_per_cell {input: mask=run_deepcell_nuclear.imageout,
+         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: mask=run_deepcell_nuclear.imageout,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
         }
 
-        call BAYSOR.run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
+        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
                             size=size,
                             prior_confidence=prior_confidence
                     }
