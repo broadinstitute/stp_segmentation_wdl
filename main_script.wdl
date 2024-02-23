@@ -18,19 +18,19 @@ workflow MAIN_WORKFLOW {
 
         String segmentation_algorithm # type in all caps, either CELLPOSE or DEEPCELL 
 
-        Int diameter # cellpose: size of cell
-        Float flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
-        Float cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
-        String model_type # cellpose : model_type='cyto' or model_type='nuclei'
-        Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
+        Int? diameter # cellpose: size of cell
+        Float? flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
+        Float? cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
+        String? model_type # cellpose : model_type='cyto' or model_type='nuclei'
+        Int? segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
 
-        Float image_mpp # deepcell: Microns per pixel for image 
-        String pad_mode # deepcell: The padding mode, one of "constant" or "reflect".
-        Int radius # deepcell: size of cell
-        Float maxima_threshold # deepcell: This controls what the model considers a unique cell. Lower values will result in more separate cells being predicted, whereas higher values will result in fewer cells.
-        Float interior_threshold # deepcell: This controls how conservative the model is in estimating what is a cell vs what is background. Lower values of interior_threshold will result in larger cells, whereas higher values will result in smaller smalls.
-        Boolean exclude_border # deepcell: default False
-        Float small_objects_threshold # deepcell: default 0
+        Float? image_mpp # deepcell: Microns per pixel for image 
+        String? pad_mode # deepcell: The padding mode, one of "constant" or "reflect".
+        Int? radius # deepcell: size of cell
+        Float? maxima_threshold # deepcell: This controls what the model considers a unique cell. Lower values will result in more separate cells being predicted, whereas higher values will result in fewer cells.
+        Float? interior_threshold # deepcell: This controls how conservative the model is in estimating what is a cell vs what is background. Lower values of interior_threshold will result in larger cells, whereas higher values will result in smaller smalls.
+        Boolean? exclude_border # deepcell: default False
+        Float? small_objects_threshold # deepcell: default 0
         
         File detected_transcripts # path to the detected transcripts file
         File transform # path to micron to mosaic transform file 
