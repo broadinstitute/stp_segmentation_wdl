@@ -54,7 +54,7 @@ workflow MAIN_WORKFLOW {
 
     scatter(interval in calling_intervals) {
 
-        call TILE.get_tile {input: image_path=image_path,
+        call get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
 								interval=interval        }
