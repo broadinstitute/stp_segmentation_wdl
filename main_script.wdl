@@ -63,12 +63,12 @@ workflow MAIN_WORKFLOW {
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
-                                image_path=get_tile.tiled_image,
-                                diameter= if defined(diameter) then diameter else none, 
-                                flow_thresh= if defined(flow_thresh) then flow_thresh else none, 
-                                cell_prob_thresh= if defined(cell_prob_thresh) then cell_prob_thresh else none,
-                                model_type= if defined(model_type) then model_type else none, 
-                                segment_channel= if defined(segment_channel) then segment_channel else none
+                            image_path=get_tile.tiled_image,
+                            diameter= if defined(diameter) then diameter else none, 
+                            flow_thresh= if defined(flow_thresh) then flow_thresh else none, 
+                            cell_prob_thresh= if defined(cell_prob_thresh) then cell_prob_thresh else none,
+                            model_type= if defined(model_type) then model_type else none, 
+                            segment_channel= if defined(segment_channel) then segment_channel else none
                             }
         }
 
