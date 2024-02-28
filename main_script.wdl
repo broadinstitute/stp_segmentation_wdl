@@ -68,11 +68,6 @@ workflow MAIN_WORKFLOW {
                                 model_type=model_type, 
                                 segment_channel=segment_channel
                             }
-
-          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: mask=run_cellpose_nuclear.imageout,
-                                detected_transcripts=get_tile.tiled_detected_transcript, 
-                                transform = transform
-                                }
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
@@ -85,13 +80,13 @@ workflow MAIN_WORKFLOW {
                                     exclude_border=exclude_border, 
                                     small_objects_threshold=small_objects_threshold
                                     }
-
-         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: mask=run_deepcell_nuclear.imageout,
+        }
+        call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
+                                mask=select_first([run_cellpose_nuclear.imageout, run_deepcell_nuclear.imageout]),
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
-        }
-
+                                
         call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
                             size=size,
                             prior_confidence=prior_confidence
