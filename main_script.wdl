@@ -40,8 +40,6 @@ workflow MAIN_WORKFLOW {
 
     }
 
-    String none = "None"
-
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     detected_transcripts=detected_transcripts,
                                     transform=transform,
@@ -62,6 +60,7 @@ workflow MAIN_WORKFLOW {
         
 
         if (segmentation_algorithm == "CELLPOSE") {
+          String none = "None"
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= if defined(diameter) then diameter else none, 
@@ -73,6 +72,7 @@ workflow MAIN_WORKFLOW {
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
+          String none = "None"
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
                                 image_path=get_tile.tiled_image,
                                 image_mpp= if defined(image_mpp) then image_mpp else none,
