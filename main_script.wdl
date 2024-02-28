@@ -38,6 +38,7 @@ workflow MAIN_WORKFLOW {
         Int size # baysor: scale, or radius of cell
         Float prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
 
+        String none = "None"
     }
 
 
@@ -61,12 +62,13 @@ workflow MAIN_WORKFLOW {
         
 
         if (segmentation_algorithm == "CELLPOSE") {
-          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: image_path=get_tile.tiled_image,
-                                diameter=if defined(diameter) then diameter, 
-                                flow_thresh=if defined(flow_thresh) then flow_thresh, 
-                                cell_prob_thresh=if defined(cell_prob_thresh) then cell_prob_thresh,
-                                model_type=if defined(model_type) then model_type, 
-                                segment_channel=if defined(segment_channel) then segment_channel
+          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
+                                image_path=get_tile.tiled_image,
+                                diameter= if defined(diameter) then diameter else none, 
+                                flow_thresh= if defined(flow_thresh) then flow_thresh else none, 
+                                cell_prob_thresh= if defined(cell_prob_thresh) then cell_prob_thresh else none,
+                                model_type= if defined(model_type) then model_type else none, 
+                                segment_channel= if defined(segment_channel) then segment_channel else none
                             }
         }
 
