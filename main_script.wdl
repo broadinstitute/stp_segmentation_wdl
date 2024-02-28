@@ -40,9 +40,7 @@ workflow MAIN_WORKFLOW {
 
     }
 
-    if (false) {
-        String? none = "None"
-    }
+    String none = "None"
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     detected_transcripts=detected_transcripts,
