@@ -74,15 +74,15 @@ workflow MAIN_WORKFLOW {
 
         if (segmentation_algorithm == "DEEPCELL") {
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
-                                    image_path=get_tile.tiled_image,
-                                    image_mpp= if defined(image_mpp) then image_mpp else none,
-                                    pad_mode= if defined(pad_mode) then pad_mode else none,
-                                    radius= if defined(radius) then radius else none,
-                                    maxima_threshold= if defined(maxima_threshold) then maxima_threshold else none,
-                                    interior_threshold= if defined(interior_threshold) then interior_threshold else none,
-                                    exclude_border= if defined(exclude_border) then exclude_border else none,
-                                    small_objects_threshold= if defined(small_objects_threshold) then small_objects_threshold else none
-                                    }
+                                image_path=get_tile.tiled_image,
+                                image_mpp= if defined(image_mpp) then image_mpp else none,
+                                pad_mode= if defined(pad_mode) then pad_mode else none,
+                                radius= if defined(radius) then radius else none,
+                                maxima_threshold= if defined(maxima_threshold) then maxima_threshold else none,
+                                interior_threshold= if defined(interior_threshold) then interior_threshold else none,
+                                exclude_border= if defined(exclude_border) then exclude_border else none,
+                                small_objects_threshold= if defined(small_objects_threshold) then small_objects_threshold else none
+                                }
         }
         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
                                 mask=select_first([run_cellpose_nuclear.imageout, run_deepcell_nuclear.imageout]),
