@@ -73,14 +73,15 @@ workflow MAIN_WORKFLOW {
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
-          call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: image_path=get_tile.tiled_image,
-                                    image_mpp=image_mpp, 
-                                    pad_mode=pad_mode, 
-                                    radius=radius, 
-                                    maxima_threshold=maxima_threshold, 
-                                    interior_threshold=interior_threshold,
-                                    exclude_border=exclude_border, 
-                                    small_objects_threshold=small_objects_threshold
+          call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
+                                    image_path=get_tile.tiled_image,
+                                    image_mpp= if defined(image_mpp) then image_mpp else none,
+                                    pad_mode= if defined(pad_mode) then pad_mode else none,
+                                    radius= if defined(radius) then radius else none,
+                                    maxima_threshold= if defined(maxima_threshold) then maxima_threshold else none,
+                                    interior_threshold= if defined(interior_threshold) then interior_threshold else none,
+                                    exclude_border= if defined(exclude_border) then exclude_border else none,
+                                    small_objects_threshold= if defined(small_objects_threshold) then small_objects_threshold else none
                                     }
         }
         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
