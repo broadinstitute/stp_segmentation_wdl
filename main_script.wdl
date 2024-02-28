@@ -38,9 +38,11 @@ workflow MAIN_WORKFLOW {
         Int size # baysor: scale, or radius of cell
         Float prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
 
-        String none = "None"
     }
 
+    if (false) {
+        String? none = "None"
+    }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     detected_transcripts=detected_transcripts,
