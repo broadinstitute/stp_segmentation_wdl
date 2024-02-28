@@ -38,6 +38,7 @@ workflow MAIN_WORKFLOW {
         Int size # baysor: scale, or radius of cell
         Float prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
 
+        String none = "None"
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
@@ -60,7 +61,6 @@ workflow MAIN_WORKFLOW {
         
 
         if (segmentation_algorithm == "CELLPOSE") {
-          String none = "None"
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= if defined(diameter) then diameter else none, 
@@ -72,7 +72,6 @@ workflow MAIN_WORKFLOW {
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
-          String none = "None"
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
                                 image_path=get_tile.tiled_image,
                                 image_mpp= if defined(image_mpp) then image_mpp else none,
