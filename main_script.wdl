@@ -62,11 +62,11 @@ workflow MAIN_WORKFLOW {
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: image_path=get_tile.tiled_image,
-                                diameter=diameter, 
-                                flow_thresh=flow_thresh, 
-                                cell_prob_thresh=cell_prob_thresh,
-                                model_type=model_type, 
-                                segment_channel=segment_channel
+                                diameter=if defined(diameter) then diameter, 
+                                flow_thresh=if defined(flow_thresh) then flow_thresh, 
+                                cell_prob_thresh=if defined(cell_prob_thresh) then cell_prob_thresh,
+                                model_type=if defined(model_type) then model_type, 
+                                segment_channel=if defined(segment_channel) then segment_channel
                             }
         }
 
@@ -86,7 +86,7 @@ workflow MAIN_WORKFLOW {
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
-                                
+
         call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
                             size=size,
                             prior_confidence=prior_confidence
