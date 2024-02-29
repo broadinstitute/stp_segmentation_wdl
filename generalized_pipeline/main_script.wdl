@@ -1,11 +1,11 @@
 version 1.0
 
-import "tile.wdl" as TILE
-import "transcripts_per_cell.wdl" as TRANSCRIPTS
-import "cellpose.wdl" as CELLPOSE
-import "deepcell.wdl" as DEEPCELL
-import "baysor.wdl" as BAYSOR
-import "merge.wdl" as MERGE
+import "/generalized_pipeline/modular_wdl_scripts/tile.wdl" as TILE
+import "/generalized_pipeline/modular_wdl_scripts/transcripts_per_cell.wdl" as TRANSCRIPTS
+import "/generalized_pipeline/modular_wdl_scripts/cellpose.wdl" as CELLPOSE
+import "/generalized_pipeline/modular_wdl_scripts/eepcell.wdl" as DEEPCELL
+import "/generalized_pipeline/modular_wdl_scripts/baysor.wdl" as BAYSOR
+import "/generalized_pipeline/modular_wdl_scripts/merge.wdl" as MERGE
 
 workflow MAIN_WORKFLOW {
     input {
