@@ -62,24 +62,24 @@ workflow MAIN_WORKFLOW {
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
-                            diameter= if defined(diameter) then diameter else 0, 
-                            flow_thresh= if defined(flow_thresh) then flow_thresh else 0.0, 
-                            cell_prob_thresh= if defined(cell_prob_thresh) then cell_prob_thresh else 0.0,
-                            model_type= if defined(model_type) then model_type else 'None', 
-                            segment_channel= if defined(segment_channel) then segment_channel else 0
+                            diameter= if defined(diameter) then select_first(diameter) else 0, 
+                            flow_thresh= if defined(flow_thresh) then select_first(flow_thresh) else 0.0, 
+                            cell_prob_thresh= if defined(cell_prob_thresh) then select_first(cell_prob_thresh) else 0.0,
+                            model_type= if defined(model_type) then select_first(model_type) else 'None', 
+                            segment_channel= if defined(segment_channel) then select_first(segment_channel) else 0
                             }
         }
 
         if (segmentation_algorithm == "DEEPCELL") {
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
                                 image_path=get_tile.tiled_image,
-                                image_mpp= if defined(image_mpp) then image_mpp else 0.0,
-                                pad_mode= if defined(pad_mode) then pad_mode else 'None',
-                                radius= if defined(radius) then radius else 0,
-                                maxima_threshold= if defined(maxima_threshold) then maxima_threshold else 0.0,
-                                interior_threshold= if defined(interior_threshold) then interior_threshold else 0.0,
-                                exclude_border= if defined(exclude_border) then exclude_border else false,
-                                small_objects_threshold= if defined(small_objects_threshold) then small_objects_threshold else 0.0
+                                image_mpp= if defined(image_mpp) then select_first(image_mpp) else 0.0,
+                                pad_mode= if defined(pad_mode) then select_first(pad_mode) else 'None',
+                                radius= if defined(radius) then select_first(radius) else 0,
+                                maxima_threshold= if defined(maxima_threshold) then select_first(maxima_threshold) else 0.0,
+                                interior_threshold= if defined(interior_threshold) then select_first(interior_threshold) else 0.0,
+                                exclude_border= if defined(exclude_border) then select_first(exclude_border) else false,
+                                small_objects_threshold= if defined(small_objects_threshold) then select_first(small_objects_threshold) else 0.0
                                 }
         }
         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
