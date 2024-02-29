@@ -76,7 +76,7 @@ workflow MAIN_WORKFLOW {
                                 image_mpp= if defined(image_mpp) then image_mpp else 0.0,
                                 pad_mode= if defined(pad_mode) then pad_mode else 'None',
                                 radius= if defined(radius) then radius else 0,
-                                maxima_threshold= if defined(maxima_threshold) then maxima_threshold else 0.0,
+                                maxima_threshold= if defined(maxima_threshold) then toFloat(maxima_threshold) else 0.0,
                                 interior_threshold= if defined(interior_threshold) then interior_threshold else 0.0,
                                 exclude_border= if defined(exclude_border) then exclude_border else false,
                                 small_objects_threshold= if defined(small_objects_threshold) then small_objects_threshold else 0.0
