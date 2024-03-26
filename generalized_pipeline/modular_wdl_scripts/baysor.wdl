@@ -26,7 +26,7 @@ task run_baysor {
                 --no-ncv-estimation \
                 -s=${size} \
                 --prior-segmentation-confidence=${prior_confidence} \
-		-p \
+		        -p \
                 --save-polygons=geojson \
                 ${detected_transcripts_cellID} ::cell
         else
