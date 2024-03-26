@@ -11,7 +11,7 @@ task get_tile_intervals {
     }
 
     command {
-        python /opt/tile_intervals.py --tif_image=${image_path} \
+        python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform_mat=${transform} \
                                     --out_path="/cromwell_root/" \
@@ -43,7 +43,7 @@ task get_tile {
     }
 
     command {
-        python /opt/tiling_script.py --tif_image=${image_path} \
+        python /opt/tiling_script.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
