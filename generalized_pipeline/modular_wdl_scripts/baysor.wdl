@@ -25,10 +25,12 @@ task run_baysor {
                 -g=barcode_id \
                 --no-ncv-estimation \
                 -s=${size} \
+                -m=10 \
                 --prior-segmentation-confidence=${prior_confidence} \
-                --plot \
                 --save-polygons=geojson \
+                --plot \
                 ${detected_transcripts_cellID} ::cell
+
         else
             echo "too few lines in file"
             echo "too,few,lines" > segmentation.csv
