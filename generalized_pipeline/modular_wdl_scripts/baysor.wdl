@@ -13,10 +13,7 @@ task run_baysor {
 
             # not an ideal situation but its what worked
             julia -e 'show(Sys.CPU_NAME)'
-            julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.build(); using IJulia;'
             julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(;name="PackageCompiler", version="2.0.6"))'
-            julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/ayeaton/Baysor.git")); Pkg.build();'
-            julia -e 'import Baysor, Pkg; Pkg.activate(dirname(dirname(pathof(Baysor)))); Pkg.instantiate();'
             printf "#!/usr/local/julia/bin/julia\n\nimport Baysor: run_cli\nrun_cli()" >> /cromwell_root/baysor && chmod +x /cromwell_root/baysor
 
             /cromwell_root/baysor run -x=global_x \
@@ -47,9 +44,9 @@ task run_baysor {
     }
 
     runtime {
-        docker: "oppdataanalysis/julia_baysor:V1.0"
+        docker: "vpetukhov/baysor:latest"
         memory: "100GB"
-        maxRetries: 2
+        maxRetries: 1
         disks: "local-disk 200 HDD"
 
     }
