@@ -44,6 +44,7 @@ task run_baysor {
         File baysor_out = "segmentation.csv"
         File baysor_counts = "segmentation_counts.tsv"
         File baysor_stat = "segmentation_cell_stats.csv"
+        File baysor_polygons = "segmentation_polygons.json"
     }
 
     runtime {
