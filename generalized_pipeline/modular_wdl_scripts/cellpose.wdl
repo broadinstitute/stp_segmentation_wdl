@@ -30,6 +30,8 @@ task run_cellpose_nuclear {
 
     output{
         File imageout="imageout.tif"
+        File outlines_image="outlines.png"
+        File outlines_text="outlines.txt"
     }
 
     runtime {
