@@ -14,7 +14,6 @@ task run_cellpose_nuclear {
     command {python -m cellpose --image_path ${image_path} \
                                 --pretrained_model ${model_type} \
                                 --save_tif \
-                                --save_outlines \
                                 --save_txt \
                                 --verbose \
                                 --use_gpu \
@@ -29,9 +28,8 @@ task run_cellpose_nuclear {
     }
 
     output{
-        File imageout="imageout.tif"
-        File outlines_image="outlines.png"
-        File outlines_text="outlines.txt"
+        File imageout = "imageout.tif"
+        File outlines_text = "outlines.txt"
     }
 
     runtime {
