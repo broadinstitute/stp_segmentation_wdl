@@ -25,6 +25,7 @@ task run_cellpose_nuclear {
                                 --no_npy
              # hack to change asap 
              mv *_cp_masks.tif imageout.tif
+             mv *_cp_outlines.txt outlines.txt
     }
 
     output{
