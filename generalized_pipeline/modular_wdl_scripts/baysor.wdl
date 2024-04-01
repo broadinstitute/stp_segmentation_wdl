@@ -28,8 +28,7 @@ task run_baysor {
                 -m=10 \
                 --prior-segmentation-confidence=${prior_confidence} \
                 --save-polygons=geojson \
-                --plot \
-                ${detected_transcripts_cellID} ::cell
+                ${detected_transcripts_cellID}
 
         else
             echo "too few lines in file"
