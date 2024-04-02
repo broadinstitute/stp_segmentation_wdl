@@ -63,7 +63,7 @@ workflow MAIN_WORKFLOW {
         Int start_index = i * intervals_per_VMs
         Int end_index = (i + 1) * intervals_per_VMs - 1
 
-        for (j in range(start_index, end_index)) {
+        scatter (j in range(start_index, end_index)) {
         inputsForVM = calling_intervals[j]
         }
     
