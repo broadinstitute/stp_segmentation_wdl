@@ -43,7 +43,7 @@ task run_deepcell_nuclear {
     runtime {
         docker: "oppdataanalysis/deepcell_nuclear:V1.0"
         memory: "20GB"
-        maxRetries: 1
+        maxRetries: 0
         disks: "local-disk 200 HDD"
     }
 }

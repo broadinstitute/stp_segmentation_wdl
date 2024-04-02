@@ -48,13 +48,13 @@ task run_baysor {
         Array[File] baysor_counts = glob("segmentation_counts_*.tsv")
         Array[File] baysor_stat = glob("segmentation_cell_stats_*.csv")
         Array[File] baysor_polygons = glob("segmentation_polygons_*.json")
-        
+
     }
 
     runtime {
         docker: "vpetukhov/baysor:latest"
         memory: "100GB"
-        maxRetries: 1
+        maxRetries: 0
         disks: "local-disk 200 HDD"
 
     }

@@ -58,12 +58,13 @@ workflow MAIN_WORKFLOW {
     Int num_VMs_in_use_unbounded = length(calling_intervals) / intervals_per_VMs
     Int num_VMs_in_use = if num_VMs_in_use_unbounded > max_VMs then max_VMs else if num_VMs_in_use_unbounded < min_VM then min_VM else num_VMs_in_use_unbounded
 
+    Int start_index = i * intervals_per_VMs
+    Int end_index = (i + 1) * intervals_per_VMs - 1
+
     scatter (i in range(num_VMs_in_use)) {
 
-        Int start_index = i * intervals_per_VMs
-        Int end_index = (i + 1) * intervals_per_VMs - 1
-
-        for (j in range(start_index, end_index)) {
+        
+        scatter (j in range(indices)) {
         Array[String] inputsForVM = calling_intervals[j]
         }
     
