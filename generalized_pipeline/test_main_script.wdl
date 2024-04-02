@@ -55,14 +55,7 @@ workflow MAIN_WORKFLOW {
     Int min_VM = 1
     Int intervals_per_VMs = 5
 
-    Int num_VMs_in_use = length(calling_intervals) / intervals_per_VMs
-
-    if (num_VMs_in_use > max_VMs){
-        num_VMs_in_use = 25
-    }
-    if (num_VMs_in_use < min_VM){
-        num_VMs_in_use = 1
-    }
+    Int num_VMs_in_use = min(max(length(calling_intervals) / intervals_per_VMs, min_VM), max_VMs)
 
     scatter (i in range(num_VMs_in_use)) {
 
