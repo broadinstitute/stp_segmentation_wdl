@@ -63,7 +63,7 @@ workflow MAIN_WORKFLOW {
         Int start_index = i * intervals_per_VMs
         Int end_index = (i + 1) * intervals_per_VMs - 1
 
-        Array[String] inputsForVM = calling_intervals[start_index, end_index]
+        Array[String] inputsForVM = calling_intervals[start_index:end_index]
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
