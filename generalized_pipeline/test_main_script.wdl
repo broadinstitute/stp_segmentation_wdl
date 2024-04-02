@@ -60,7 +60,7 @@ workflow MAIN_WORKFLOW {
 
     scatter (i in range(num_VMs_in_use)) {
 
-        Array[String] inputsForVM = slice(calling_intervals, i * intervals_per_VMs, (i + 1) * intervals_per_VMs - 1)
+        Array[String] inputsForVM = calling_intervals[i * intervals_per_VMs, (i + 1) * intervals_per_VMs - 1]
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
