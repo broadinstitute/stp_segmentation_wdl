@@ -64,7 +64,7 @@ workflow MAIN_WORKFLOW {
         Int end_index = (i + 1) * intervals_per_VMs - 1
 
         scatter (j in range(start_index, end_index)) {
-        inputsForVM == calling_intervals[j]
+        Array[String] inputsForVM = calling_intervals[j]
         }
     
         call TILE.get_tile as get_tile {input: image_path=image_path,
