@@ -52,10 +52,19 @@ workflow MAIN_WORKFLOW {
     Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
 
     Int max_VMs = 25
+    Int min_VM = 1
+    Int intervals_per_VMs = 5
 
-    Int intervals_per_VMs = length(calling_intervals) / max_VMs
+    Int num_VMs_in_use = length(calling_intervals) / intervals_per_VMs
 
-    scatter (i in range(max_VMs)) {
+    if (num_VMs_in_use > max_VMs){
+        num_VMs_in_use = max_VMs
+    }
+    if (num_VMs_in_use < min_VM){
+        num_VMs_in_use = min_VM
+    }
+
+    scatter (i in range(num_VMs_in_use)) {
 
         Array[String] inputsForVM = slice(calling_intervals, i * intervals_per_VMs, (i + 1) * intervals_per_VMs - 1)
 

@@ -1,14 +1,14 @@
 version 1.0
 task run_deepcell_nuclear {
     input {
-        File image_path
-        Float image_mpp
-        String pad_mode
-        Int radius
-        Float maxima_threshold
-        Float interior_threshold
-        Boolean exclude_border
-        Float small_objects_threshold
+        File? image_path
+        Float? image_mpp
+        String? pad_mode
+        Int? radius
+        Float? maxima_threshold
+        Float? interior_threshold
+        Boolean? exclude_border
+        Float? small_objects_threshold
     }
 
     command {

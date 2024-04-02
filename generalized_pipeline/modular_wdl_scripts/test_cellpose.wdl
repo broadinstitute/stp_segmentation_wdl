@@ -2,19 +2,21 @@ version 1.0
 task run_cellpose_nuclear {
 
 	input {       
-    	Array[File] image_path
+    	Array[File]? image_path
         Int? diameter
         Float? flow_thresh
         Float? cell_prob_thresh
         String? model_type
         Int? segment_channel
-
     }
 
-    command <<<
+    command {
         
-        for index, value in enumerate(${interval}):
-            python -m cellpose --image_path ${image_path} \
+        index=0
+        for value in $image_path;
+
+        do
+            python -m cellpose --image_path ${value} \
                                 --pretrained_model ${model_type} \
                                 --save_tif \
                                 --save_txt \
@@ -26,22 +28,26 @@ task run_cellpose_nuclear {
                                 --chan ${segment_channel} \
                                 --savedir /cromwell_root/  \
                                 --no_npy
-             # hack to change asap 
-        
-        ## this is bash!!
-        mv *_cp_masks.tif imageout.tif
-        mv *_cp_outlines.txt outlines.txt
-    >>>
+            
+            # hack to change asap
+            mv *_cp_masks.tif "imageout_${index}.tif"
+            mv *_cp_outlines.txt "outlines_${index}.txt"   
+
+            index=$((index+1))
+        done
+    }
 
     output{
-        File imageout = "imageout.tif"
-        File outlines_text = "outlines.txt"
+
+        Array[File] imageout = glob("imageout_*.tif")
+        Array[File] outlines_text = glob("outlines_*.txt")
+
     }
 
     runtime {
         docker: "oppdataanalysis/cellpose:V1.0"
         memory: "100GB"
-        maxRetries: 2
+        maxRetries: 1
         disks: "local-disk 200 HDD"
 
     }

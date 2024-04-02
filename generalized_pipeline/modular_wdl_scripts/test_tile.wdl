@@ -44,7 +44,10 @@ task get_tile {
 
     command <<<
 
-        for index, value in enumerate(${interval}):
+        index=0
+        for value in $interval;
+
+        do
             python /opt/tiling_script.py --input_image=${image_path} \
                                         --detected_transcripts=${detected_transcripts} \
                                         --transform=${transform} \
@@ -52,6 +55,8 @@ task get_tile {
                                         --ind=${index} \
                                         --interval=${value} \
                                         --show="False"
+
+        done
     >>>
 
     output {
