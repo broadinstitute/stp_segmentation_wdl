@@ -49,6 +49,7 @@ task run_baysor {
     runtime {
         docker: "oppdataanalysis/julia_baysor:V1.0"
         memory: "100GB"
+        preemptible: 2
         maxRetries: 0
         disks: "local-disk 200 HDD"
 

@@ -21,6 +21,7 @@ task get_transcripts_per_cell {
     runtime {
         docker: "oppdataanalysis/image_seg_transcript:V1.0"
         memory: "20GB"
+        preemptible: 2
         maxRetries: 0
         disks: "local-disk 200 HDD"
     }
