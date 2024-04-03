@@ -47,9 +47,9 @@ task run_baysor {
     }
 
     runtime {
-        docker: "vpetukhov/baysor:latest"
+        docker: "jishar7/baysor:latest"
         memory: "100GB"
-        maxRetries: 1
+        maxRetries: 0
         disks: "local-disk 200 HDD"
 
     }
