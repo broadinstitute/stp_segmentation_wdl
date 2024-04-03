@@ -47,7 +47,7 @@ task run_baysor {
     }
 
     runtime {
-        docker: "jishar7/baysor:latest"
+        docker: "oppdataanalysis/julia_baysor:V1.0"
         memory: "100GB"
         maxRetries: 0
         disks: "local-disk 200 HDD"
