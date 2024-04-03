@@ -1,4 +1,4 @@
 version: 1.2
 workflows:
    - subclass: WDL
-     primaryDescriptorPath: /generalized_pipeline/test_main_script.wdl
+     primaryDescriptorPath: /generalized_pipeline/main_script.wdl
