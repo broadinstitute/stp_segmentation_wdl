@@ -62,10 +62,8 @@ workflow MAIN_WORKFLOW {
 
         Int start_index = i * intervals_per_VMs
         Int end_index = (i + 1) * intervals_per_VMs - 1
-
-        Array[Int] indices = range(start_index, end_index)
         
-        scatter (j in indices) {
+        scatter (j in start_index..end_index) {
         Array[String] inputsForVM = calling_intervals[j]
         }
     
