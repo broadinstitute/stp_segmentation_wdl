@@ -11,30 +11,24 @@ task run_deepcell_nuclear {
         Float? small_objects_threshold
     }
 
-    command {
-    
+    command <<<
         index=0
-        for value in $image_path;
-
-        do
-
+        for value in "${image_path[@]}"; do
             python /opt/simple_deepcell_wrapper.py \
-            --image_path ${value} \
-            --image_mpp ${image_mpp} \
-            --pad_mode ${pad_mode} \
-            --radius ${radius} \
-            --maxima_threshold ${maxima_threshold} \
-            --interior_threshold ${interior_threshold} \
-            --exclude_border ${exclude_border} \
-            --small_objects_threshold ${small_objects_threshold}
+                --image_path ${value} \
+                --image_mpp ${image_mpp} \
+                --pad_mode ${pad_mode} \
+                --radius ${radius} \
+                --maxima_threshold ${maxima_threshold} \
+                --interior_threshold ${interior_threshold} \
+                --exclude_border ${exclude_border} \
+                --small_objects_threshold ${small_objects_threshold}
         
-        mv imageout.tif "imageout_${index}.tif"
+            mv imageout.tif "imageout_${index}.tif"
 
-        index=$((index+1))
-
+            index=$((index+1))
         done
-
-    }
+    >>>
 
     output {
         Array[File] imageout = glob("imageout_*.tif")
