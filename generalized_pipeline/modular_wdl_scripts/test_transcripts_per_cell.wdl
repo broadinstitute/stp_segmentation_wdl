@@ -7,9 +7,9 @@ task get_transcripts_per_cell {
         File transform
     }
 
-    command {
+    command <<<
 
-       index=0
+       index = 0
        for tuple in $(paste <(echo "$mask") <(echo "$detected_transcripts")); do
             mask_file=$(echo "$tuple" | cut -f1)
             detected_transcripts_file=$(echo "$tuple" | cut -f2)
@@ -23,7 +23,7 @@ task get_transcripts_per_cell {
 
             index=$((index+1))
        done
-    }
+    >>>
 
     output {
         Array[File] detected_transcripts_cellID = "detected_transcripts_cellID.csv"
