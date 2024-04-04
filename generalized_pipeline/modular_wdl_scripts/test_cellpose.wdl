@@ -10,12 +10,9 @@ task run_cellpose_nuclear {
         Int? segment_channel
     }
 
-    command {
-        
+    command <<<
         index=0
-        for value in $image_path;
-
-        do
+        for value in "${image_path[@]}"; do
             python -m cellpose --image_path ${value} \
                                 --pretrained_model ${model_type} \
                                 --save_tif \
@@ -35,7 +32,7 @@ task run_cellpose_nuclear {
 
             index=$((index+1))
         done
-    }
+    >>>
 
     output{
 
