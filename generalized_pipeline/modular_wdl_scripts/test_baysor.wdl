@@ -7,37 +7,32 @@ task run_baysor {
         Float prior_confidence
     }
 
-	command {
-       
-        # not an ideal situation but its what worked
+	command <<<
         julia -e 'show(Sys.CPU_NAME)'
         julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(;name="PackageCompiler", version="2.0.6"))'
         printf "#!/usr/local/julia/bin/julia\n\nimport Baysor\nBaysor.run_cli()" >> /cromwell_root/baysor && chmod +x /cromwell_root/baysor
-        
+
         index=0
-        for value in $detected_transcripts_cellID;
-
-        do
+        for value in "${detected_transcripts_cellID[@]}"; do
+            /cromwell_root/baysor run -x=${global_x} \
+                -y=${global_y} \
+                -z=${global_z} \
+                -g=${barcode_id} \
+                --no-ncv-estimation \
+                -s=${size} \
+                -m=10 \
+                --prior-segmentation-confidence=${prior_confidence} \
+                --save-polygons=geojson \
+                ${value}
         
-        /cromwell_root/baysor run -x=global_x \
-            -y=global_y \
-            -z=global_z \
-            -g=barcode_id \
-            --no-ncv-estimation \
-            -s=${size} \
-            -m=10 \
-            --prior-segmentation-confidence=${prior_confidence} \
-            --save-polygons=geojson \
-            ${value}
-        
-        mv segmentation.csv "segmentation_${index}.csv"
-        mv segmentation_counts.tsv "segmentation_counts_${index}.tsv"  
-        mv segmentation_cell_stats.csv "segmentation_cell_stats_${index}.csv"
-        mv segmentation_polygons.json "segmentation_polygons_${index}.json"
+            mv segmentation.csv "segmentation_${index}.csv"
+            mv segmentation_counts.tsv "segmentation_counts_${index}.tsv"  
+            mv segmentation_cell_stats.csv "segmentation_cell_stats_${index}.csv"
+            mv segmentation_polygons.json "segmentation_polygons_${index}.json"
 
+            index=$((index+1))
         done
-      
-    }
+    >>>
 
     output {
 

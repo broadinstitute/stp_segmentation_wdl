@@ -43,19 +43,16 @@ task get_tile {
     }
 
     command <<<
-
         index=0
-        for value in $interval;
-
-        do
-            python /opt/tiling_script.py --input_image=${image_path} \
-                                        --detected_transcripts=${detected_transcripts} \
-                                        --transform=${transform} \
+        for value in "${interval}"; do
+            python /opt/tiling_script.py --input_image="${image_path}" \
+                                        --detected_transcripts="${detected_transcripts}" \
+                                        --transform="${transform}" \
                                         --out_path="/cromwell_root/" \
-                                        --ind=${index} \
-                                        --interval=${value} \
+                                        --ind="${index}" \
+                                        --interval="${value}" \
                                         --show="False"
-
+            index=$((index+1))
         done
     >>>
 
