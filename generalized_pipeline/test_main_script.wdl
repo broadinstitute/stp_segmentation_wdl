@@ -63,8 +63,9 @@ workflow MAIN_WORKFLOW {
 
     scatter (i in range(num_VMs_in_use)) {
 
+        Array[Int] indices = range(intervals_per_VMs * i, intervals_per_VMs * (i + 1));
         
-        scatter (j in range(indices)) {
+        scatter (j in indices) {
         Array[String] inputsForVM = calling_intervals[j]
         }
     
