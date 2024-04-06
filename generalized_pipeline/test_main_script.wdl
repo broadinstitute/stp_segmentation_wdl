@@ -49,7 +49,7 @@ workflow MAIN_WORKFLOW {
                                     min_height=min_height
                             }
 
-    Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
+    Array[Array[Array[Int]]] calling_intervals = read_lines(get_tile_intervals.intervals)
 
     Int max_VMs = 25
     Int min_VM = 1
