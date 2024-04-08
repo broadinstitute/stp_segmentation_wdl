@@ -50,7 +50,7 @@ workflow MAIN_WORKFLOW {
     Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
 
     Int index_of_interval = 0
-
+    Int num_VMs_in_use = 8
     scatter (i in range(num_VMs_in_use)) {
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
