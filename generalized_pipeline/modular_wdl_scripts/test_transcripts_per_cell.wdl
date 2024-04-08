@@ -20,14 +20,17 @@ task get_transcripts_per_cell {
                 --transform "$transform_file"
 
             mv detected_transcripts_cellID.csv "detected_transcripts_cellID_${index}.csv"
+            mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_${index}.csv"
+            mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_${index}.parquet"
 
             index=$((index+1))
        done
     >>>
 
     output {
-        Array[File] detected_transcripts_cellID = "detected_transcripts_cellID.csv"
-        Array[File] detected_transcripts_cellID_geo = "detected_transcripts_cellID_geo.csv"
+        Array[File] detected_transcripts_cellID = glob("detected_transcripts_cellID_*.csv")
+        Array[File] detected_transcripts_cellID_geo_csv = glob("detected_transcripts_cellID_geo_*.csv")
+        Array[File] detected_transcripts_cellID_geo_parquet = glob("detected_transcripts_cellID_geo_*.parquet")
     }
 
     runtime {
