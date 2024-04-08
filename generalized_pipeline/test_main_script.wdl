@@ -49,29 +49,18 @@ workflow MAIN_WORKFLOW {
                                     min_height=min_height
                             }
 
-    Array[Array[Array[Int]]] calling_intervals = read_lines(get_tile_intervals.intervals)
+    Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
 
-    Int max_VMs = 25
-    Int min_VM = 1
-    Int intervals_per_VMs = 5
-
-    Int num_VMs_in_use_unbounded = length(calling_intervals) / intervals_per_VMs
-    Int num_VMs_in_use = if num_VMs_in_use_unbounded > max_VMs then max_VMs else if num_VMs_in_use_unbounded < min_VM then min_VM else num_VMs_in_use_unbounded
+    Int index_of_interval = 0
 
     scatter (i in range(num_VMs_in_use)) {
-        
-        Int start_index = i * intervals_per_VMs
-        Int end_index = (i + 1) * intervals_per_VMs - 1
-        
-        scatter (j in start_index..end_index) {
-        Array[String] inputsForVM = calling_intervals[j]
-        }
-    
+
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
-								interval=inputsForVM        }
-        
+								interval=calling_intervals[index_of_interval]}
+
+        index_of_interval = index_of_interval + 1
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 

@@ -27,6 +27,7 @@ task get_transcripts_per_cell {
 
     output {
         Array[File] detected_transcripts_cellID = "detected_transcripts_cellID.csv"
+        Array[File] detected_transcripts_cellID_geo = "detected_transcripts_cellID_geo.csv"
     }
 
     runtime {
