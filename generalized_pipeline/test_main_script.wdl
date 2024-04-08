@@ -59,7 +59,7 @@ workflow MAIN_WORKFLOW {
                                 transform=transform,
 								interval=calling_intervals[index_of_interval]}
 
-        index_of_interval = index_of_interval + 1
+        Int index_of_interval = index_of_interval + 1
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
