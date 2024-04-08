@@ -21,6 +21,7 @@ task merge_segmentation_dfs {
     runtime {
         docker: "oppdataanalysis/merge_segmentation:V1.0"
         memory: "10GB"
+        preemptible: 2
         disks: "local-disk 200 HDD"
     }
 

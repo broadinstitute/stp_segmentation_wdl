@@ -28,6 +28,7 @@ task get_tile_intervals {
     runtime {
         docker: "oppdataanalysis/tiling:V1.0"
         memory: "20GB"
+        preemptible: 2
         disks: "local-disk 200 HDD"
     }
     
@@ -43,17 +44,12 @@ task get_tile {
     }
 
     command <<<
-        index=0
-        for value in "${interval}"; do
-            python /opt/tiling_script.py --input_image="${image_path}" \
-                                        --detected_transcripts="${detected_transcripts}" \
-                                        --transform="${transform}" \
-                                        --out_path="/cromwell_root/" \
-                                        --ind="${index}" \
-                                        --interval="${value}" \
-                                        --show="False"
-            index=$((index+1))
-        done
+        python /opt/tiling_script.py --tif_image=${image_path} \
+                                    --detected_transcripts=${detected_transcripts} \
+                                    --transform=${transform} \
+                                    --out_path="/cromwell_root/" \
+                                    --interval=${interval} \
+                                    --show="False"
     >>>
 
     output {
@@ -65,6 +61,7 @@ task get_tile {
     runtime {
         docker: "oppdataanalysis/tiling:V1.0"
         memory: "20GB"
+        preemptible: 2
         disks: "local-disk 200 HDD"
     }
     
