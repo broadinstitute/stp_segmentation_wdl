@@ -6,8 +6,7 @@ task get_tile_intervals {
         File transform  
         Int ntiles_width
         Int ntiles_height
-        Int min_width
-        Int min_height
+        Int overlap
     }
 
     command {
@@ -17,8 +16,7 @@ task get_tile_intervals {
                                     --out_path="/cromwell_root/" \
                                     --ntiles_width=${ntiles_width} \
                                     --ntiles_height=${ntiles_height} \
-                                    --min_width=${min_width} \
-                                    --min_height=${min_height}
+                                    --overlap=overlap
     }
 
     output {
@@ -44,7 +42,7 @@ task get_tile {
     }
 
     command <<<
-        python /opt/tiling_script.py --tif_image=${image_path} \
+        python /opt/tiling_script.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \

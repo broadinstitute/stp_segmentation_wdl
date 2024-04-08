@@ -45,8 +45,7 @@ workflow MAIN_WORKFLOW {
                                     transform=transform,
                                     ntiles_width=ntiles_width,
                                     ntiles_height=ntiles_height,
-                                    min_width=min_width,
-                                    min_height=min_height
+                                    overlap=overlap
                             }
 
     Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
