@@ -24,7 +24,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "oppdataanalysis/tiling:V1.0"
+        docker: "jishar7/tiling:latest"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -57,7 +57,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "oppdataanalysis/tiling:V1.0"
+        docker: "jishar7/tiling:latest"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

@@ -34,7 +34,7 @@ task get_transcripts_per_cell {
     }
 
     runtime {
-        docker: "oppdataanalysis/image_seg_transcript:V1.0"
+        docker: "jishar7/mask_cellpose:latest"
         memory: "20GB"
         preemptible: 2
         maxRetries: 0
