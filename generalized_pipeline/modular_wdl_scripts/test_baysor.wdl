@@ -9,12 +9,12 @@ task run_baysor {
 
 	command <<<
         # not an ideal situation but its what worked
-            julia -e 'show(Sys.CPU_NAME)'
-            julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.build(); using IJulia;'
-            julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(;name="PackageCompiler", version="2.0.6"))'
-            julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/ayeaton/Baysor.git")); Pkg.build();'
-            julia -e 'import Baysor, Pkg; Pkg.activate(dirname(dirname(pathof(Baysor)))); Pkg.instantiate();'
-            printf "#!/usr/local/julia/bin/julia\n\nimport Baysor: run_cli\nrun_cli()" >> /cromwell_root/baysor && chmod +x /cromwell_root/baysor
+        julia -e 'show(Sys.CPU_NAME)'
+        julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.build(); using IJulia;'
+        julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(;name="PackageCompiler", version="2.0.6"))'
+        julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/ayeaton/Baysor.git")); Pkg.build();'
+        julia -e 'import Baysor, Pkg; Pkg.activate(dirname(dirname(pathof(Baysor)))); Pkg.instantiate();'
+        printf "#!/usr/local/julia/bin/julia\n\nimport Baysor: run_cli\nrun_cli()" >> /cromwell_root/baysor && chmod +x /cromwell_root/baysor
 
         index=0
         for value in "${detected_transcripts_cellID[@]}"; do
