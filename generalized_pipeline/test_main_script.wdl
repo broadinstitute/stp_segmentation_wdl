@@ -11,8 +11,7 @@ workflow MAIN_WORKFLOW {
     input {
         Int ntiles_width # number of tiles on X axis
         Int ntiles_height # number of tiles on Y axis
-        Int min_width # minimum tile size x axis
-        Int min_height # minimum tile size y axis
+        Int overlap # overlap between tiles
 
         File image_path # path to DAPI image
 
