@@ -2,8 +2,8 @@ version 1.0
 task merge_segmentation_dfs {
 
     input {
-        Array[File] segmentation
-        Array[File] segmentation_stats
+        Array[Array[File]] segmentation
+        Array[Array[File]] segmentation_stats
     }
 
     command {
