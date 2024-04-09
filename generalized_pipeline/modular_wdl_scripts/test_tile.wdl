@@ -21,10 +21,11 @@ task get_tile_intervals {
 
     output {
         File intervals = "intervals.csv"
+        # File num_VMs_in_use_file = "num_VMs_in_use.txt"
     }
 
     runtime {
-        docker: "jishar7/tiling:latest"
+        docker: "jishar7/tiling:V2.0"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -57,7 +58,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling:latest"
+        docker: "jishar7/tiling:V2.0"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
