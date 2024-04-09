@@ -20,7 +20,7 @@ task get_tile_intervals {
     }
 
     output {
-        File intervals = "intervals.csv"
+        File intervals = "intervals.txt"
         # File num_VMs_in_use_file = "num_VMs_in_use.txt"
     }
 
