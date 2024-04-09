@@ -42,14 +42,14 @@ task get_tile {
 		String interval
     }
 
-    command <<<
+    command {
         python /opt/tiling_script.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
                                     --interval=${interval} \
                                     --show="False"
-    >>>
+    }
 
     output {
         Array[File] tile_metadata = glob("tile_metadata_*.csv")
