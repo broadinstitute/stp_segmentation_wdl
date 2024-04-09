@@ -16,7 +16,7 @@ task get_tile_intervals {
                                     --out_path="/cromwell_root/" \
                                     --ntiles_width=${ntiles_width} \
                                     --ntiles_height=${ntiles_height} \
-                                    --overlap=overlap
+                                    --overlap=${overlap}
     }
 
     output {
