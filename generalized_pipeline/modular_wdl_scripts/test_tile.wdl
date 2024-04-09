@@ -12,7 +12,7 @@ task get_tile_intervals {
     command {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
-                                    --transform_mat=${transform} \
+                                    --transform=${transform} \
                                     --out_path="/cromwell_root/" \
                                     --ntiles_width=${ntiles_width} \
                                     --ntiles_height=${ntiles_height} \
