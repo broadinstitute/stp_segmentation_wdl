@@ -48,7 +48,7 @@ workflow MAIN_WORKFLOW {
                             }
 
     Map[String, Array[String]] calling_intervals = read_json(get_tile_intervals.intervals)
-    Array[String] KEYS = keys(calling_intervals)
+    # Array[String] KEYS = keys(calling_intervals)
 
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
@@ -56,7 +56,7 @@ workflow MAIN_WORKFLOW {
 
     scatter (i in range(num_VMs_in_use)) {
 
-        String index_for_intervals = KEYS[i]
+        String index_for_intervals = "~{i}"
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
