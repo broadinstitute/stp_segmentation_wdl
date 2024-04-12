@@ -56,10 +56,12 @@ workflow MAIN_WORKFLOW {
 
     scatter (i in range(num_VMs_in_use)) {
 
+        String index_for_intervals = KEYS[i]
+
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
-								interval=calling_intervals[KEYS[i]]}
+								interval=calling_intervals[index_for_intervals]}
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 

@@ -39,7 +39,7 @@ task get_tile {
         File image_path
         File detected_transcripts
         File transform 
-		String interval
+		Array[String] interval
     }
 
     command {
