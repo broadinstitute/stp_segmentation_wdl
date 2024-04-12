@@ -47,8 +47,9 @@ workflow MAIN_WORKFLOW {
                                     overlap=overlap
                             }
 
-    Array[String] calling_intervals = read_json(get_tile_intervals.intervals)
-    
+    Map[String, Array[String]] calling_intervals = read_json(get_tile_intervals.intervals)
+    Array[String] KEYS = keys(calling_intervals)
+
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
     Int num_VMs_in_use = 8
@@ -58,7 +59,7 @@ workflow MAIN_WORKFLOW {
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
-								interval=calling_intervals[i]}
+								interval=calling_intervals[KEYS[i]]}
 
         if (segmentation_algorithm == "CELLPOSE") {
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
