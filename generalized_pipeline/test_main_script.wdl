@@ -47,7 +47,7 @@ workflow MAIN_WORKFLOW {
                                     overlap=overlap
                             }
 
-    Array[String] calling_intervals = read_lines(get_tile_intervals.intervals)
+    Array[String] calling_intervals = read_json(get_tile_intervals.intervals)
     
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
