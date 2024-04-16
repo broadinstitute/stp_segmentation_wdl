@@ -47,7 +47,7 @@ task get_tile {
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
-                                    --interval=${interval} \
+                                    --interval=${sep=', ' interval} \
                                     --show="False"
     }
 
