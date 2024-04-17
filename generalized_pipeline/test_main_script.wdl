@@ -7,6 +7,11 @@ import "./modular_wdl_scripts/test_deepcell.wdl" as DEEPCELL
 import "./modular_wdl_scripts/test_baysor.wdl" as BAYSOR
 import "./modular_wdl_scripts/test_merge.wdl" as MERGE
 
+struct json_interval_file_contents {
+    String index
+    Array[String] intervals
+}
+
 workflow MAIN_WORKFLOW {
     input {
         Int ntiles_width # number of tiles on X axis
@@ -48,8 +53,7 @@ workflow MAIN_WORKFLOW {
                             }
 
     Map[String, Array[String]] calling_intervals = read_json(get_tile_intervals.intervals)
-    # Array[String] KEYS = keys(calling_intervals)
-
+    
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
     Int num_VMs_in_use = 8

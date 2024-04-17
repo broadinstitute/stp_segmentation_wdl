@@ -25,7 +25,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling:V14.0"
+        docker: "jishar7/tiling:V15.0"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -39,7 +39,7 @@ task get_tile {
         File image_path
         File detected_transcripts
         File transform 
-		Array[Array[Int]] interval
+		Array[String] interval
     }
 
     command {
@@ -47,7 +47,7 @@ task get_tile {
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
-                                    --interval=${sep=', ' interval} \
+                                    --interval="~{sep=', ' interval}" \
                                     --show="False"
     }
 
@@ -58,7 +58,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling:V14.0"
+        docker: "jishar7/tiling:V15.0"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
