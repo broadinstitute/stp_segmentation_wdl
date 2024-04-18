@@ -33,7 +33,7 @@ task run_cellpose_nuclear {
             mv *_cp_masks.tif "imageout_{index}.tif"
             mv *_cp_outlines.txt "outlines_{index}.txt"   
 
-            index= index + 1
+            index = index + 1
         done
     >>>
 
