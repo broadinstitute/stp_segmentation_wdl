@@ -12,17 +12,17 @@ task run_cellpose_nuclear {
 
     command <<<
         index=0
-        for value in "${image_path[@]}"; do
-            python -m cellpose --image_path ${value} \
-                                --pretrained_model ${model_type} \
+        for value in ~{image_path}; do
+            python -m cellpose --image_path ~{value} \
+                                --pretrained_model ~{model_type} \
                                 --save_tif \
                                 --save_txt \
                                 --verbose \
                                 --use_gpu \
-                                --diameter ${diameter} \
-                                --flow_threshold ${flow_thresh} \
-                                --cellprob_threshold ${cell_prob_thresh} \
-                                --chan ${segment_channel} \
+                                --diameter ~{diameter} \
+                                --flow_threshold ~{flow_thresh} \
+                                --cellprob_threshold ~{cell_prob_thresh} \
+                                --chan ~{segment_channel} \
                                 --savedir "/cromwell_root/"  \
                                 --no_npy
             
