@@ -2,7 +2,7 @@
 
 This repository contains WDL scripts that will be used to run workflows on Terra.bio.
 
-## A very brief WDL, Docker and Cromwell guide
+## Quick Overview: WDL, Docker, and Cromwell
 
 #### What is WDL (Workflow Description Language)?
 
