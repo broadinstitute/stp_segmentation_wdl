@@ -13,7 +13,7 @@ task run_cellpose_nuclear {
     command <<<
         index=0
         for value in "~{sep=', ' image_path}"; do
-            python -m cellpose --image_path value \
+            python -m cellpose --image_path ${value} \
                                 --pretrained_model ~{model_type} \
                                 --save_tif \
                                 --save_txt \
