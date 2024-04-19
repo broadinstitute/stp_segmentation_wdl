@@ -1,6 +1,6 @@
 # STP Segmentation WDL
 
-This repository contains WDL scripts that will be used to run workflows on Terra.bio.
+This repository contains WDL scripts that will be used to run cell segmentation workflows on Terra.bio.
 
 ## Quick Overview: WDL, Docker, and Cromwell
 
