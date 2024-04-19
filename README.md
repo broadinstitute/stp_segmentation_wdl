@@ -14,7 +14,7 @@ Docker is a platform for developing, shipping, and running applications in conta
 
 #### What is Cromwell?
 
-Cromwell is a workflow management system designed to execute WDL (Workflow Description Language) workflows. It's developed by the Broad Institute for managing complex scientific workflows. Local Setup instructions mentioned [here](https://github.com/broadinstitute/stp_segmentation_wdl/edit/main/README.md#a-install-cromwell-on-local-machinecluster).
+Cromwell is a workflow management system designed to execute WDL (Workflow Description Language) workflows. It's developed by the Broad Institute for managing complex scientific workflows. Local Setup instructions mentioned [here](https://github.com/broadinstitute/stp_segmentation_wdl?tab=readme-ov-file#testing-wdl-workflow-on-a-local-machinecluster).
 
 ### A) WDL Guide:
 
