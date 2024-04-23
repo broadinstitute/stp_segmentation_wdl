@@ -12,9 +12,11 @@ task run_cellpose_nuclear {
 
     command <<<
         index=0
-        for value in "~{sep=', ' image_path}"; 
-        do
-            python -m cellpose --image_path "${value}" \
+
+        IFS=', ' read -r -a combined_file_array <<< "~{sep=', ' image_path}"
+
+        for value in "${combined_file_array[@]}"; do
+            python -m cellpose --image_path "$value" \
                                 --pretrained_model ~{model_type} \
                                 --save_tif \
                                 --save_txt \
@@ -29,10 +31,10 @@ task run_cellpose_nuclear {
             
             # hack to change asap
 
-            mv *_cp_masks.tif "imageout_${index}.tif"
-            mv *_cp_outlines.txt "outlines_${index}.txt"
+            mv *_cp_masks.tif "imageout_$index.tif"
+            mv *_cp_outlines.txt "outlines_$index.txt"
 
-            index = index + 1
+            ((index++))
         done
     >>>
 
