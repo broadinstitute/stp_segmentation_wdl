@@ -23,7 +23,7 @@ task get_transcripts_per_cell {
             python /opt/mask_overlap.py \
                 --mask "$mask_file" \
                 --detected_transcripts "$detected_transcripts_file" \
-                --transform ~{transform_file}
+                --transform ~{transform}
 
             mv detected_transcripts_cellID.csv "detected_transcripts_cellID_$index.csv"
             mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_$index.csv"
