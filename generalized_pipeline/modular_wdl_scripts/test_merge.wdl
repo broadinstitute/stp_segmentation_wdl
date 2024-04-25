@@ -6,10 +6,10 @@ task merge_segmentation_dfs {
         Array[Array[File]] segmentation_stats
     }
 
-    command {
-        python /opt/merge_dfs.py --segmentation_paths ${sep=',' segmentation} \
-                                --segmentation_cell_stats_paths ${sep=',' segmentation_stats}
-    }
+    command <<<
+        python /opt/merge_dfs.py --segmentation_paths ~{sep=',' segmentation} \
+                                --segmentation_cell_stats_paths ~{sep=',' segmentation_stats}
+    >>>
 
     output {
         File merged_segmentation = "merged_segmentation.csv"

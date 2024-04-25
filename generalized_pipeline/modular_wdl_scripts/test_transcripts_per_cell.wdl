@@ -29,7 +29,7 @@ task get_transcripts_per_cell {
             mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_$index.csv"
             mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_$index.parquet"
 
-            ((index+1))
+            ((index++))
        done
     >>>
 

@@ -17,21 +17,24 @@ task run_baysor {
         printf "#!/usr/local/julia/bin/julia\n\nimport Baysor: run_cli\nrun_cli()" >> /cromwell_root/baysor && chmod +x /cromwell_root/baysor
 
         index=0
-        for value in "${detected_transcripts_cellID[@]}"; do
-            /cromwell_root/baysor run -x=${global_x} \
-                -y=${global_y} \
-                -z=${global_z} \
-                -g=${barcode_id} \
-                --no-ncv-estimation \
-                -s=${size} \
-                --prior-segmentation-confidence=${prior_confidence} \
-                ${value} ::cell
-        
-            mv segmentation.csv "segmentation_${index}.csv"
-            mv segmentation_counts.tsv "segmentation_counts_${index}.tsv"  
-            mv segmentation_cell_stats.csv "segmentation_cell_stats_${index}.csv"
 
-            index=$((index+1))
+        IFS=', ' read -r -a combined_file_array_transcripts <<< "~{sep=', ' detected_transcripts_cellID}"
+
+        for value in "${combined_file_array_transcripts[@]}"; do
+            /cromwell_root/baysor run -x="global_x" \
+                -y="global_y" \
+                -z="global_z" \
+                -g="barcode_id" \
+                --no-ncv-estimation \
+                -s=~{size} \
+                --prior-segmentation-confidence=~{prior_confidence} \
+                "$value" ::cell
+        
+            mv segmentation.csv "segmentation_$index.csv"
+            mv segmentation_counts.tsv "segmentation_counts_$index.tsv"  
+            mv segmentation_cell_stats.csv "segmentation_cell_stats_$index.csv"
+
+            ((index++))
         done
     >>>
 
