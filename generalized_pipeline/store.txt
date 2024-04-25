@@ -24,3 +24,18 @@ command <<<
             index = index + 1
         done
     >>>
+
+# for transcripts per cell
+
+for tuple in $(paste <(echo "$mask") <(echo "$detected_transcripts")); do
+            mask_file=$(echo "$tuple" | cut -f1)
+            detected_transcripts_file=$(echo "$tuple" | cut -f2)
+
+            python /opt/mask_overlap.py \
+                --mask "$mask_file" \
+                --detected_transcripts "$detected_transcripts_file" \
+                --transform "$transform_file"
+
+            mv detected_transcripts_cellID.csv "detected_transcripts_cellID_$index.csv"
+            mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_$index.csv"
+            mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_$index.parquet"

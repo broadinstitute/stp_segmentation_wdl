@@ -10,20 +10,26 @@ task get_transcripts_per_cell {
     command <<<
 
        index = 0
-       for tuple in $(paste <(echo "$mask") <(echo "$detected_transcripts")); do
-            mask_file=$(echo "$tuple" | cut -f1)
-            detected_transcripts_file=$(echo "$tuple" | cut -f2)
+
+       IFS=', ' read -r -a combined_file_array_mask <<< "~{sep=', ' mask}"
+       IFS=', ' read -r -a combined_file_array_transcripts <<< "~{sep=', ' detected_transcripts}"
+
+       length=${#combined_file_array_mask[@]}
+
+       for ((i=0; i<$length; i++)); do
+            mask_file=${combined_file_array_mask[i]}  
+            detected_transcripts_file=${combined_file_array_transcripts[i]} 
 
             python /opt/mask_overlap.py \
                 --mask "$mask_file" \
                 --detected_transcripts "$detected_transcripts_file" \
                 --transform "$transform_file"
 
-            mv detected_transcripts_cellID.csv "detected_transcripts_cellID_${index}.csv"
-            mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_${index}.csv"
-            mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_${index}.parquet"
+            mv detected_transcripts_cellID.csv "detected_transcripts_cellID_$index.csv"
+            mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_$index.csv"
+            mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_$index.parquet"
 
-            index=$((index+1))
+            ((index+1))
        done
     >>>
 
