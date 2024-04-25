@@ -7,11 +7,6 @@ import "./modular_wdl_scripts/test_deepcell.wdl" as DEEPCELL
 import "./modular_wdl_scripts/test_baysor.wdl" as BAYSOR
 import "./modular_wdl_scripts/test_merge.wdl" as MERGE
 
-struct json_interval_file_contents {
-    String index
-    Array[String] intervals
-}
-
 workflow MAIN_WORKFLOW {
     input {
         Int ntiles_width # number of tiles on X axis
