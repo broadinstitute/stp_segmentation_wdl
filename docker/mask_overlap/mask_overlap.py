@@ -91,9 +91,6 @@ def main(detected_transcripts, transform, outlines, out_path):
     
     out_df.to_parquet(out_path + 'detected_transcripts_cellID_geo.parquet')
 
-    out_df =  out_df.drop(["geometry_y", "geometry_x"],  axis = 1)
-    out_df.to_csv(out_path + "detected_transcripts_cellID.csv")
-
 
 if __name__ == '__main__':
 
