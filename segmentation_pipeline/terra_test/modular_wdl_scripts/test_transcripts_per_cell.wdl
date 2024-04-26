@@ -26,7 +26,6 @@ task get_transcripts_per_cell {
                 --detected_transcripts "$detected_transcripts_file" \
                 --transform ~{transform}
 
-            mv detected_transcripts_cellID.csv "detected_transcripts_cellID_$index.csv"
             mv detected_transcripts_cellID_geo.csv "detected_transcripts_cellID_geo_$index.csv"
             mv detected_transcripts_cellID_geo.parquet "detected_transcripts_cellID_geo_$index.parquet"
 
