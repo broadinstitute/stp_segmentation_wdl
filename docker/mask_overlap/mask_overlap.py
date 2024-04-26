@@ -7,6 +7,7 @@ from skimage import measure
 from shapely import geometry
 import time
 import geopandas
+from shapely.geometry import Polygon
 import rtree
 
 def convert_to_px(conversion, mat):
