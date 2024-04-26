@@ -49,7 +49,7 @@ task run_cellpose_nuclear {
         docker: "oppdataanalysis/cellpose:V1.0"
         memory: "100GB"
         preemptible: 2
-        maxRetries: 0
+        maxRetries: 1
         disks: "local-disk 200 HDD"
 
     }
