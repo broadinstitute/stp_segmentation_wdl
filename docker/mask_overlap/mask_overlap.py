@@ -32,7 +32,7 @@ def convert_to_px(conversion, mat):
     return [transformed_mat[[0]], transformed_mat[[1]]]
 
 
-def main(detected_transcripts, transform, mask):
+def main(detected_transcripts, transform, mask, out_path):
     df_detected_transcripts = pd.read_csv(detected_transcripts)
     df_detected_transcripts =  df_detected_transcripts.drop("Unnamed: 0", axis = 1)
     
@@ -83,22 +83,24 @@ def main(detected_transcripts, transform, mask):
     out_df[":cell"] = out_df[":cell"].fillna(0)
     out_df[":cell"] = out_df[":cell"].astype(int)
         
-    out_df.to_csv("detected_transcripts_cellID_geo.csv")
+    out_df.to_csv(out_path + "detected_transcripts_cellID_geo.csv")
     
-    out_df.to_parquet('detected_transcripts_cellID_geo.parquet')
+    out_df.to_parquet(out_path + 'detected_transcripts_cellID_geo.parquet')
 
     out_df =  out_df.drop(["geometry_y", "geometry_x"],  axis = 1)
-    out_df.to_csv("detected_transcripts_cellID.csv")
+    out_df.to_csv(out_path + "detected_transcripts_cellID.csv")
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='segmentation to transcripts')
     parser.add_argument('--mask')
+    parser.add_argument('--out_path')
     parser.add_argument('--transform')
     parser.add_argument('--detected_transcripts')
     args = parser.parse_args()
 
     main(mask = args.mask,
+        out_path = args.out_path,
         transform = args.transform,
         detected_transcripts = args.detected_transcripts)

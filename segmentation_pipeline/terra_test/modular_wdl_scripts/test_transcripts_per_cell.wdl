@@ -22,6 +22,7 @@ task get_transcripts_per_cell {
 
             python /opt/mask_overlap.py \
                 --mask "$mask_file" \
+                --out_path="/cromwell_root/" \
                 --detected_transcripts "$detected_transcripts_file" \
                 --transform ~{transform}
 
