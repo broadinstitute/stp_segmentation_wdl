@@ -7,6 +7,7 @@ from skimage import measure
 from shapely import geometry
 import time
 import geopandas
+from shapely.wkb import dumps
 from shapely.geometry import Polygon
 import rtree
 
@@ -79,11 +80,13 @@ def main(detected_transcripts, transform, outlines, out_path):
     df_geo_join = df_geo_join[[":cell", "geometry", "Index"]]
     out_df = df_detected_transcripts_geo.merge(df_geo_join, how = 'left', on = "Index")
 
-
     out_df =out_df.drop_duplicates(subset="Index")
     out_df[":cell"] = out_df[":cell"].fillna(0)
     out_df[":cell"] = out_df[":cell"].astype(int)
         
+    out_df['geometry_x'] = out_df['geometry_x'].apply(lambda geom: dumps(geom, hex=True))
+    out_df['geometry_y'] = out_df['geometry_y'].apply(lambda geom: dumps(geom, hex=True))
+
     out_df.to_csv(out_path + "detected_transcripts_cellID_geo.csv")
     
     out_df.to_parquet(out_path + 'detected_transcripts_cellID_geo.parquet')
