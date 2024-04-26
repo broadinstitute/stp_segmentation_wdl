@@ -91,7 +91,7 @@ workflow MAIN_WORKFLOW {
                                 transform = transform
                                 }
 
-        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
+        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
                             size=size,
                             prior_confidence=prior_confidence
                     }

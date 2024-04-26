@@ -2,7 +2,7 @@ version 1.0
 task run_baysor {
 
     input {
-        Array[File] detected_transcripts_cellID
+        Array[File] detected_transcripts_cellID_geo_csv
         Int size
         Float prior_confidence
     }
@@ -18,7 +18,7 @@ task run_baysor {
 
         index=0
 
-        IFS=', ' read -r -a combined_file_array_transcripts <<< "~{sep=', ' detected_transcripts_cellID}"
+        IFS=', ' read -r -a combined_file_array_transcripts <<< "~{sep=', ' detected_transcripts_cellID_geo_csv}"
 
         for value in "${combined_file_array_transcripts[@]}"; do
             /cromwell_root/baysor run -x="global_x" \
