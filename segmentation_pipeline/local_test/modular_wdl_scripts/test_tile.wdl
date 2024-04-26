@@ -13,7 +13,7 @@ task get_tile_intervals {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --out_path="/cromwell_root/" \
+                                    --out_path="" \
                                     --ntiles_width=${ntiles_width} \
                                     --ntiles_height=${ntiles_height} \
                                     --overlap=${overlap}
@@ -46,7 +46,7 @@ task get_tile {
         python /opt/tiling_script.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --out_path="/cromwell_root/" \
+                                    --out_path="" \
                                     --interval="~{sep=', ' interval}" \
                                     --show="False"
     }

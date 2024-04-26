@@ -26,7 +26,6 @@ task run_cellpose_nuclear {
                                 --flow_threshold ~{flow_thresh} \
                                 --cellprob_threshold ~{cell_prob_thresh} \
                                 --chan ~{segment_channel} \
-                                --savedir "/cromwell_root/"  \
                                 --no_npy
             
             # hack to change asap
