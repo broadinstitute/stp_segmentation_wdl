@@ -41,7 +41,7 @@ task get_transcripts_per_cell {
     }
 
     runtime {
-        docker: "jishar7/mask_cellpose:V7.0"
+        docker: "jishar7/mask_cellpose:V8.0"
         memory: "20GB"
         preemptible: 2
         maxRetries: 0
