@@ -11,4 +11,7 @@ RUN pip install scikit-image
 RUN pip install opencv-python
 RUN pip install matplotlib
 RUN pip install numpy==1.23
+RUN pip install pyarrow fastparquet  # Add this line to install pyarrow and fastparquet
+
 ENTRYPOINT ["/bin/bash", "-l", "-c", "/bin/bash"]
+
