@@ -31,8 +31,13 @@ def convert_to_px(conversion, mat):
     
     return [transformed_mat[[0]], transformed_mat[[1]]]
 
+def parse_outline_to_polygon(outline_str):
+        numbers = list(map(int, outline_str.split(',')))
+        points = [(numbers[i], numbers[i + 1]) for i in range(0, len(numbers), 2)]
+        return Polygon(points)
 
-def main(detected_transcripts, transform, mask, out_path):
+def main(detected_transcripts, transform, outlines, out_path):
+
     df_detected_transcripts = pd.read_csv(detected_transcripts)
     df_detected_transcripts =  df_detected_transcripts.drop("Unnamed: 0", axis = 1)
     
@@ -46,24 +51,19 @@ def main(detected_transcripts, transform, mask, out_path):
     
     df_detected_transcripts["Index"] = df_detected_transcripts.index + 1
     
-    im_mask = imread(mask)
-    
-    if (len(im_mask.shape) < 3):
-        mask_outlines = measure.find_contours(np.transpose(im_mask[:,:]), 0.9,
-                          fully_connected='high')
-    else:
-        if (im_mask.shape[0] < im_mask.shape[2]) \
-        or (im_mask.shape[1] < im_mask.shape[2]):
-            print("I didn't prepare for these mask dimensions")
-        else:
-            mask_outlines = measure.find_contours(np.transpose(im_mask[:,:,0]), 0.9,
-                          fully_connected='high')
-    outline_polygons = [geometry.Polygon(x) for x in mask_outlines if len(x) > 2]
-       
-    df_polygons = pd.DataFrame({":cell": range(0, len(outline_polygons))})
+    # Read the file and parse each line into a Polygon
+    polygons = []
+    with open(outlines, 'r') as file:
+        for line in file:
+            line = line.strip()  # Remove newline character and any leading/trailing whitespace
+            if line:  # Check if line is not empty
+                polygon = parse_outline_to_polygon(line)
+                polygons.append(polygon)
+
+    df_polygons = pd.DataFrame({":cell": range(0, len(polygons))})
         
     df_polygons_geo = geopandas.GeoDataFrame(
-        df_polygons, geometry=outline_polygons)
+        df_polygons, geometry=polygons)
         
     df_detected_transcripts_geo = geopandas.GeoDataFrame(
         df_detected_transcripts, geometry=geopandas.points_from_xy(df_detected_transcripts['x_px'], 
@@ -94,13 +94,13 @@ def main(detected_transcripts, transform, mask, out_path):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='segmentation to transcripts')
-    parser.add_argument('--mask')
+    parser.add_argument('--outlines')
     parser.add_argument('--out_path')
     parser.add_argument('--transform')
     parser.add_argument('--detected_transcripts')
     args = parser.parse_args()
 
-    main(mask = args.mask,
+    main(outlines = args.outlines,
         out_path = args.out_path,
         transform = args.transform,
         detected_transcripts = args.detected_transcripts)
