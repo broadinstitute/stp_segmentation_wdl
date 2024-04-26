@@ -86,7 +86,7 @@ workflow MAIN_WORKFLOW {
                                 }
         }
         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
-                                mask=select_first([run_cellpose_nuclear.imageout, run_deepcell_nuclear.imageout]),
+                                outlines=select_first([run_cellpose_nuclear.outlines_text, run_deepcell_nuclear.imageout]),
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }

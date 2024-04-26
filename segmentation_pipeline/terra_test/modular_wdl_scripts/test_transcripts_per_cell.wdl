@@ -2,7 +2,7 @@ version 1.0
 task get_transcripts_per_cell {
 
     input {
-        Array[File] mask
+        Array[File] outlines
         Array[File] detected_transcripts
         File transform
     }
@@ -11,17 +11,17 @@ task get_transcripts_per_cell {
 
        index = 0
 
-       IFS=', ' read -r -a combined_file_array_mask <<< "~{sep=', ' mask}"
+       IFS=', ' read -r -a combined_file_array_outlines <<< "~{sep=', ' outlines}"
        IFS=', ' read -r -a combined_file_array_transcripts <<< "~{sep=', ' detected_transcripts}"
 
-       length=${#combined_file_array_mask[@]}
+       length=${#combined_file_array_outlines[@]}
 
        for ((i=0; i<$length; i++)); do
-            mask_file=${combined_file_array_mask[i]}  
+            outlines_file=${combined_file_array_outlines[i]}  
             detected_transcripts_file=${combined_file_array_transcripts[i]} 
 
             python /opt/mask_overlap.py \
-                --mask "$mask_file" \
+                --outlines "$outlines_file" \
                 --out_path="/cromwell_root/" \
                 --detected_transcripts "$detected_transcripts_file" \
                 --transform ~{transform}
