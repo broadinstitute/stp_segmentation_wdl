@@ -2,13 +2,15 @@ version 1.0
 task merge_segmentation_dfs {
 
     input {
-        Array[File] segmentation
-        Array[File] segmentation_stats
+        Array[Array[File]] segmentation
+        Array[File] segmentation_files = flatten(segmentation)
+        Array[Array[File]] segmentation_stats
+        Array[File] segmentation_stats_files = flatten(segmentation_stats)
     }
 
     command <<<
-        python /opt/merge_dfs.py --segmentation_paths ~{sep=',' segmentation} \
-                                --segmentation_cell_stats_paths ~{sep=',' segmentation_stats}
+        python /opt/merge_dfs.py --segmentation_paths ~{sep=',' segmentation_files} \
+                                --segmentation_cell_stats_paths ~{sep=',' segmentation_stats_files}
     >>>
 
     output {
