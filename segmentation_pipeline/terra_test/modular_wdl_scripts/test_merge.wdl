@@ -2,8 +2,8 @@ version 1.0
 task merge_segmentation_dfs {
 
     input {
-        Array[Array[File]] segmentation
-        Array[Array[File]] segmentation_stats
+        Array[File] segmentation
+        Array[File] segmentation_stats
     }
 
     command <<<
@@ -20,6 +20,7 @@ task merge_segmentation_dfs {
 
     runtime {
         docker: "oppdataanalysis/merge_segmentation:V1.0"
+        preemptible: 2
         memory: "10GB"
         disks: "local-disk 200 HDD"
     }

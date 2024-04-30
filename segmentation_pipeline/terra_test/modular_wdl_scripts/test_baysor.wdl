@@ -32,7 +32,7 @@ task run_baysor {
         
             mv segmentation.csv "segmentation_$index.csv"
             mv segmentation_counts.tsv "segmentation_counts_$index.tsv"  
-            mv segmentation_cell_stats.csv "segmentation_cell_stats_$index.csv"
+            mv segmentation_cell_stats.csv "cell_stats_segmentation_$index.csv"
 
             ((index++))
         done
@@ -42,13 +42,14 @@ task run_baysor {
 
         Array[File] baysor_out = glob("segmentation_*.csv")
         Array[File] baysor_counts = glob("segmentation_counts_*.tsv")
-        Array[File] baysor_stat = glob("segmentation_cell_stats_*.csv")
+        Array[File] baysor_stat = glob("cell_stats_segmentation_*.csv")
 
     }
 
     runtime {
         docker: "vpetukhov/baysor:latest"
         continueOnReturnCode: [0, 1]
+        preemptible: 2
         memory: "100GB"
         maxRetries: 0
         disks: "local-disk 200 HDD"
