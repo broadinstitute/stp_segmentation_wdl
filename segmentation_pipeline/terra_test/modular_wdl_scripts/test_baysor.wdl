@@ -52,7 +52,7 @@ task run_baysor {
         preemptible: 2
         memory: "100GB"
         maxRetries: 0
-        disks: "local-disk 200 HDD"
+        disks: "local-disk 250 HDD"
 
     }
     
