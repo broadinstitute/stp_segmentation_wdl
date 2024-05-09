@@ -2,7 +2,7 @@ version 1.0
 task run_cellpose_nuclear {
 
 	input {       
-    	Array[File]? image_path
+    	Array[File]+ image_path
         Int? diameter
         Float? flow_thresh
         Float? cell_prob_thresh
@@ -12,7 +12,7 @@ task run_cellpose_nuclear {
 
     command <<<
         index=0
-
+        echo "The current working directory is: $(pwd)"
         IFS=', ' read -r -a combined_file_array <<< "~{sep=', ' image_path}"
 
         for value in "${combined_file_array[@]}"; do
@@ -20,6 +20,7 @@ task run_cellpose_nuclear {
                                 --pretrained_model ~{model_type} \
                                 --save_tif \
                                 --save_txt \
+                                --savedir="$(pwd)" \
                                 --verbose \
                                 --use_gpu \
                                 --diameter ~{diameter} \
@@ -28,26 +29,20 @@ task run_cellpose_nuclear {
                                 --chan ~{segment_channel} \
                                 --no_npy
             
-            # hack to change asap
-
-            mv *_cp_masks.tif "imageout_$index.tif"
-            mv *_cp_outlines.txt "outlines_$index.txt"
-
             ((index++))
         done
     >>>
 
     output{
-
-        Array[File] imageout = glob("imageout_*.tif")
-        Array[File] outlines_text = glob("outlines_*.txt")
-
+        Array[File]+ imageout = glob("*.tif")
+        Array[File]+ outlines_text = glob("*.txt")
     }
 
     runtime {
-        docker: "oppdataanalysis/cellpose:V1.0"
+        docker: "jishar7/cellpose_mac@sha256:6f6e625c90e35ace76f5b1da58c915dd244d0496104d47db673d209b69865efe"
         memory: "100GB"
         preemptible: 2
+        continueOnReturnCode: [0, 1]
         maxRetries: 0
         disks: "local-disk 200 HDD"
 

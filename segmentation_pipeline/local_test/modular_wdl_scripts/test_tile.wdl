@@ -13,7 +13,6 @@ task get_tile_intervals {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --out_path="" \
                                     --ntiles_width=${ntiles_width} \
                                     --ntiles_height=${ntiles_height} \
                                     --overlap=${overlap}
@@ -25,7 +24,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tile_test:V1:0"
+        docker: "jishar7/tile_test@sha256:e5fa42e9e4fecfa0fa0a31fa64c6d5b392ba4e2f273644036faea579ef7a31b8"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -39,26 +38,25 @@ task get_tile {
         File image_path
         File detected_transcripts
         File transform 
-		Array[String] interval
+	Array[String]+ interval
     }
 
     command {
         python /opt/tiling_script.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --out_path="" \
                                     --interval="~{sep=', ' interval}" \
                                     --show="False"
     }
 
     output {
-        Array[File] tile_metadata = glob("tile_metadata_*.csv")
-        Array[File] tiled_image = glob("tiled_image_*.tiff")
-        Array[File] tiled_detected_transcript = glob("tiled_detected_transcript_*.csv")
+        Array[File]+ tile_metadata = glob("tile_metadata_*.csv")
+        Array[File]+ tiled_image = glob("tiled_image_*.tiff")
+        Array[File]+ tiled_detected_transcript = glob("tiled_detected_transcript_*.csv")
     }
 
     runtime {
-        docker: "jishar7/tile_test:V1:0"
+        docker: "jishar7/tile_test@sha256:e5fa42e9e4fecfa0fa0a31fa64c6d5b392ba4e2f273644036faea579ef7a31b8"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

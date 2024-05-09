@@ -47,10 +47,10 @@ task run_baysor {
     }
 
     runtime {
-        docker: "vpetukhov/baysor:latest"
+        docker: "vpetukhov/baysor@sha256:4bf0b232891b4be0358d41fac31fe3ef3e4c9194e15c7a15ea2132558a627995"
+        memory: "100GB"
         continueOnReturnCode: [0, 1]
         preemptible: 2
-        memory: "100GB"
         maxRetries: 0
         disks: "local-disk 250 HDD"
 

@@ -46,10 +46,10 @@ task run_cellpose_nuclear {
     }
 
     runtime {
-        docker: "oppdataanalysis/cellpose:V1.0"
         continueOnReturnCode: [0, 1]
-        preemptible: 2
+        docker: "oppdataanalysis/cellpose@sha256:83834b8f813e3a2e8e90cd3625019d4e3ee4c64ca0b9648b47e8e9ed3e3216f0"
         memory: "100GB"
+        preemptible: 2
         maxRetries: 0
         disks: "local-disk 200 HDD"
 

@@ -25,7 +25,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling:V16.0"
+        docker: "jishar7/tiling@sha256:4d9b444c1afc09fc1d6b00101e1b866083592b09a2e45a4e9378ab74002eb65d"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -58,7 +58,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling:V16.0"
+        docker: "jishar7/tiling@sha256:4d9b444c1afc09fc1d6b00101e1b866083592b09a2e45a4e9378ab74002eb65d"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

@@ -35,7 +35,7 @@ task run_deepcell_nuclear {
     }
 
     runtime {
-        docker: "oppdataanalysis/deepcell_nuclear:V1.0"
+        docker: "oppdataanalysis/deepcell_nuclear@sha256:4a39fc9d6ecbc0a9116a5f842b892ebb924bb87151a7ca54fc46226b4187bbc5"
         memory: "20GB"
         preemptible: 2
         maxRetries: 0

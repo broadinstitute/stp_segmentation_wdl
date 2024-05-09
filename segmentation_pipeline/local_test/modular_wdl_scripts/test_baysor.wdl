@@ -2,7 +2,7 @@ version 1.0
 task run_baysor {
 
     input {
-        Array[File] detected_transcripts_cellID
+        Array[File]+ detected_transcripts_cellID
         Int size
         Float prior_confidence
     }
@@ -40,16 +40,17 @@ task run_baysor {
 
     output {
 
-        Array[File] baysor_out = glob("segmentation_*.csv")
-        Array[File] baysor_counts = glob("segmentation_counts_*.tsv")
-        Array[File] baysor_stat = glob("segmentation_cell_stats_*.csv")
+        Array[File]+ baysor_out = glob("segmentation_*.csv")
+        Array[File]+ baysor_counts = glob("segmentation_counts_*.tsv")
+        Array[File]+ baysor_stat = glob("segmentation_cell_stats_*.csv")
 
     }
 
     runtime {
-        docker: "vpetukhov/baysor:latest"
+        docker: "oppdataanalysis/julia_baysor@sha256:33eaa04015d42c9baa93ba3243b927679cd8c2d31f5bc1fcb68561dec549e858"
         memory: "100GB"
         preemptible: 2
+        continueOnReturnCode: [0, 1]
         maxRetries: 0
         disks: "local-disk 200 HDD"
 
