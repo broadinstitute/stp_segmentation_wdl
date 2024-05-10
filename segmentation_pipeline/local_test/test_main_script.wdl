@@ -86,12 +86,12 @@ workflow MAIN_WORKFLOW {
                                 }
         }
         call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
-                                mask=select_first([run_cellpose_nuclear.imageout, run_deepcell_nuclear.imageout]),
+                                outlines=select_first([run_cellpose_nuclear.outlines_text, run_deepcell_nuclear.imageout]),
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
 
-        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID = get_transcripts_per_cell.detected_transcripts_cellID,
+        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
                             size=size,
                             prior_confidence=prior_confidence
                     }

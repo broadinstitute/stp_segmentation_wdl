@@ -40,7 +40,7 @@ task get_transcripts_per_cell {
 
     runtime {
         continueOnReturnCode: [0, 1]
-        docker: "jishar7/mask_cellpose@sha256:717e938a541d54471d41836a76858438244c986f9e84f8e1d31f7eaac0abcfbc"
+        docker: "jishar7/mask_cellpose@sha256:c4f96e0a445648fcd10155611e2695777b2dd605f4791c820173344261a112c8"
         memory: "20GB"
         preemptible: 2
         maxRetries: 0
