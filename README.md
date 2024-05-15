@@ -72,7 +72,7 @@ This command will push the image with the specified tag (`tag`) to your Docker H
 
 ## Testing WDL Workflow on a Local Machine/Cluster:
 
-## Using Cromwell
+## -- Using Cromwell
 ### A. Install Cromwell on Local Machine/Cluster:
 
 To set up Cromwell, refer to the guidelines provided here: [Cromwell Installation Guidelines](https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/). Begin by testing an example WDL to ensure successful setup.
@@ -92,7 +92,9 @@ Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (1
 
 ### E. View Outputs
 
-## Using Miniwdl
+-- Celldega vizualization tool --
+
+## -- Using Miniwdl
 ### A. Install Miniwdl on Local Machine/Cluster:
 
 To set up Miniwdl, refer to the guidelines provided here: [Miniwdl Installation Guidelines](https://miniwdl.readthedocs.io/en/latest/getting_started.html). Begin by testing an example WDL to ensure successful setup.
@@ -110,11 +112,18 @@ Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (1
 
 ### D. Run Segmentation WDL on Toy Example locally using Miniwdl:
 
-cd the directory "local_test" in the stp_segmemtation_wdl repository folder
+Navigate to the "local_test" directory within the stp_segmentation_wdl repository.
 
-Open up a terminal window and type in the following command: ` miniwdl run {test_main_script.wdl} --input {inputs.json} --cfg {default.cfg} `
+Open a terminal window and enter the following command:
+```sh
+miniwdl run "test_main_script.wdl" --input "inputs.json" --cfg "default.cfg"
+```
+- `test_main_script.wdl` is the workflow script, which includes calls to various tasks, ensuring a cleaner overall script.
+- `inputs.json` contains the default inputs for all variables used in the workflow. You can modify this file to suit your test case.
+- `default.cfg` provides configuration to enable cache calling, reducing machine burden and time consumption by preventing repetitive calls during debugging.
+
+After the workflow runs successfully, the terminal window will display the addresses of all output files. The inputs, outputs, log files, and other artifacts for each task call will be saved in their respective folders.
 
 ### E. View Outputs
 
-
-
+-- Celldega vizualization tool --
