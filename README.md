@@ -70,42 +70,8 @@ Replace `image_name:latest` with the name and tag of your locally built image, a
 This command will push the image with the specified tag (`tag`) to your Docker Hub repository (`your_username/repository`).
 
 
-## Testing WDL Workflow on a Local Machine/Cluster:
+## Testing WDL Workflow on a Local Machine/Cluster Using Miniwdl:
 
-## -- Using Cromwell
-### A. Install Cromwell on Local Machine/Cluster:
-
-To set up Cromwell, refer to the guidelines provided here: [Cromwell Installation Guidelines](https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/). Begin by testing an example WDL to ensure successful setup.
-
-### B. Clone the repository:
-
-To test this WDL workflow on your local machine or on a cluster, please clone this repository using either of the following methods:  
-
-1) **Direct Download**: Navigate to the repository and click on "Code" at the upper right corner, then select "Download ZIP". Move the downloaded .zip file to your desired directory on your local machine/cluster and extract its contents.
-2) **Git Clone**: Execute the command `git clone https://github.com/broadinstitute/stp_segmentation_wdl.git` to clone the repository and extract the WDL scripts onto your local machine/cluster.
-
-### C. Get Toy Datasets:
-
-Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (10,000x10,000 pixels) designed to validate the functionality of the STP cell segmentation pipeline, please contact the STP computational team: [STP Computational Team GitHub](https://github.com/orgs/broadinstitute/teams/stp).
-
-### D. Run Segmentation WDL on Toy Example locally using Cromwell:
-
-Navigate to the "local_test" directory within the stp_segmentation_wdl repository.
-
-Open a terminal window and enter the following command:
-```sh
-java -jar {address_to_cromwell-{latest}.jar} run "test_main_script.wdl" --inputs "inputs.json"
-```
-- `test_main_script.wdl` is the workflow script, which includes calls to various tasks, ensuring a cleaner overall script.
-- `inputs.json` contains the default inputs for all variables used in the workflow. You can modify this file to suit your test case.
-
-After a successful workflow run, the inputs, outputs, log files, and other artifacts for each task call will be saved in a directory named "cromwell-executions" within the current working directory, which in this case is "local_test."
-
-### E. View Outputs
-
--- Celldega vizualization tool --
-
-## -- Using Miniwdl
 ### A. Install Miniwdl on Local Machine/Cluster:
 
 To set up Miniwdl, refer to the guidelines provided here: [Miniwdl Installation Guidelines](https://miniwdl.readthedocs.io/en/latest/getting_started.html). Begin by testing an example WDL to ensure successful setup.
