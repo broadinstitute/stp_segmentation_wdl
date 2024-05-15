@@ -90,6 +90,17 @@ Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (1
 
 ### D. Run Segmentation WDL on Toy Example locally using Cromwell:
 
+Navigate to the "local_test" directory within the stp_segmentation_wdl repository.
+
+Open a terminal window and enter the following command:
+```sh
+java -jar {address_to_cromwell-{latest}.jar} run "test_main_script.wdl" --inputs "inputs.json"
+```
+- `test_main_script.wdl` is the workflow script, which includes calls to various tasks, ensuring a cleaner overall script.
+- `inputs.json` contains the default inputs for all variables used in the workflow. You can modify this file to suit your test case.
+
+After a successful workflow run, the inputs, outputs, log files, and other artifacts for each task call will be saved in a directory named "cromwell-executions" within the current working directory, which in this case is "local_test."
+
 ### E. View Outputs
 
 -- Celldega vizualization tool --
@@ -122,7 +133,7 @@ miniwdl run "test_main_script.wdl" --input "inputs.json" --cfg "default.cfg"
 - `inputs.json` contains the default inputs for all variables used in the workflow. You can modify this file to suit your test case.
 - `default.cfg` provides configuration to enable cache calling, reducing machine burden and time consumption by preventing repetitive calls during debugging.
 
-After the workflow runs successfully, the terminal window will display the addresses of all output files. The inputs, outputs, log files, and other artifacts for each task call will be saved in their respective folders.
+After the workflow runs successfully, the terminal window will display the addresses of all output files. The inputs, outputs, log files, and other artifacts for each task call will be saved in their respective folders within the current working directory, which in this case is "local_test."
 
 ### E. View Outputs
 
