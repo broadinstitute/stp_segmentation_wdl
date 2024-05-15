@@ -2,7 +2,7 @@
 
 This repository contains WDL scripts that will be used to run cell segmentation workflows on [Terra](https://terra.bio/).
 
-## Quick Overview: WDL, Docker, and Cromwell
+## Quick Overview: WDL, Docker, and Miniwdl
 
 #### What is WDL (Workflow Description Language)?
 
