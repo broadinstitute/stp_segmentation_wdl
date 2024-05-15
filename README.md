@@ -12,9 +12,9 @@ WDL is a language for describing computational workflows. It allows you to defin
 
 Docker is a platform for developing, shipping, and running applications in containers. Containers provide a consistent environment for running software, regardless of the underlying infrastructure. Dockerfiles are used to create Docker images, which are portable snapshots of an application and its dependencies.
 
-#### What is Cromwell?
+#### What is Miniwdl?
 
-Cromwell is a workflow management system designed to execute WDL (Workflow Description Language) workflows. It's developed by the Broad Institute for managing complex scientific workflows. Local Setup instructions mentioned [here](https://github.com/broadinstitute/stp_segmentation_wdl?tab=readme-ov-file#testing-wdl-workflow-on-a-local-machinecluster).
+MiniWDL is a lightweight, user-friendly implementation of the Workflow Description Language (WDL) for running scientific workflows. It's designed for ease of use and efficiency, suitable for both small and large-scale data processing. MiniWDL supports local and cloud-based execution, making it versatile and scalable for various scientific computing tasks.
 
 ### A. WDL Guide:
 
