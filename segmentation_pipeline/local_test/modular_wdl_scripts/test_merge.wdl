@@ -9,7 +9,8 @@ task merge_segmentation_dfs {
     }
 
     command <<<
-        python /opt/merge_dfs.py --segmentation_paths ~{sep=',' segmentation_files} \ --segmentation_cell_stats_paths ~{sep=',' segmentation_stats_files}
+        python /opt/merge_dfs.py --segmentation_paths ~{sep=',' segmentation_files} \
+                                --segmentation_cell_stats_paths ~{sep=',' segmentation_stats_files}
     >>>
 
     output {

@@ -2,7 +2,7 @@
 
 This repository contains WDL scripts that will be used to run cell segmentation workflows on [Terra](https://terra.bio/).
 
-## Quick Overview: WDL, Docker, and Cromwell
+## Quick Overview: WDL, Docker, and Miniwdl
 
 #### What is WDL (Workflow Description Language)?
 
@@ -12,9 +12,9 @@ WDL is a language for describing computational workflows. It allows you to defin
 
 Docker is a platform for developing, shipping, and running applications in containers. Containers provide a consistent environment for running software, regardless of the underlying infrastructure. Dockerfiles are used to create Docker images, which are portable snapshots of an application and its dependencies.
 
-#### What is Cromwell?
+#### What is Miniwdl?
 
-Cromwell is a workflow management system designed to execute WDL (Workflow Description Language) workflows. It's developed by the Broad Institute for managing complex scientific workflows. Local Setup instructions mentioned [here](https://github.com/broadinstitute/stp_segmentation_wdl?tab=readme-ov-file#testing-wdl-workflow-on-a-local-machinecluster).
+MiniWDL is a lightweight, user-friendly implementation of the Workflow Description Language (WDL) for running scientific workflows. It's designed for ease of use and efficiency, suitable for both small and large-scale data processing. MiniWDL supports local and cloud-based execution, making it versatile and scalable for various scientific computing tasks.
 
 ### A. WDL Guide:
 
@@ -70,29 +70,8 @@ Replace `image_name:latest` with the name and tag of your locally built image, a
 This command will push the image with the specified tag (`tag`) to your Docker Hub repository (`your_username/repository`).
 
 
-## Testing WDL Workflow on a Local Machine/Cluster:
+## Testing WDL Workflow on a Local Machine/Cluster Using Miniwdl:
 
-## Using Cromwell
-### A. Install Cromwell on Local Machine/Cluster:
-
-To set up Cromwell, refer to the guidelines provided here: [Cromwell Installation Guidelines](https://cromwell.readthedocs.io/en/stable/tutorials/FiveMinuteIntro/). Begin by testing an example WDL to ensure successful setup.
-
-### B. Clone the repository:
-
-To test this WDL workflow on your local machine or on a cluster, please clone this repository using either of the following methods:  
-
-1) **Direct Download**: Navigate to the repository and click on "Code" at the upper right corner, then select "Download ZIP". Move the downloaded .zip file to your desired directory on your local machine/cluster and extract its contents.
-2) **Git Clone**: Execute the command `git clone https://github.com/broadinstitute/stp_segmentation_wdl.git` to clone the repository and extract the WDL scripts onto your local machine/cluster.
-
-### C. Get Toy Datasets:
-
-Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (10,000x10,000 pixels) designed to validate the functionality of the STP cell segmentation pipeline, please contact the STP computational team: [STP Computational Team GitHub](https://github.com/orgs/broadinstitute/teams/stp).
-
-### D. Run Segmentation WDL on Toy Example locally using Cromwell:
-
-### E. View Outputs
-
-## Using Miniwdl
 ### A. Install Miniwdl on Local Machine/Cluster:
 
 To set up Miniwdl, refer to the guidelines provided here: [Miniwdl Installation Guidelines](https://miniwdl.readthedocs.io/en/latest/getting_started.html). Begin by testing an example WDL to ensure successful setup.
@@ -110,11 +89,18 @@ Additionally, if you wish to experiment with toy MERSCOPE and Xenium datasets (1
 
 ### D. Run Segmentation WDL on Toy Example locally using Miniwdl:
 
-cd the directory "local_test" in the stp_segmemtation_wdl repository folder
+Navigate to the "local_test" directory within the stp_segmentation_wdl repository.
 
-Open up a terminal window and type in the following command: ` miniwdl run {test_main_script.wdl} --input {inputs.json} --cfg {default.cfg} `
+Open a terminal window and enter the following command:
+```sh
+miniwdl run "test_main_script.wdl" --input "inputs.json" --cfg "default.cfg"
+```
+- `test_main_script.wdl` is the workflow script, which includes calls to various tasks, ensuring a cleaner overall script.
+- `inputs.json` contains the default inputs for all variables used in the workflow. You can modify this file to suit your test case.
+- `default.cfg` provides configuration to enable cache calling, reducing machine burden and time consumption by preventing repetitive calls during debugging.
+
+After the workflow runs successfully, the terminal window will display the addresses of all output files. The inputs, outputs, log files, and other artifacts for each task call will be saved in their respective folders within the current working directory, which in this case is "local_test."
 
 ### E. View Outputs
 
-
-
+-- Celldega vizualization tool --

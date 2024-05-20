@@ -10,7 +10,6 @@ task run_baysor {
 	command <<<
         # not an ideal situation but its what worked
         julia -e 'show(Sys.CPU_NAME)'
-        julia -e 'using Pkg; Pkg.rm("Baysor"); Pkg.rm("Makie"); empty!(DEPOT_PATH[1]*"/compiled"); Pkg.gc();'
         julia -e 'using Pkg; Pkg.add("IJulia"); Pkg.build(); using IJulia;'
         julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(;name="PackageCompiler", version="2.0.6"))'
         julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/ayeaton/Baysor.git")); Pkg.build();'
@@ -49,7 +48,7 @@ task run_baysor {
 
     runtime {
         docker: "oppdataanalysis/julia_baysor@sha256:33eaa04015d42c9baa93ba3243b927679cd8c2d31f5bc1fcb68561dec549e858"
-        memory: "100GB"
+        memory: "200GB"
         preemptible: 2
         continueOnReturnCode: [0, 1]
         maxRetries: 0

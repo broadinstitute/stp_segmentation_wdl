@@ -4,8 +4,7 @@ task get_tile_intervals {
         File image_path
         File detected_transcripts
         File transform  
-        Int ntiles_width
-        Int ntiles_height
+        Int tiles_dimension
         Int overlap
     }
 
@@ -13,8 +12,7 @@ task get_tile_intervals {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --ntiles_width=${ntiles_width} \
-                                    --ntiles_height=${ntiles_height} \
+                                    --tiles_dimension=${tiles_dimension} \
                                     --overlap=${overlap}
     }
 
@@ -24,7 +22,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tile_test@sha256:e5fa42e9e4fecfa0fa0a31fa64c6d5b392ba4e2f273644036faea579ef7a31b8"
+        docker: "jishar7/tile_test@sha256:37b1abb6c65622a53b2d9277dde53d5aaa9bf18f3652b7931fa1efc88239bc16"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -56,7 +54,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tile_test@sha256:e5fa42e9e4fecfa0fa0a31fa64c6d5b392ba4e2f273644036faea579ef7a31b8"
+        docker: "jishar7/tile_test@sha256:37b1abb6c65622a53b2d9277dde53d5aaa9bf18f3652b7931fa1efc88239bc16"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

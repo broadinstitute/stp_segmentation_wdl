@@ -4,8 +4,7 @@ task get_tile_intervals {
         File image_path
         File detected_transcripts
         File transform  
-        Int ntiles_width
-        Int ntiles_height
+        Int tiles_dimension
         Int overlap
     }
 
@@ -14,8 +13,7 @@ task get_tile_intervals {
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
-                                    --ntiles_width=${ntiles_width} \
-                                    --ntiles_height=${ntiles_height} \
+                                    --tiles_dimension=${tiles_dimension} \
                                     --overlap=${overlap}
     }
 
@@ -25,7 +23,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling@sha256:4d9b444c1afc09fc1d6b00101e1b866083592b09a2e45a4e9378ab74002eb65d"
+        docker: "jishar7/tiling@sha256:7c69a7b698d216351098423fe29a975f4a78d65094c1d18d787c6470f7bc95c3"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -58,7 +56,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling@sha256:4d9b444c1afc09fc1d6b00101e1b866083592b09a2e45a4e9378ab74002eb65d"
+        docker: "jishar7/tiling@sha256:7c69a7b698d216351098423fe29a975f4a78d65094c1d18d787c6470f7bc95c3"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

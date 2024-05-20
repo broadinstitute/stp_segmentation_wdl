@@ -9,8 +9,7 @@ import "./modular_wdl_scripts/test_merge.wdl" as MERGE
 
 workflow MAIN_WORKFLOW {
     input {
-        Int ntiles_width # number of tiles on X axis
-        Int ntiles_height # number of tiles on Y axis
+        Int tiles_dimension # tile width and height
         Int overlap # overlap between tiles
 
         File image_path # path to DAPI image
@@ -42,8 +41,7 @@ workflow MAIN_WORKFLOW {
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     detected_transcripts=detected_transcripts,
                                     transform=transform,
-                                    ntiles_width=ntiles_width,
-                                    ntiles_height=ntiles_height,
+                                    tiles_dimension=tiles_dimension,
                                     overlap=overlap
                             }
 
@@ -51,7 +49,7 @@ workflow MAIN_WORKFLOW {
     
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
-    Int num_VMs_in_use = 8
+    Int num_VMs_in_use = 6
 
     scatter (i in range(num_VMs_in_use)) {
 
