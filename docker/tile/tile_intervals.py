@@ -11,7 +11,7 @@ import json
 import pandas as pd
 
 def main(input_image, detected_transcripts, transform_mat,
-             ntiles_width, ntiles_height, overlap, out_path):
+             tiles_dimension, overlap, out_path):
 
     # read in tif/jpeg file
     if input_image.lower().endswith(('.tif', '.tiff')):
@@ -39,8 +39,8 @@ def main(input_image, detected_transcripts, transform_mat,
     image_height = image.shape[0]
     
     # given the number of tiles, figure out size of tiles
-    tile_width = int(np.ceil(image_width / ntiles_width))
-    tile_height = int(np.ceil(image_height / ntiles_height))
+    tile_width = tiles_dimension
+    tile_height = tiles_dimension
     
     tile_boundaries_list = utils.tile_coords(image_width = image_width, image_height = image_height,
                     tile_width = tile_width, tile_height = tile_height, 
@@ -54,7 +54,7 @@ def main(input_image, detected_transcripts, transform_mat,
     
     max_VMs = 25
     min_VM = 1
-    intervals_per_VMs = 5
+    intervals_per_VMs = 6
 
     num_VMs_in_use_unbounded = len(tile_boundaries_list) / intervals_per_VMs
     num_VMs_in_use = int(max_VMs if num_VMs_in_use_unbounded > max_VMs else (min_VM if num_VMs_in_use_unbounded < min_VM else num_VMs_in_use_unbounded))
@@ -84,8 +84,7 @@ if __name__ == '__main__':
     parser.add_argument('--input_image')
     parser.add_argument('--detected_transcripts')
     parser.add_argument('--transform')
-    parser.add_argument('--ntiles_width', type = int)
-    parser.add_argument('--ntiles_height', type = int)
+    parser.add_argument('--tiles_dimension', type = int),
     parser.add_argument('--overlap', type = int)
     parser.add_argument('--out_path') 
     args = parser.parse_args()
@@ -93,7 +92,6 @@ if __name__ == '__main__':
     main(input_image = args.input_image,  
         detected_transcripts = args.detected_transcripts,
         transform_mat = args.transform,
-        ntiles_width = args.ntiles_width,
-        ntiles_height = args.ntiles_height,
+        tiles_dimension = args.tiles_dimension,
         overlap = args.overlap,
         out_path = args.out_path)
