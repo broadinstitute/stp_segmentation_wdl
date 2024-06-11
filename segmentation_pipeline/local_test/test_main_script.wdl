@@ -5,7 +5,7 @@ import "./modular_wdl_scripts/test_transcripts_per_cell.wdl" as TRANSCRIPTS
 import "./modular_wdl_scripts/test_cellpose.wdl" as CELLPOSE
 import "./modular_wdl_scripts/test_deepcell.wdl" as DEEPCELL
 import "./modular_wdl_scripts/test_baysor.wdl" as BAYSOR
-import "./modular_wdl_scripts/test_merge.wdl" as MERGE
+import "./modular_wdl_scripts/test_merge_current.wdl" as MERGE
 
 workflow MAIN_WORKFLOW {
     input {
@@ -33,8 +33,8 @@ workflow MAIN_WORKFLOW {
         File detected_transcripts # path to the detected transcripts file
         File transform # path to micron to mosaic transform file 
 
-        Int size # baysor: scale, or radius of cell
-        Float prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
+        Int? size # baysor: scale, or radius of cell
+        Float? prior_confidence # baysor: The value 0.0 makes the algorithm ignore the prior, while the value 1.0 restricts the algorithm from contradicting the prior.
 
     }
 
@@ -71,7 +71,28 @@ workflow MAIN_WORKFLOW {
                             }
         }
 
-        if (segmentation_algorithm == "DEEPCELL") {
+        if (segmentation_algorithm == "CELLPOSE+BAYSOR") {
+          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
+                            image_path=get_tile.tiled_image,
+                            diameter= if defined(diameter) then select_first([diameter]) else 0, 
+                            flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0, 
+                            cell_prob_thresh= if defined(cell_prob_thresh) then select_first([cell_prob_thresh]) else 0.0,
+                            model_type= if defined(model_type) then select_first([model_type]) else 'None', 
+                            segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0
+                            }
+
+          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
+                                outlines=run_cellpose_nuclear.outlines_text,
+                                detected_transcripts=get_tile.tiled_detected_transcript, 
+                                transform = transform
+                                }
+
+          call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
+                            size=size,
+                            prior_confidence=prior_confidence
+        }}
+
+        if (segmentation_algorithm == "DEEPCELL+BAYSOR") {
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
                                 image_path=get_tile.tiled_image,
                                 image_mpp= if defined(image_mpp) then select_first([image_mpp]) else 0.0,
@@ -82,21 +103,24 @@ workflow MAIN_WORKFLOW {
                                 exclude_border= if defined(exclude_border) then select_first([exclude_border]) else false,
                                 small_objects_threshold= if defined(small_objects_threshold) then select_first([small_objects_threshold]) else 0.0
                                 }
-        }
-        call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
-                                outlines=select_first([run_cellpose_nuclear.outlines_text, run_deepcell_nuclear.imageout]),
+          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
+                                outlines=run_deepcell_nuclear.imageout,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
 
-        call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
+          call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
                             size=size,
                             prior_confidence=prior_confidence
-                    }
-    }
+        }}
 
-    call MERGE.merge_segmentation_dfs { input: segmentation=run_baysor.baysor_out,
-        segmentation_stats=run_baysor.baysor_stat
-    }
-
-}
+    if (segmentation_algorithm == "CELLPOSE+BAYSOR" || segmentation_algorithm == "DEEPCELL+BAYSOR") {
+        call MERGE.merge_segmentation_dfs { input: segmentation=run_baysor.baysor_out,
+                        segmentation_stats=run_baysor.baysor_stat
+    }}
+    
+    if (segmentation_algorithm == "CELLPOSE") {
+        call MERGE.merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines_text,
+                intervals=get_tile_intervals.intervals
+    }}
+}}
