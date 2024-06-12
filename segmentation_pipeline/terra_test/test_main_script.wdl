@@ -118,9 +118,7 @@ workflow MAIN_WORKFLOW {
         }}
     }
     
-    Array[Array[File]] non_null_outlines = select_all(run_cellpose_nuclear.outlines)
-
-    call MERGE.merge_segmentation_dfs { input: outlines=non_null_outlines,
+    call MERGE.merge_segmentation_dfs { input: outlines=select_all(run_cellpose_nuclear.outlines),
                 intervals=get_tile_intervals.intervals
     }
 }
