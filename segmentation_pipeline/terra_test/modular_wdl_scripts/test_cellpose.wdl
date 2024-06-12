@@ -41,7 +41,7 @@ task run_cellpose_nuclear {
     output {
 
         Array[File] imageout = glob("imageout_*.tif")
-        Array[File] outlines_text = glob("outlines_*.txt")
+        Array[File] outlines = glob("outlines_*.txt")
 
     }
 
