@@ -23,7 +23,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling@sha256:7c69a7b698d216351098423fe29a975f4a78d65094c1d18d787c6470f7bc95c3"
+        docker: "jishar7/tiling_for_terra@sha256:5f47a23173e4c03ae13348f25125aea6a6c3ad39026469ac9bd6c3a8087c63ba"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -38,6 +38,7 @@ task get_tile {
         File detected_transcripts
         File transform 
 		Array[String] interval
+        String shard_index
     }
 
     command {
@@ -46,7 +47,8 @@ task get_tile {
                                     --transform=${transform} \
                                     --out_path="/cromwell_root/" \
                                     --interval="~{sep=', ' interval}" \
-                                    --show="False"
+                                    --show="False" \
+                                    --shard_index=${shard_index}
     }
 
     output {
@@ -56,7 +58,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling@sha256:7c69a7b698d216351098423fe29a975f4a78d65094c1d18d787c6470f7bc95c3"
+        docker: "jishar7/tiling_for_terra@sha256:5f47a23173e4c03ae13348f25125aea6a6c3ad39026469ac9bd6c3a8087c63ba"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
