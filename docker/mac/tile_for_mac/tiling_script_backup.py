@@ -12,8 +12,7 @@ import utils
 import argparse
 import json
 
-def main(input_image, detected_transcripts, transform_mat, intervals,
-             out_path, show, shard_index):
+def main(input_image, detected_transcripts, transform_mat, intervals, show, shard_index):
 
     # read in image file
     if input_image.lower().endswith(('.tif', '.tiff')):
@@ -52,7 +51,7 @@ def main(input_image, detected_transcripts, transform_mat, intervals,
                                 "x_min": [x_min],
                                 "x_max": [x_max]})
 
-        meta.to_csv(out_path + f"/tile_metadata_{shard_index}_{j}.csv")
+        meta.to_csv(f"tile_metadata_{shard_index}_{j}.csv")
 
                         # for each tile position, get the image 
         current_tile = image[y_min:y_max, x_min:x_max]
@@ -69,8 +68,8 @@ def main(input_image, detected_transcripts, transform_mat, intervals,
         current_tile_transc["y_px"] = [i -  y_min for i in current_tile_transc["y_px"]]
 
                         # save the image and save the csv
-        cv.imwrite(out_path + f"/tiled_image_{shard_index}_{j}.tiff", current_tile)
-        current_tile_transc.to_csv(out_path + f"/tiled_detected_transcript_{shard_index}_{j}.csv")
+        cv.imwrite(f"tiled_image_{shard_index}_{j}.tiff", current_tile)
+        current_tile_transc.to_csv(f"tiled_detected_transcript_{shard_index}_{j}.csv")
 
                         # plot an overlay of the tiff and detected transcripts if show 
         if show:
@@ -78,7 +77,7 @@ def main(input_image, detected_transcripts, transform_mat, intervals,
             plt.imshow(current_tile, origin='lower')
             sns.scatterplot(data = current_tile_transc, x = "x_px", y = "y_px",
                                             s = 0.5, alpha = 0.3 , color = "red")
-            plt.savefig(out_path + f"/tiled_overlay_{shard_index}_{j}.png")
+            plt.savefig(f"tiled_overlay_{shard_index}_{j}.png")
             plt.close()
         
         j=j+1
@@ -91,7 +90,6 @@ if __name__ == '__main__':
     parser.add_argument('--detected_transcripts')
     parser.add_argument('--transform')
     parser.add_argument('--interval')
-    parser.add_argument('--out_path')
     parser.add_argument('--show', type = bool)
     parser.add_argument('--shard_index')
     args = parser.parse_args()
@@ -100,6 +98,5 @@ if __name__ == '__main__':
         detected_transcripts = args.detected_transcripts,
         transform_mat = args.transform,
         intervals=args.interval,
-        out_path = args.out_path,
         show = args.show,
         shard_index = args.shard_index)

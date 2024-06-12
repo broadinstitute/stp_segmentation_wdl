@@ -24,7 +24,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
-RUN pip install --no-cache-dir pandas geopandas google-cloud-storage shapely matplotlib
+RUN pip install --no-cache-dir pandas geopandas google-cloud-storage shapely matplotlib argparse pyarrow fastparquet
 
 COPY merge_polygons.py /opt/merge_polygons.py
 RUN chmod +x /opt/merge_polygons.py
