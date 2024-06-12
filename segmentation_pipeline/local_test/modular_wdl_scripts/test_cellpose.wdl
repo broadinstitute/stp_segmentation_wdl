@@ -2,7 +2,7 @@ version 1.0
 task run_cellpose_nuclear {
 
 	input {       
-    	Array[File]+ image_path
+    	Array[File] image_path
         Int? diameter
         Float? flow_thresh
         Float? cell_prob_thresh
@@ -34,8 +34,8 @@ task run_cellpose_nuclear {
     >>>
 
     output{
-        Array[File]+ imageout = glob("*.tif")
-        Array[File]+ outlines_text = glob("*.txt")
+        Array[File] imageout = glob("*.tif")
+        Array[File] outlines = glob("*.txt")
     }
 
     runtime {

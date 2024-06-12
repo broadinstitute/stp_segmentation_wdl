@@ -36,7 +36,8 @@ task get_tile {
         File image_path
         File detected_transcripts
         File transform 
-	    Array[String]+ interval
+	    Array[String] interval
+        String shard_index
     }
 
     command {
@@ -44,13 +45,14 @@ task get_tile {
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
                                     --interval="~{sep=', ' interval}" \
-                                    --show="False"
+                                    --show="False" \
+                                    --shard_index=${shard_index}
     }
 
     output {
-        Array[File]+ tile_metadata = glob("tile_metadata_*.csv")
-        Array[File]+ tiled_image = glob("tiled_image_*.tiff")
-        Array[File]+ tiled_detected_transcript = glob("tiled_detected_transcript_*.csv")
+        Array[File] tile_metadata = glob("tile_metadata_*.csv")
+        Array[File] tiled_image = glob("tiled_image_*.tiff")
+        Array[File] tiled_detected_transcript = glob("tiled_detected_transcript_*.csv")
     }
 
     runtime {

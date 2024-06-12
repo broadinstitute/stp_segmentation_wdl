@@ -58,38 +58,40 @@ workflow MAIN_WORKFLOW {
         call TILE.get_tile as get_tile {input: image_path=image_path,
                                 detected_transcripts=detected_transcripts,
                                 transform=transform,
-								interval=calling_intervals[index_for_intervals]}
+								interval=calling_intervals[index_for_intervals],
+                                shard_index=index_for_intervals}
 
-        if (segmentation_algorithm == "CELLPOSE") {
-          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
-                            image_path=get_tile.tiled_image,
-                            diameter= if defined(diameter) then select_first([diameter]) else 0, 
-                            flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0, 
-                            cell_prob_thresh= if defined(cell_prob_thresh) then select_first([cell_prob_thresh]) else 0.0,
-                            model_type= if defined(model_type) then select_first([model_type]) else 'None', 
-                            segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0
-                            }
+        call containsSubstring as containsSubstring_for_cellpose {input:
+            text = segmentation_algorithm,
+            substring = "CELLPOSE"
         }
 
-        if (segmentation_algorithm == "CELLPOSE+BAYSOR") {
+        if (containsSubstring_for_cellpose.result) {
+            
           call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= if defined(diameter) then select_first([diameter]) else 0, 
                             flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0, 
                             cell_prob_thresh= if defined(cell_prob_thresh) then select_first([cell_prob_thresh]) else 0.0,
                             model_type= if defined(model_type) then select_first([model_type]) else 'None', 
-                            segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0
-                            }
+                            segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0}
+          
+          call containsSubstring as containsSubstring_for_baysor {input:
+                text = segmentation_algorithm,
+                substring = "BAYSOR"
+          }
 
-          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
-                                outlines=run_cellpose_nuclear.outlines_text,
+        if (containsSubstring_for_baysor.result) {
+          
+          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell_cellpose {input: 
+                                outlines=run_cellpose_nuclear.outlines,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
-                                transform = transform
-                                }
+                                transform = transform}
 
-          call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
-                            size=size,
-                            prior_confidence=prior_confidence
+          call BAYSOR.run_baysor as run_baysor_cellpose {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell_cellpose.detected_transcripts_cellID_geo_csv,
+                            size= if defined(size) then select_first([size]) else 0,
+                            prior_confidence= if defined(prior_confidence) then select_first([prior_confidence]) else 0.0
+                            }
         }}
 
         if (segmentation_algorithm == "DEEPCELL+BAYSOR") {
@@ -103,24 +105,40 @@ workflow MAIN_WORKFLOW {
                                 exclude_border= if defined(exclude_border) then select_first([exclude_border]) else false,
                                 small_objects_threshold= if defined(small_objects_threshold) then select_first([small_objects_threshold]) else 0.0
                                 }
-          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell {input: 
+
+          call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell_deepcell {input: 
                                 outlines=run_deepcell_nuclear.imageout,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform
                                 }
 
-          call BAYSOR.run_baysor as run_baysor {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell.detected_transcripts_cellID_geo_csv,
-                            size=size,
-                            prior_confidence=prior_confidence
+          call BAYSOR.run_baysor as run_baysor_deepcell {input: detected_transcripts_cellID_geo_csv = get_transcripts_per_cell_deepcell.detected_transcripts_cellID_geo_csv,
+                            size= if defined(size) then select_first([size]) else 0,
+                            prior_confidence= if defined(prior_confidence) then select_first([prior_confidence]) else 0.0
         }}
-
-    if (segmentation_algorithm == "CELLPOSE+BAYSOR" || segmentation_algorithm == "DEEPCELL+BAYSOR") {
-        call MERGE.merge_segmentation_dfs { input: segmentation=run_baysor.baysor_out,
-                        segmentation_stats=run_baysor.baysor_stat
-    }}
+    }
     
-    if (segmentation_algorithm == "CELLPOSE") {
-        call MERGE.merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines_text,
+    call MERGE.merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
                 intervals=get_tile_intervals.intervals
-    }}
-}}
+    }
+}
+
+task containsSubstring {
+    input {
+        String text
+        String substring
+    }
+
+    command {
+        if [[ "${text}" == *"${substring}"* ]]; then
+            echo "true"
+        else
+            echo "false"
+        fi
+    }
+
+    output {
+        Boolean result = read_boolean(stdout())
+    }
+
+}
