@@ -16,11 +16,11 @@ workflow MAIN_WORKFLOW {
 
         String segmentation_algorithm # type in all caps, either CELLPOSE or DEEPCELL 
 
-        Int? diameter # cellpose: size of cell
-        Float? flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
-        Float? cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
-        String? model_type # cellpose : model_type='cyto' or model_type='nuclei'
-        Int? segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
+        Int diameter # cellpose: size of cell
+        Float flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
+        Float cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
+        String model_type # cellpose : model_type='cyto' or model_type='nuclei'
+        Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
 
         Float? image_mpp # deepcell: Microns per pixel for image 
         String? pad_mode # deepcell: The padding mode, one of "constant" or "reflect".
@@ -117,18 +117,8 @@ workflow MAIN_WORKFLOW {
                             prior_confidence= if defined(prior_confidence) then select_first([prior_confidence]) else 0.0
         }}
     }
-    
-    call containsSubstring as containsSubstring_for_cellpose {input:
-            text = segmentation_algorithm,
-            substring = "CELLPOSE"
-    }
 
-    Array[Array[File]] non_null_outlines = []
-    if (containsSubstring_for_cellpose.result) {
-        non_null_outlines = run_cellpose_nuclear.outlines
-    }
-
-    call MERGE.merge_segmentation_dfs { input: outlines=non_null_outlines,
+    call MERGE.merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
                 intervals=get_tile_intervals.intervals
     }
 }

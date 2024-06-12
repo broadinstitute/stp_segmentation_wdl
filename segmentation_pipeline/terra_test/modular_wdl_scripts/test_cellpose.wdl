@@ -3,11 +3,11 @@ task run_cellpose_nuclear {
 
 	input {       
     	Array[File] image_path
-        Int? diameter
-        Float? flow_thresh
-        Float? cell_prob_thresh
-        String? model_type
-        Int? segment_channel
+        Int diameter
+        Float flow_thresh
+        Float cell_prob_thresh
+        String model_type
+        Int segment_channel
     }
 
     command <<<
