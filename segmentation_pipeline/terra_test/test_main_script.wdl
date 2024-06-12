@@ -5,7 +5,7 @@ import "./modular_wdl_scripts/test_transcripts_per_cell.wdl" as TRANSCRIPTS
 import "./modular_wdl_scripts/test_cellpose.wdl" as CELLPOSE
 import "./modular_wdl_scripts/test_deepcell.wdl" as DEEPCELL
 import "./modular_wdl_scripts/test_baysor.wdl" as BAYSOR
-import "./modular_wdl_scripts/test_merge_current.wdl" as MERGE
+import "./modular_wdl_scripts/test_merge.wdl" as MERGE
 
 workflow MAIN_WORKFLOW {
     input {
