@@ -3,7 +3,7 @@ task merge_segmentation_dfs {
 
     input {
         Array[Array[File]?] outlines
-        Array[File] outline_files = flatten(outlines)
+        Array[File]? outline_files = flatten(outlines)
         File intervals
     }
 
