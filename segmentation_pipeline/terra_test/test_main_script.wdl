@@ -118,7 +118,12 @@ workflow MAIN_WORKFLOW {
         }}
     }
     
-    call MERGE.merge_segmentation_dfs { input: outlines=select_all(run_cellpose_nuclear.outlines),
+    Array[Array[File]] non_null_outlines = []
+    if (containsSubstring_for_cellpose.result) {
+        non_null_outlines = run_cellpose_nuclear.outlines
+    }
+
+    call MERGE.merge_segmentation_dfs { input: outlines=non_null_outlines,
                 intervals=get_tile_intervals.intervals
     }
 }
