@@ -118,6 +118,11 @@ workflow MAIN_WORKFLOW {
         }}
     }
     
+    call containsSubstring as containsSubstring_for_cellpose {input:
+            text = segmentation_algorithm,
+            substring = "CELLPOSE"
+    }
+
     Array[Array[File]] non_null_outlines = []
     if (containsSubstring_for_cellpose.result) {
         non_null_outlines = run_cellpose_nuclear.outlines
