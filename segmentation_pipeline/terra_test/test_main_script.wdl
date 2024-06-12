@@ -60,15 +60,8 @@ workflow MAIN_WORKFLOW {
                                 transform=transform,
 								interval=calling_intervals[index_for_intervals],
                                 shard_index=index_for_intervals}
-
-        call containsSubstring as containsSubstring_for_cellpose {input:
-            text = segmentation_algorithm,
-            substring = "CELLPOSE"
-        }
-
-        if (containsSubstring_for_cellpose.result) {
-            
-          call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
+    
+        call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= if defined(diameter) then select_first([diameter]) else 0, 
                             flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0, 
@@ -76,10 +69,10 @@ workflow MAIN_WORKFLOW {
                             model_type= if defined(model_type) then select_first([model_type]) else 'None', 
                             segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0}
           
-          call containsSubstring as containsSubstring_for_baysor {input:
+        call containsSubstring as containsSubstring_for_baysor {input:
                 text = segmentation_algorithm,
                 substring = "BAYSOR"
-          }
+        }
 
         if (containsSubstring_for_baysor.result) {
           
@@ -92,7 +85,7 @@ workflow MAIN_WORKFLOW {
                             size= if defined(size) then select_first([size]) else 0,
                             prior_confidence= if defined(prior_confidence) then select_first([prior_confidence]) else 0.0
                             }
-        }}
+        }
 
         if (segmentation_algorithm == "DEEPCELL+BAYSOR") {
           call DEEPCELL.run_deepcell_nuclear as run_deepcell_nuclear {input: 
