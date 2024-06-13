@@ -48,7 +48,8 @@ def main(cell_outlines, intervals):
     number_of_files_to_process_start = 0
     number_of_files_to_process_end = len(data_json['0'])
 
-    print(cell_outlines)
+    print('data_json', data_json)
+    print('cell outlines', cell_outlines)
     print(type(cell_outlines))
 
     for shard_index in data_json.keys():        
@@ -56,6 +57,7 @@ def main(cell_outlines, intervals):
         #prefix = f'submissions/{submission_id}/MAIN_WORKFLOW/{main_workflow}/call-run_cellpose_nuclear/shard-{shard_index}/cacheCopy/glob-c2c9caec5892270ef8eeb49def59c8cf/'
         #paths = list_blobs_paths(bucket_name, prefix)
         print(cell_outlines[number_of_files_to_process_start:number_of_files_to_process_end])
+
         for inst_path in cell_outlines[number_of_files_to_process_start:number_of_files_to_process_end]:
             
             print(inst_path)
@@ -79,6 +81,9 @@ def main(cell_outlines, intervals):
             # Create a GeoDataFrame
             inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
             
+            print('shard_index', shard_index)
+            print('job id', job_id)
+
             # look up translation 
             inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
             y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]

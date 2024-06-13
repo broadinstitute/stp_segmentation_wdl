@@ -8,6 +8,7 @@ task merge_segmentation_dfs {
     }
 
     command <<<
+
         python /opt/merge_polygons.py --cell_outlines ~{sep=',' outline_files} \
                                 --intervals ~{intervals}
     >>>
