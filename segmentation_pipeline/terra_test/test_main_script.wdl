@@ -11,8 +11,6 @@ workflow MAIN_WORKFLOW {
 
         File image_path # path to DAPI image
 
-        String segmentation_algorithm # type in all caps, either CELLPOSE or DEEPCELL 
-
         Int diameter # cellpose: size of cell
         Float flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
         Float cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
