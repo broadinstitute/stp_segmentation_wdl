@@ -29,19 +29,14 @@ task run_cellpose_nuclear {
                                 --savedir "$(pwd)"  \
                                 --no_npy
             
-            # hack to change asap
-
-            mv *_cp_masks.tif "imageout_$index.tif"
-            mv *_cp_outlines.txt "outlines_$index.txt"
-
             ((index++))
         done
     >>>
 
     output {
 
-        Array[File] imageout = glob("imageout_*.tif")
-        Array[File] outlines = glob("outlines_*.txt")
+        Array[File] imageout = glob("*.tif")
+        Array[File] outlines = glob("*.txt")
 
     }
 
