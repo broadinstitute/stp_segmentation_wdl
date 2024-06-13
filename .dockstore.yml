@@ -1,4 +1,4 @@
 version: 1.2
 workflows:
    - subclass: WDL
-     primaryDescriptorPath: /segmentation_pipeline/terra_test/test_main_script.wdl
+     primaryDescriptorPath: /segmentation_pipeline/terra/test_main_script.wdl
