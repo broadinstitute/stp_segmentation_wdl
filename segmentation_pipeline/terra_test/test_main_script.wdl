@@ -61,7 +61,7 @@ workflow MAIN_WORKFLOW {
 								interval=calling_intervals[index_for_intervals],
                                 shard_index=index_for_intervals}
     
-        call CELLPOSE.run_cellpose_nuclear {input: 
+        call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= if defined(diameter) then select_first([diameter]) else 0, 
                             flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0, 
@@ -77,7 +77,7 @@ workflow MAIN_WORKFLOW {
         if (containsSubstring_for_baysor.result) {
           
           call TRANSCRIPTS.get_transcripts_per_cell as get_transcripts_per_cell_cellpose {input: 
-                                outlines=CELLPOSE.run_cellpose_nuclear.outlines,
+                                outlines=run_cellpose_nuclear.outlines,
                                 detected_transcripts=get_tile.tiled_detected_transcript, 
                                 transform = transform}
 
@@ -111,7 +111,7 @@ workflow MAIN_WORKFLOW {
         }}
     }
 
-    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=CELLPOSE.run_cellpose_nuclear.outlines,
+    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
                 intervals=get_tile_intervals.intervals
     }
 }
