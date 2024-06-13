@@ -111,7 +111,7 @@ workflow MAIN_WORKFLOW {
         }}
     }
 
-    call MERGE.merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
+    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
                 intervals=get_tile_intervals.intervals
     }
 }
