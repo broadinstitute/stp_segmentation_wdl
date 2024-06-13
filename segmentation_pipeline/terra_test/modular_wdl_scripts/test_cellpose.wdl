@@ -47,7 +47,8 @@ task run_cellpose_nuclear {
 
     runtime {
         continueOnReturnCode: [0, 1]
-        docker: "oppdataanalysis/cellpose@sha256:83834b8f813e3a2e8e90cd3625019d4e3ee4c64ca0b9648b47e8e9ed3e3216f0"
+        docker: "jishar7/cellpose_mac@sha256:6f6e625c90e35ace76f5b1da58c915dd244d0496104d47db673d209b69865efe"
+        # docker: "oppdataanalysis/cellpose@sha256:83834b8f813e3a2e8e90cd3625019d4e3ee4c64ca0b9648b47e8e9ed3e3216f0"
         memory: "100GB"
         preemptible: 2
         maxRetries: 0
