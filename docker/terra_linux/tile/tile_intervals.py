@@ -38,7 +38,6 @@ def main(input_image, detected_transcripts, transform_mat,
     image_width = image.shape[1]
     image_height = image.shape[0]
     
-    # given the number of tiles, figure out size of tiles
     tile_width = tiles_dimension
     tile_height = tiles_dimension
     

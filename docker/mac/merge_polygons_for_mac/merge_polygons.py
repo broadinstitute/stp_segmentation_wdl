@@ -9,10 +9,6 @@ from shapely.affinity import translate
 import matplotlib.pyplot as plt
 import warnings
 
-#BILLING_PROJECT_ID = os.environ['WORKSPACE_NAMESPACE']
-#WORKSPACE = os.environ['WORKSPACE_NAME']
-#bucket = os.environ['WORKSPACE_BUCKET']
-
 def main(cell_outlines, intervals):
 
     cell_outlines = cell_outlines.split(",")
@@ -34,88 +30,72 @@ def main(cell_outlines, intervals):
 
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
-    #bucket_name = bucket.replace('gs://', '')
-
-    #submission_id = '867d7554-6703-4f28-b144-c152a5302c70'
-    #main_workflow = '604e31c5-4b1e-4534-b1ee-4cd5af37f6ad'
-
     gdf = None
 
     gdf_tile = gpd.GeoDataFrame()
 
     color_index = 0
 
-    number_of_files_to_process_start = 0
-    number_of_files_to_process_end = len(data_json['0'])
-
     print('data_json', data_json)
     print('cell outlines', cell_outlines)
     print(type(cell_outlines))
 
-    for shard_index in data_json.keys():        
+    for inst_path in cell_outlines:
         
-        #prefix = f'submissions/{submission_id}/MAIN_WORKFLOW/{main_workflow}/call-run_cellpose_nuclear/shard-{shard_index}/cacheCopy/glob-c2c9caec5892270ef8eeb49def59c8cf/'
-        #paths = list_blobs_paths(bucket_name, prefix)
-        print(cell_outlines[number_of_files_to_process_start:number_of_files_to_process_end])
+        # print(inst_path)
+        # shard_index = inst_path.split('/')[-2]
+        # job_id = inst_path.split('/')[-2]
 
-        for inst_path in cell_outlines[number_of_files_to_process_start:number_of_files_to_process_end]:
-            
-            print(inst_path)
-            job_id = inst_path.split('/')[-2]
-            shard_name = 'shard-' + str(shard_index)        
-            job_name = 'job-' + job_id
-            job_name = shard_name + '_' + job_name
+        inst_filename = inst_path.split('/')[-1]
+        shard_index = inst_filename.split('_')[2].split('_')[0]
+        job_id = inst_filename.split('_')[3].split('_')[0]
 
-            #full_path = 'gs://' + bucket_name + '/' + inst_path
+        shard_name = 'shard-' + str(shard_index)        
+        tmp_job_name = 'job-' + job_id
+        job_name = shard_name + '_' + tmp_job_name
 
-            inst_df = pd.read_csv(inst_path, delimiter='\t', header=None) 
+        inst_df = pd.read_csv(inst_path, delimiter='\t', header=None) 
 
-            inst_df.index = [job_name + '_' + str(x) for x in inst_df.index.tolist()]
-            
-            # Apply the conversion to each cell in the DataFrame
-            inst_df['geometry'] = inst_df[0].apply(string_to_polygon)
-            
-            inst_df['shard'] = pd.Series(shard_name, index=inst_df.index)
-            inst_df['job'] = pd.Series(job_name, index=inst_df.index)        
+        inst_df.index = [job_name + '_' + str(x) for x in inst_df.index.tolist()]
+        
+        # Apply the conversion to each cell in the DataFrame
+        inst_df['geometry'] = inst_df[0].apply(string_to_polygon)
+        
+        inst_df['shard'] = pd.Series(shard_name, index=inst_df.index)
+        inst_df['job'] = pd.Series(job_name, index=inst_df.index)        
 
-            # Create a GeoDataFrame
-            inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
-            
-            print('shard_index', shard_index)
-            print('job id', job_id)
+        # Create a GeoDataFrame
+        inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
+        
+        print('shard_index', shard_index)
+        print('job id', job_id)
 
-            # look up translation 
-            inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
-            y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]
-            
-            geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
-            
-            tile_name = str(x_min) + '_' + str(x_max) + '_' + str(y_min) + '_' + str(y_max)
-            
-            gdf_tile.loc[tile_name, 'geometry'] = geo_tile
+        # look up translation 
+        inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
+        y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]
+        
+        geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
+        
+        tile_name = str(x_min) + '_' + str(x_max) + '_' + str(y_min) + '_' + str(y_max)
+        
+        gdf_tile.loc[tile_name, 'geometry'] = geo_tile
 
-            # Translate all geometries at once
-            inst_gdf['geometry'] = inst_gdf.geometry.apply(translate, xoff=x_min, yoff=y_min)
-            
-            inst_color = color_list[color_index%len(color_list)]
-            
-            inst_gdf['color'] = pd.Series(inst_color, index=inst_gdf.index)
-            
-            color_index = color_index + 1
+        # Translate all geometries at once
+        inst_gdf['geometry'] = inst_gdf.geometry.apply(translate, xoff=x_min, yoff=y_min)
+        
+        inst_color = color_list[color_index%len(color_list)]
+        
+        inst_gdf['color'] = pd.Series(inst_color, index=inst_gdf.index)
+        
+        color_index = color_index + 1
 
-            if gdf is None:
-                gdf = inst_gdf
-            else: 
-                gdf = pd.concat([gdf, inst_gdf], axis=0)
+        if gdf is None:
+            gdf = inst_gdf
+        else: 
+            gdf = pd.concat([gdf, inst_gdf], axis=0)
 
-        next_shard_index_str = str(int(shard_index) + 1)
-    
-        if next_shard_index_str in data_json.keys():
-            number_of_files_to_process_start = number_of_files_to_process_end
-            number_of_files_to_process_end = number_of_files_to_process_end + len(data_json[shard_index])
-
-    # trying to make unique indices
-    gdf.reset_index(inplace=True)
+    # # trying to make unique indices
+    # gdf.reset_index(inplace=True)
 
     gdf_tile.reset_index(inplace=True)
 
