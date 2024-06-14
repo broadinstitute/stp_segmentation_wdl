@@ -12,7 +12,6 @@ task get_tile_intervals {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --detected_transcripts=${detected_transcripts} \
                                     --transform=${transform} \
-                                    --out_path="$(pwd)" \
                                     --tiles_dimension=${tiles_dimension} \
                                     --overlap=${overlap}
     }
@@ -23,7 +22,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:fa48c79b4f7850172b47fe259b4e73f19200c4a9114b93025eaf0e92117a46f6"
+        docker: "jishar7/tiling_for_mac@sha256:a4c2e491e326c458a76b920e3013657f7f71ff18651eff3d35519dc41fc4090f"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -58,7 +57,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:fa48c79b4f7850172b47fe259b4e73f19200c4a9114b93025eaf0e92117a46f6"
+        docker: "jishar7/tiling_for_mac@sha256:a4c2e491e326c458a76b920e3013657f7f71ff18651eff3d35519dc41fc4090f"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
