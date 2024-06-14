@@ -17,9 +17,6 @@ workflow MAIN_WORKFLOW {
         String model_type # cellpose : model_type='cyto' or model_type='nuclei'
         Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
 
-        File detected_transcripts # path to the detected transcripts file
-        File transform # path to micron to mosaic transform file 
-
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
