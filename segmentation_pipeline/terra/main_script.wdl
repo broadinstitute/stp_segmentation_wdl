@@ -20,8 +20,6 @@ workflow MAIN_WORKFLOW {
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
-                                    detected_transcripts=detected_transcripts,
-                                    transform=transform,
                                     tiles_dimension=tiles_dimension,
                                     overlap=overlap
                             }
@@ -37,8 +35,6 @@ workflow MAIN_WORKFLOW {
         String index_for_intervals = "~{i}"
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
-                                detected_transcripts=detected_transcripts,
-                                transform=transform,
 								interval=calling_intervals[index_for_intervals],
                                 shard_index=index_for_intervals}
 
