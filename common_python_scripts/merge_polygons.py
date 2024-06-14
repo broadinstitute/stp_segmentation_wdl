@@ -58,9 +58,6 @@ def main(cell_outlines, intervals):
 
         # Create a GeoDataFrame
         inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
-        
-        print('shard_index', shard_index)
-        print('job id', job_id)
 
         # look up translation 
         inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
@@ -122,44 +119,21 @@ def main(cell_outlines, intervals):
     # Calculating Overlap Area Parameters
 
     for inst_row in df_intersect.index.tolist():
-
-        print('value counts of index', pd.Series(gdf.index.tolist()).value_counts())
-        print(gdf.shape)
-        print(len(gdf.index.tolist()))
-        print(len(set(gdf.index.tolist())))
         
         # look up pair of intersecting polygons
-        print(f"inst_row = {inst_row}") 
         id_1 = df_intersect.loc[inst_row, 'id_1']
         id_2 = df_intersect.loc[inst_row, 'id_2']
-        
-        print(f"id1 = {id_1}") 
-        print(f"id2 = {id_2}") 
 
         cell_1 = all_cells[id_1]
         cell_2 = all_cells[id_2]
-        
-        print(f"cell1 = {cell_1}") 
-        print(f"cell2 = {cell_2}") 
 
         poly_1 = gdf.loc[cell_1, 'geometry']
-
-        print(f"type poly1 = {type(poly_1)}")
-        print(f"poly1 = {poly_1}")
 
         area_1 = poly_1.area
 
         poly_2 = gdf.loc[cell_2, 'geometry']
 
-        print(f"type poly2 = {type(poly_2)}")
-        print(f"poly2 = {poly_2}")
-
         area_2 = poly_2.area
-
-        print(f"Type of area_1: {type(area_1)}") 
-        print(f"Type of area_2: {type(area_2)}") 
-        print(f"Value of area_1: {area_1}") 
-        print(f"Value of area_2: {area_2}")
         
         area_intersection = poly_1.intersection(poly_2).area
         area_union = poly_1.union(poly_2).area
