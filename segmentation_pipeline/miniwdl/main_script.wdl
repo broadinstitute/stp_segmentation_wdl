@@ -1,8 +1,8 @@
 version 1.0
 
-import "./modular_wdl_scripts/test_tile.wdl" as TILE
-import "./modular_wdl_scripts/test_cellpose.wdl" as CELLPOSE
-import "./modular_wdl_scripts/test_merge.wdl" as MERGE
+import "./modular_wdl_scripts/tile.wdl" as TILE
+import "./modular_wdl_scripts/cellpose.wdl" as CELLPOSE
+import "./modular_wdl_scripts/merge.wdl" as MERGE
 
 workflow MAIN_WORKFLOW {
     input {
