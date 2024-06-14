@@ -24,9 +24,16 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
-RUN pip install --no-cache-dir pandas geopandas google-cloud-storage shapely matplotlib argparse pyarrow fastparquet
+RUN pip install --no-cache-dir pandas==2.2.2
+RUN pip install geopandas==0.14.4
+RUN pip install google-cloud-storage==2.17.0
+RUN pip install shapely==2.0.4
+RUN pip install matplotlib==3.9.0
+RUN pip install argparse==1.4.0
+RUN pip install pyarrow==16.1.0
+RUN pip install fastparquet==2024.5.0
 
-COPY merge_polygons.py /opt/merge_polygons.py
+COPY common_python_scripts/merge_polygons.py /opt/merge_polygons.py
 RUN chmod +x /opt/merge_polygons.py
 
 ENTRYPOINT ["/bin/bash", "-l", "-c", "/bin/bash"]

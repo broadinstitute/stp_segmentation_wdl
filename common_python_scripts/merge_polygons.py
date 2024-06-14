@@ -36,16 +36,8 @@ def main(cell_outlines, intervals):
 
     color_index = 0
 
-    print('data_json', data_json)
-    print('cell outlines', cell_outlines)
-    print(type(cell_outlines))
-
     for inst_path in cell_outlines:
         
-        # print(inst_path)
-        # shard_index = inst_path.split('/')[-2]
-        # job_id = inst_path.split('/')[-2]
-
         inst_filename = inst_path.split('/')[-1]
         shard_index = inst_filename.split('_')[2].split('_')[0]
         job_id = inst_filename.split('_')[3].split('_')[0]
@@ -102,7 +94,7 @@ def main(cell_outlines, intervals):
     all_cells = gdf.index.tolist()
 
     # find cell polygons that intersect from aggregate cell segmentation
-    intersecting_pairs = gdf.sindex.query_bulk(gdf.geometry, predicate='intersects')
+    intersecting_pairs = gdf.sindex.query(gdf.geometry, predicate='intersects')
 
     df_intersect = pd.DataFrame(intersecting_pairs).T
 
@@ -216,7 +208,7 @@ def main(cell_outlines, intervals):
         """
         
         # check if poly intersects with any polygons in gdf_nc
-        possible_intersections = gdf_nc.sindex.query_bulk(poly, predicate='intersects')
+        possible_intersections = gdf_nc.sindex.query(poly, predicate='intersects')
         
         # if no intersection then add to gdf_nc
         if len(possible_intersections) == 0:
@@ -314,13 +306,12 @@ def main(cell_outlines, intervals):
             
             gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_merged, ioa_small_thresh)
     
-    print(gdf_nc.index)
     gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
-    print(gdf_nc.index)
     gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
-    print(gdf_nc.index)
 
+    # confirm if the following is necessary
     gdf_nc.columns = [str(col) for col in gdf_nc.columns]
+
     gdf_nc.to_parquet('merged_cell_polygons.parquet')
 
 if __name__ == '__main__':

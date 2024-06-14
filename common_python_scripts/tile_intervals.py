@@ -45,12 +45,6 @@ def main(input_image, detected_transcripts, transform_mat,
     tile_boundaries_list = utils.tile_coords(image_width = image_width, image_height = image_height,
                     tile_width = tile_width, tile_height = tile_height, 
                     overlap = overlap)
-        
-    #with open(out_path + "/intervals.csv", "w", newline="") as f:
-    #    writer = csv.writer(f)
-    #    header = ['y_min', 'y_max', 'x_min', 'x_max']  # Adjust column names as needed
-    #   writer.writerow(header)
-    #    writer.writerows(tile_boundaries_list)
     
     max_VMs = 25
     min_VM = 1
@@ -68,14 +62,6 @@ def main(input_image, detected_transcripts, transform_mat,
 
     with open("data.json", "w") as json_file:
         json.dump(listed_intervals, json_file)
-        
-    #listed_intervals = []
-    #for i in range(0, len(tile_boundaries_list), intervals_per_VMs):
-    #    listed_intervals.append(tile_boundaries_list[i:i+intervals_per_VMs])
-
-    #with open(out_path + "/intervals.txt", "w", newline="") as f:
-    #    writer = csv.writer(f)
-    #    writer.writerows(listed_intervals)
 
 
 if __name__ == '__main__':
