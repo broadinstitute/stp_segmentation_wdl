@@ -1,10 +1,8 @@
 {
-    "MAIN_WORKFLOW.detected_transcripts": "/Users/jishar/Documents/10000x10000/subset_coordinates.csv",
     "MAIN_WORKFLOW.cell_prob_thresh": 0.0,
     "MAIN_WORKFLOW.model_type": "nuclei",
     "MAIN_WORKFLOW.flow_thresh": 0.4,
     "MAIN_WORKFLOW.overlap": 200,
-    "MAIN_WORKFLOW.transform": "/Users/jishar/Documents/10000x10000/transformation_matrix.csv",
     "MAIN_WORKFLOW.diameter": 74,
     "MAIN_WORKFLOW.image_path": "/Users/jishar/Documents/10000x10000/original_cropped_image.tif",
     "MAIN_WORKFLOW.segment_channel": 0,

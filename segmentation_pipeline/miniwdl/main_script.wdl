@@ -17,14 +17,9 @@ workflow MAIN_WORKFLOW {
         String model_type # cellpose : model_type='cyto' or model_type='nuclei'
         Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
 
-        File detected_transcripts # path to the detected transcripts file
-        File transform # path to micron to mosaic transform file 
-
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
-                                    detected_transcripts=detected_transcripts,
-                                    transform=transform,
                                     tiles_dimension=tiles_dimension,
                                     overlap=overlap
                             }
@@ -40,12 +35,9 @@ workflow MAIN_WORKFLOW {
         String index_for_intervals = "~{i}"
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
-                                detected_transcripts=detected_transcripts,
-                                transform=transform,
 								interval=calling_intervals[index_for_intervals],
                                 shard_index=index_for_intervals}
 
-    
         call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
                             image_path=get_tile.tiled_image,
                             diameter= diameter, 

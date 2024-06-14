@@ -10,8 +10,7 @@ import csv
 import json
 import pandas as pd
 
-def main(input_image, detected_transcripts, transform_mat,
-             tiles_dimension, overlap):
+def main(input_image, tiles_dimension, overlap):
 
     # read in tif/jpeg file
     if input_image.lower().endswith(('.tif', '.tiff')):
@@ -21,20 +20,6 @@ def main(input_image, detected_transcripts, transform_mat,
     else:
         print("Unsupported image format. Please provide a TIFF (.tif/.tiff) or JPEG (.jpg/.jpeg) image.")
     
-    # read in detected transcripts
-    detected_transcripts_df = pd.read_csv(detected_transcripts)
-    
-    # micron to px transform
-    transform = np.array(pd.read_csv(transform_mat, 
-                        sep = " ", 
-                        header = None))
-
-    transformed_px = utils.convert_to_px(transform, 
-                        detected_transcripts_df[["global_x", "global_y"]])
-    
-    detected_transcripts_df["x_px"]  = transformed_px[0]
-    detected_transcripts_df["y_px"] = transformed_px[1]
-
     image_width = image.shape[1]
     image_height = image.shape[0]
     
@@ -68,14 +53,10 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Tile merfish')
     parser.add_argument('--input_image')
-    parser.add_argument('--detected_transcripts')
-    parser.add_argument('--transform')
     parser.add_argument('--tiles_dimension', type = int),
     parser.add_argument('--overlap', type = int)
     args = parser.parse_args()
 
     main(input_image = args.input_image,  
-        detected_transcripts = args.detected_transcripts,
-        transform_mat = args.transform,
         tiles_dimension = args.tiles_dimension,
         overlap = args.overlap)
