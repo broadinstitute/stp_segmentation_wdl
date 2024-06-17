@@ -24,18 +24,20 @@ workflow MAIN_WORKFLOW {
                                     overlap=overlap
                             }
 
-    Map[String, Array[String]] calling_intervals = read_json(get_tile_intervals.intervals)
+    Map[String, Array[Array[Int]]] calling_intervals = read_json(get_tile_intervals.intervals)
     
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
-    Int num_VMs_in_use = 6
-
+    Array[Array[Int]] nested_array_num_VMs_in_use = calling_intervals['number_of_VMs']
+    Array[Int] array_num_VMs_in_use = nested_array_num_VMs_in_use[0]
+    Int num_VMs_in_use = array_num_VMs_in_use[0]
+    
     scatter (i in range(num_VMs_in_use)) {
 
         String index_for_intervals = "~{i}"
 
         call TILE.get_tile as get_tile {input: image_path=image_path,
-								interval=calling_intervals[index_for_intervals],
+								intervals=get_tile_intervals.intervals,
                                 shard_index=index_for_intervals}
 
         call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 

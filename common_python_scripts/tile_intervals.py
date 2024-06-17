@@ -12,6 +12,27 @@ import pandas as pd
 
 def main(input_image, tiles_dimension, overlap):
 
+    def distribute_tasks(total_tasks, max_vms=25, max_tasks_per_vm=100, min_tasks_per_vm=1):
+        if total_tasks <= max_tasks_per_vm:
+            # If tasks are fewer than or equal to the max tasks per VM, use one VM
+            return {0: total_tasks}
+
+        # Calculate the required number of VMs
+        required_vms = min((total_tasks + max_tasks_per_vm - 1) // max_tasks_per_vm, max_vms)
+        
+        # Distribute tasks across the required number of VMs
+        tasks_per_vm = total_tasks // required_vms
+        remainder_tasks = total_tasks % required_vms
+
+        distribution = {}
+        for vm in range(required_vms):
+            if vm < remainder_tasks:
+                distribution[vm] = tasks_per_vm + 1
+            else:
+                distribution[vm] = tasks_per_vm
+
+        return distribution
+
     # read in tif/jpeg file
     if input_image.lower().endswith(('.tif', '.tiff')):
         image = tf.imread(input_image)
@@ -31,21 +52,24 @@ def main(input_image, tiles_dimension, overlap):
                     tile_width = tile_width, tile_height = tile_height, 
                     overlap = overlap)
     
-    max_VMs = 25
-    min_VM = 1
-    intervals_per_VMs = 6
-
-    num_VMs_in_use_unbounded = len(tile_boundaries_list) / intervals_per_VMs
-    num_VMs_in_use = int(max_VMs if num_VMs_in_use_unbounded > max_VMs else (min_VM if num_VMs_in_use_unbounded < min_VM else num_VMs_in_use_unbounded))
-
+    distribution = distribute_tasks(len(tile_boundaries_list))
+    
     listed_intervals = {}
+    listed_intervals['number_of_VMs'] = [[len(distribution.keys())]]
 
-    j = 0
-    for i in range(0, len(tile_boundaries_list), intervals_per_VMs):
-        listed_intervals[int(j)] = tile_boundaries_list[i:i+intervals_per_VMs]
-        j=j+1
+    jump = 0
+    for vm_index, intervals_per_vm in distribution.items():
+        listed_intervals[str(vm_index)] = tile_boundaries_list[jump:jump+intervals_per_vm]
+        jump = jump + intervals_per_vm
 
-    with open("data.json", "w") as json_file:
+    #listed_intervals = {}
+    #j = 0
+
+    #for i in range(0, len(tile_boundaries_list), intervals_per_VMs):
+    #    listed_intervals[int(j)] = tile_boundaries_list[i:i+intervals_per_VMs]
+    #    j=j+1
+
+    with open("intervals.json", "w") as json_file:
         json.dump(listed_intervals, json_file)
 
 

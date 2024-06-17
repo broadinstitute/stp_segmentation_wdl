@@ -28,6 +28,8 @@ def main(cell_outlines, intervals):
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
+    del data_json['number_of_VMs']
+
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
     gdf = None
@@ -60,7 +62,9 @@ def main(cell_outlines, intervals):
         inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
 
         # look up translation 
-        inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
+        #inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
+        inst_coords = data_json[str(shard_index)][int(job_id)]
+        
         y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]
         
         geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])

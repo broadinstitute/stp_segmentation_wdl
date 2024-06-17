@@ -297,7 +297,7 @@ def tile_coords(image_height, image_width,
 
             #tile_boundaries_list.append(y_min, y_max, x_min, x_max)
 
-            tile_boundaries_list.append(f"{y_min}, {y_max}, {x_min}, {x_max}")
+            tile_boundaries_list.append([y_min, y_max, x_min, x_max])
 
             x_min += (tile_width - overlap)  # Move to the next tile with overlap
 
