@@ -28,7 +28,7 @@ def main(cell_outlines, intervals):
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
-    del data_json['number_of_VMs']
+    #del data_json['number_of_VMs']
 
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
