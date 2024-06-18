@@ -93,6 +93,13 @@ def main(cell_outlines, intervals):
     print("gdf", gdf)
 
     if len(data_json['number_of_tiles'][0]) == 1:
+
+        gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
+        gdf.index = [str(x) for x in gdf.index.tolist()]
+
+        # confirm if the following is necessary
+        gdf.columns = [str(col) for col in gdf.columns]
+
         gdf.to_parquet('processed_cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
