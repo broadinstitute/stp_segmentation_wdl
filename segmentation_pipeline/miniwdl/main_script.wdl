@@ -32,6 +32,8 @@ workflow MAIN_WORKFLOW {
     Array[Array[Int]] nested_array_num_VMs_in_use = calling_intervals['number_of_VMs']
     Array[Int] array_num_VMs_in_use = nested_array_num_VMs_in_use[0]
     Int num_VMs_in_use = array_num_VMs_in_use[0]
+
+    Int num_of_tiles = calling_intervals['number_of_tiles'][0][0]
     
     scatter (i in range(num_VMs_in_use)) {
 
@@ -52,8 +54,10 @@ workflow MAIN_WORKFLOW {
           
     }
 
-    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
-                intervals=get_tile_intervals.intervals
+    if (num_of_tiles!=1) {
+        call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
+                    intervals=get_tile_intervals.intervals
+        }
     }
 }
 

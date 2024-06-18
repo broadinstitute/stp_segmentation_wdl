@@ -20,7 +20,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:6946a25309038d8056bb4c1d53e2ce9c0a677d02170276351fb48fdb05dc7b1a"
+        docker: "jishar7/tiling_for_mac@sha256:ef3fec56e1607c445b6e7df00316036a3fcc89543675693f19d663c56b4707d7"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -49,7 +49,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:6946a25309038d8056bb4c1d53e2ce9c0a677d02170276351fb48fdb05dc7b1a"
+        docker: "jishar7/tiling_for_mac@sha256:ef3fec56e1607c445b6e7df00316036a3fcc89543675693f19d663c56b4707d7"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

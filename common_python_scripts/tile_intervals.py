@@ -52,6 +52,7 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
     
     listed_intervals = {}
     listed_intervals['number_of_VMs'] = [[len(distribution.keys())]]
+    listed_intervals['number_of_tiles'] = [[len(tile_boundaries_list)]]
 
     jump = 0
     for vm_index, intervals_per_vm in distribution.items():
