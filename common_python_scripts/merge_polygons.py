@@ -91,212 +91,216 @@ def main(cell_outlines, intervals):
             gdf = pd.concat([gdf, inst_gdf], axis=0)
 
     print("gdf", gdf)
+
+    if len(data_json['number_of_tiles'][0]) == 1:
+        gdf.to_parquet('cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
-    gdf_tile.reset_index(inplace=True)
+    else:
+        gdf_tile.reset_index(inplace=True)
 
-    all_cells = gdf.index.tolist()
+        all_cells = gdf.index.tolist()
 
-    # find cell polygons that intersect from aggregate cell segmentation
-    intersecting_pairs = gdf.sindex.query(gdf.geometry, predicate='intersects')
+        # find cell polygons that intersect from aggregate cell segmentation
+        intersecting_pairs = gdf.sindex.query(gdf.geometry, predicate='intersects')
 
-    df_intersect = pd.DataFrame(intersecting_pairs).T
+        df_intersect = pd.DataFrame(intersecting_pairs).T
 
-    df_intersect.columns = ['id_1', 'id_2']
+        df_intersect.columns = ['id_1', 'id_2']
 
-    df_intersect = df_intersect[df_intersect['id_1'] != df_intersect['id_2']]
+        df_intersect = df_intersect[df_intersect['id_1'] != df_intersect['id_2']]
 
-    # Add a new column that contains a sorted tuple of the id columns
-    df_intersect['sorted_id_pair'] = df_intersect.apply(lambda row: tuple(sorted([row['id_1'], row['id_2']])), axis=1)
+        # Add a new column that contains a sorted tuple of the id columns
+        df_intersect['sorted_id_pair'] = df_intersect.apply(lambda row: tuple(sorted([row['id_1'], row['id_2']])), axis=1)
 
-    # Drop duplicate rows based on the sorted_id_pair column
-    df_intersect = df_intersect.drop_duplicates(subset='sorted_id_pair')
+        # Drop duplicate rows based on the sorted_id_pair column
+        df_intersect = df_intersect.drop_duplicates(subset='sorted_id_pair')
 
-    # Optional: Drop the sorted_id_pair column if it is no longer needed
-    df_intersect = df_intersect.drop(columns=['sorted_id_pair'])
+        # Optional: Drop the sorted_id_pair column if it is no longer needed
+        df_intersect = df_intersect.drop(columns=['sorted_id_pair'])
 
-    df_intersect.reset_index(inplace=True)
-    df_intersect.drop(['index'], inplace=True, axis=1)
+        df_intersect.reset_index(inplace=True)
+        df_intersect.drop(['index'], inplace=True, axis=1)
 
-    list_conflict_ids = sorted(list(set(df_intersect['id_1'].unique().tolist() + df_intersect['id_2'].unique().tolist())))
-    list_conflict_cells = [all_cells[x] for x in list_conflict_ids]
+        list_conflict_ids = sorted(list(set(df_intersect['id_1'].unique().tolist() + df_intersect['id_2'].unique().tolist())))
+        list_conflict_cells = [all_cells[x] for x in list_conflict_ids]
 
-    list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
+        list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
 
-    print("df_intersect before ioa calculation", df_intersect)
-    # Calculating Overlap Area Parameters
+        print("df_intersect before ioa calculation", df_intersect)
+        # Calculating Overlap Area Parameters
 
-    for inst_row in df_intersect.index.tolist():
-        
-        # look up pair of intersecting polygons
-        id_1 = df_intersect.loc[inst_row, 'id_1']
-        id_2 = df_intersect.loc[inst_row, 'id_2']
-
-        cell_1 = all_cells[id_1]
-        cell_2 = all_cells[id_2]
-
-        poly_1 = gdf.loc[cell_1, 'geometry']
-
-        area_1 = poly_1.area
-
-        poly_2 = gdf.loc[cell_2, 'geometry']
-
-        area_2 = poly_2.area
-        
-        area_intersection = poly_1.intersection(poly_2).area
-        area_union = poly_1.union(poly_2).area
-        
-        iou = area_intersection/area_union
-        
-        ioa_1 = area_intersection/area_1
-        ioa_2 = area_intersection/area_2
-        
-        if area_1 <= area_2:
-            ioa_small = ioa_1
-        else:
-            ioa_small = ioa_2
-
-        df_intersect.loc[inst_row, 'iou'] = iou
-        df_intersect.loc[inst_row, 'area_1'] = area_1
-        df_intersect.loc[inst_row, 'area_2'] = area_2    
-        df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
-        df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
-        df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
-
-    print("df_intersect after ioa calculation", df_intersect)
-    # rank by easiest to resolve
-    df_intersect.sort_values(by='ioa_small', ascending=False, inplace=True)    
-
-    # initialize gdf_nc
-    gdf_nc = gdf.loc[list_no_conflict_cells]
-    gdf_nc.reset_index(inplace=True)
-    gdf_nc.drop([0], axis=1, inplace=True)
-
-    gdf_ = gdf.reset_index()
-    ioa_small_thresh = 0.5
-
-    # Suppress FutureWarning
-    warnings.simplefilter(action='ignore', category=FutureWarning)
-
-    def add_or_merge_into_gdf_nc(gdf_nc, poly, ioa_thresh):
-        
-        """
-        This function allows us to add a new polygon to gdf_nc
-        gdf_nc contains the no conflict polygons. We define conflict to mean
-        a non-trivial intersection between polygons with a ioa_small above
-        our threshold.
-        
-        This function will check for conflicts before adding poly and 
-        merge if necessary
-        """
-        
-        # check if poly intersects with any polygons in gdf_nc
-        possible_intersections = gdf_nc.sindex.query(poly, predicate='intersects')
-        
-        # if no intersection then add to gdf_nc
-        if len(possible_intersections) == 0:
+        for inst_row in df_intersect.index.tolist():
             
-            new_data = {
-                0: None,
-                'index': 'merged',
-                'geometry': poly,
-                'shard': None,
-                'job': None,
-                'color': 'red'
-            }
-            
-            # add poly to gdf_nc because there is no conflict  
-            new_row = gpd.GeoDataFrame([new_data])
-            gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))
-
-        # elif poly intersects with one or more gdf_nc polygons
-        
-        elif len(possible_intersections) != 0:
-
-            # Assumption: the polygon we are adding to gdf_nc should only ever have to be 
-            # merged with one polygon from gdf_nc.
-            
-            max_ioa_merged = 0
-            max_ioa_merged_index = 0
-            
-            for index in possible_intersections:
-
-                poly_intersect = gdf_nc.loc[index, 'geometry']
-                ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
-                
-                # find the polygon with the highest intersection and calculate ioa_merge  
-                
-                if ioa_merged >= max_ioa_merged:
-                    max_ioa_merged = ioa_merged
-                    max_ioa_merged_index = index
-                    
-            if max_ioa_merged >= ioa_small_thresh:
-                
-                # If ioa_merge >= threshold, then merged with gdf_nc polygon
-                
-                poly_intersect = gdf_nc.loc[max_ioa_merged_index, 'geometry']
-                
-                # poly_merged = ...
-                
-                poly_merged = poly_intersect.union(poly)
-                
-                # delete intersecting polygon in gdf_nc
-                
-                gdf_nc = gdf_nc.drop(max_ioa_merged_index)
-
-                # add polygon_merged to gdf_nc
-                
-                new_data = {0: None,'geometry': poly_merged,'shard': None,'job': None,'color': 'red'}
-            
-                # add poly to gdf_nc because there is no conflict  
-                new_row = gpd.GeoDataFrame([new_data])
-                gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))            
-            # else 
-
-            else:
-        
-                # add poly to gdf_nc becuse there is a small conflict    
-                new_data = {0: None,'geometry': poly,'shard': None,'job': None,'color': 'red'} 
-                new_row = gpd.GeoDataFrame([new_data])
-                gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))                      
-    
-        return gdf_nc
-
-
-    # loop through df_intersect
-    for inst_row in df_intersect.index.tolist():
-        
-        inst_ioa_small = df_intersect.loc[inst_row, 'ioa_small']
-        
-        if inst_ioa_small < ioa_small_thresh :
-            
-            # do not merge conflicted cells and add both to gdf_nc
-            
-            gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_1, ioa_small_thresh)
-            gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_2, ioa_small_thresh)
-        
-        elif inst_ioa_small >= ioa_small_thresh:
-            
-            # merge cells and add merged cell to gdf_nc
-            
+            # look up pair of intersecting polygons
             id_1 = df_intersect.loc[inst_row, 'id_1']
             id_2 = df_intersect.loc[inst_row, 'id_2']
+
+            cell_1 = all_cells[id_1]
+            cell_2 = all_cells[id_2]
+
+            poly_1 = gdf.loc[cell_1, 'geometry']
+
+            area_1 = poly_1.area
+
+            poly_2 = gdf.loc[cell_2, 'geometry']
+
+            area_2 = poly_2.area
             
-            poly_1 = gdf_.loc[id_1, 'geometry']
-            poly_2 = gdf_.loc[id_2, 'geometry']
-
-            poly_merged = poly_1.union(poly_2)
+            area_intersection = poly_1.intersection(poly_2).area
+            area_union = poly_1.union(poly_2).area
             
-            gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_merged, ioa_small_thresh)
-    
-    gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
-    gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
+            iou = area_intersection/area_union
+            
+            ioa_1 = area_intersection/area_1
+            ioa_2 = area_intersection/area_2
+            
+            if area_1 <= area_2:
+                ioa_small = ioa_1
+            else:
+                ioa_small = ioa_2
 
-    # confirm if the following is necessary
-    gdf_nc.columns = [str(col) for col in gdf_nc.columns]
+            df_intersect.loc[inst_row, 'iou'] = iou
+            df_intersect.loc[inst_row, 'area_1'] = area_1
+            df_intersect.loc[inst_row, 'area_2'] = area_2    
+            df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
+            df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
+            df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
 
-    gdf_nc.to_parquet('merged_cell_polygons.parquet')
+        print("df_intersect after ioa calculation", df_intersect)
+        # rank by easiest to resolve
+        df_intersect.sort_values(by='ioa_small', ascending=False, inplace=True)    
+
+        # initialize gdf_nc
+        gdf_nc = gdf.loc[list_no_conflict_cells]
+        gdf_nc.reset_index(inplace=True)
+        gdf_nc.drop([0], axis=1, inplace=True)
+
+        gdf_ = gdf.reset_index()
+        ioa_small_thresh = 0.5
+
+        # Suppress FutureWarning
+        warnings.simplefilter(action='ignore', category=FutureWarning)
+
+        def add_or_merge_into_gdf_nc(gdf_nc, poly, ioa_thresh):
+            
+            """
+            This function allows us to add a new polygon to gdf_nc
+            gdf_nc contains the no conflict polygons. We define conflict to mean
+            a non-trivial intersection between polygons with a ioa_small above
+            our threshold.
+            
+            This function will check for conflicts before adding poly and 
+            merge if necessary
+            """
+            
+            # check if poly intersects with any polygons in gdf_nc
+            possible_intersections = gdf_nc.sindex.query(poly, predicate='intersects')
+            
+            # if no intersection then add to gdf_nc
+            if len(possible_intersections) == 0:
+                
+                new_data = {
+                    0: None,
+                    'index': 'merged',
+                    'geometry': poly,
+                    'shard': None,
+                    'job': None,
+                    'color': 'red'
+                }
+                
+                # add poly to gdf_nc because there is no conflict  
+                new_row = gpd.GeoDataFrame([new_data])
+                gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))
+
+            # elif poly intersects with one or more gdf_nc polygons
+            
+            elif len(possible_intersections) != 0:
+
+                # Assumption: the polygon we are adding to gdf_nc should only ever have to be 
+                # merged with one polygon from gdf_nc.
+                
+                max_ioa_merged = 0
+                max_ioa_merged_index = 0
+                
+                for index in possible_intersections:
+
+                    poly_intersect = gdf_nc.loc[index, 'geometry']
+                    ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
+                    
+                    # find the polygon with the highest intersection and calculate ioa_merge  
+                    
+                    if ioa_merged >= max_ioa_merged:
+                        max_ioa_merged = ioa_merged
+                        max_ioa_merged_index = index
+                        
+                if max_ioa_merged >= ioa_small_thresh:
+                    
+                    # If ioa_merge >= threshold, then merged with gdf_nc polygon
+                    
+                    poly_intersect = gdf_nc.loc[max_ioa_merged_index, 'geometry']
+                    
+                    # poly_merged = ...
+                    
+                    poly_merged = poly_intersect.union(poly)
+                    
+                    # delete intersecting polygon in gdf_nc
+                    
+                    gdf_nc = gdf_nc.drop(max_ioa_merged_index)
+
+                    # add polygon_merged to gdf_nc
+                    
+                    new_data = {0: None,'geometry': poly_merged,'shard': None,'job': None,'color': 'red'}
+                
+                    # add poly to gdf_nc because there is no conflict  
+                    new_row = gpd.GeoDataFrame([new_data])
+                    gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))            
+                # else 
+
+                else:
+            
+                    # add poly to gdf_nc becuse there is a small conflict    
+                    new_data = {0: None,'geometry': poly,'shard': None,'job': None,'color': 'red'} 
+                    new_row = gpd.GeoDataFrame([new_data])
+                    gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))                      
+        
+            return gdf_nc
+
+
+        # loop through df_intersect
+        for inst_row in df_intersect.index.tolist():
+            
+            inst_ioa_small = df_intersect.loc[inst_row, 'ioa_small']
+            
+            if inst_ioa_small < ioa_small_thresh :
+                
+                # do not merge conflicted cells and add both to gdf_nc
+                
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_1, ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_2, ioa_small_thresh)
+            
+            elif inst_ioa_small >= ioa_small_thresh:
+                
+                # merge cells and add merged cell to gdf_nc
+                
+                id_1 = df_intersect.loc[inst_row, 'id_1']
+                id_2 = df_intersect.loc[inst_row, 'id_2']
+                
+                poly_1 = gdf_.loc[id_1, 'geometry']
+                poly_2 = gdf_.loc[id_2, 'geometry']
+
+                poly_merged = poly_1.union(poly_2)
+                
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_merged, ioa_small_thresh)
+        
+        gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
+        gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
+
+        # confirm if the following is necessary
+        gdf_nc.columns = [str(col) for col in gdf_nc.columns]
+
+        gdf_nc.to_parquet('merged_cell_polygons.parquet')
 
 if __name__ == '__main__':
 
