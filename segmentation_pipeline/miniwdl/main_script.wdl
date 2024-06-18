@@ -17,12 +17,13 @@ workflow MAIN_WORKFLOW {
         String model_type # cellpose : model_type='cyto' or model_type='nuclei'
         Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
 
+        Int amount_of_VMs 
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
                                     tiles_dimension=tiles_dimension,
-                                    overlap=overlap
-                            }
+                                    overlap=overlap,
+                                    amount_of_VMs=amount_of_VMs}
 
     Map[String, Array[Array[Int]]] calling_intervals = read_json(get_tile_intervals.intervals)
     

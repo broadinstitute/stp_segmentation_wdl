@@ -4,12 +4,14 @@ task get_tile_intervals {
         File image_path
         Int tiles_dimension
         Int overlap
+        Int amount_of_VMs
     }
 
     command {
         python /opt/tile_intervals.py --input_image=${image_path} \
                                     --tiles_dimension=${tiles_dimension} \
-                                    --overlap=${overlap}
+                                    --overlap=${overlap} \
+                                    --amount_of_VMs=${amount_of_VMs}
     }
 
     output {
@@ -18,7 +20,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:8093c266c0c12396dea3ddbfdaa00e95378bad06edadf843cacea407741dbf8e"
+        docker: "jishar7/tiling_for_mac@sha256:8dcc5981ae187214f88beb8791f2ca239c0c512fbbdb7048a2f84d1b4fb6b4f3"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -47,7 +49,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_mac@sha256:8093c266c0c12396dea3ddbfdaa00e95378bad06edadf843cacea407741dbf8e"
+        docker: "jishar7/tiling_for_mac@sha256:8dcc5981ae187214f88beb8791f2ca239c0c512fbbdb7048a2f84d1b4fb6b4f3"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

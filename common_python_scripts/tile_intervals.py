@@ -10,13 +10,15 @@ import csv
 import json
 import pandas as pd
 
-def main(input_image, tiles_dimension, overlap):
+def main(input_image, tiles_dimension, overlap, amount_of_VMs):
 
     def distribute_tasks(total_tasks, max_vms=25, max_tasks_per_vm=100, min_tasks_per_vm=1):
         if total_tasks <= max_tasks_per_vm:
             # If tasks are fewer than or equal to the max tasks per VM, use one VM
             return {0: total_tasks}
 
+        if max_vms >= 25:
+            max_vms = 25
         # Calculate the required number of VMs
         required_vms = min((total_tasks + max_tasks_per_vm - 1) // max_tasks_per_vm, max_vms)
         
@@ -52,7 +54,7 @@ def main(input_image, tiles_dimension, overlap):
                     tile_width = tile_width, tile_height = tile_height, 
                     overlap = overlap)
     
-    distribution = distribute_tasks(len(tile_boundaries_list))
+    distribution = distribute_tasks(total_tasks=len(tile_boundaries_list), max_vms=amount_of_VMs)
     
     listed_intervals = {}
     listed_intervals['number_of_VMs'] = [[len(distribution.keys())]]
@@ -78,9 +80,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tile merfish')
     parser.add_argument('--input_image')
     parser.add_argument('--tiles_dimension', type = int),
-    parser.add_argument('--overlap', type = int)
+    parser.add_argument('--overlap', type = int),
+    parser.add_argument('--amount_of_VMs', type = int)
     args = parser.parse_args()
 
     main(input_image = args.input_image,  
         tiles_dimension = args.tiles_dimension,
-        overlap = args.overlap)
+        overlap = args.overlap,
+        amount_of_VMs = args.amount_of_VMs)
