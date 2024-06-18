@@ -12,22 +12,16 @@ import pandas as pd
 
 def main(input_image, tiles_dimension, overlap, amount_of_VMs):
 
-    def distribute_tasks(total_tasks, max_vms, max_tasks_per_vm=100, min_tasks_per_vm=1):
-        if total_tasks <= max_tasks_per_vm:
-            # If tasks are fewer than or equal to the max tasks per VM, use one VM
-            return {0: total_tasks}
+    def distribute_tasks(total_tasks, max_vms):
 
         if max_vms >= 25:
             max_vms = 25
-        # Calculate the required number of VMs
-        required_vms = min((total_tasks + max_tasks_per_vm - 1) // max_tasks_per_vm, max_vms)
-        
-        # Distribute tasks across the required number of VMs
-        tasks_per_vm = total_tasks // required_vms
-        remainder_tasks = total_tasks % required_vms
+            
+        tasks_per_vm = total_tasks // max_vms
+        remainder_tasks = total_tasks % max_vms
 
         distribution = {}
-        for vm in range(required_vms):
+        for vm in range(max_vms):
             if vm < remainder_tasks:
                 distribution[vm] = tasks_per_vm + 1
             else:
