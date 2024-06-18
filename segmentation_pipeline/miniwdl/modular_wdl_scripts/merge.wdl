@@ -18,7 +18,7 @@ task merge_segmentation_dfs {
     }
 
     runtime {
-        docker: "jishar7/merge_polygons_for_mac@sha256:f2a87696fac9ff57707a7d2d89f86b1e8a1459e9671fae0a7ccfbcd652a0846d"
+        docker: "jishar7/merge_polygons_for_mac@sha256:81be80d0070cb96c5fb38aa0f3213ece0ecf87e35cca6e1fde9b97e7db8dd6aa"
         memory: "10GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

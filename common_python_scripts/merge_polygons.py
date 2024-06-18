@@ -92,7 +92,9 @@ def main(cell_outlines, intervals):
 
     print("gdf", gdf)
 
-    if len(data_json['number_of_tiles'][0]) == 1:
+    if data_json['number_of_tiles'][0][0] == 1:
+
+        print("inside if statement, num of tiles check")
 
         gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
         gdf.index = [str(x) for x in gdf.index.tolist()]
@@ -105,6 +107,8 @@ def main(cell_outlines, intervals):
     # gdf.reset_index(inplace=True)
 
     else:
+
+        print("inside else statement, num of tiles check")
         gdf_tile.reset_index(inplace=True)
 
         all_cells = gdf.index.tolist()
