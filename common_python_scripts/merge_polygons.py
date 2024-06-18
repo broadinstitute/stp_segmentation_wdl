@@ -38,6 +38,9 @@ def main(cell_outlines, intervals):
 
     color_index = 0
 
+    print("intervals json")
+    print(data_json)
+
     for inst_path in cell_outlines:
         
         inst_filename = inst_path.split('/')[-1]
@@ -87,6 +90,7 @@ def main(cell_outlines, intervals):
         else: 
             gdf = pd.concat([gdf, inst_gdf], axis=0)
 
+    print("gdf", gdf)
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
@@ -120,6 +124,7 @@ def main(cell_outlines, intervals):
 
     list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
 
+    print("df_intersect before ioa calculation", df_intersect)
     # Calculating Overlap Area Parameters
 
     for inst_row in df_intersect.index.tolist():
@@ -159,6 +164,7 @@ def main(cell_outlines, intervals):
         df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
         df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
 
+    print("df_intersect after ioa calculation", df_intersect)
     # rank by easiest to resolve
     df_intersect.sort_values(by='ioa_small', ascending=False, inplace=True)    
 
