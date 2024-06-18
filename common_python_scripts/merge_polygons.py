@@ -93,7 +93,7 @@ def main(cell_outlines, intervals):
     print("gdf", gdf)
 
     if len(data_json['number_of_tiles'][0]) == 1:
-        gdf.to_parquet('cell_polygons.parquet')
+        gdf.to_parquet('processed_cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
@@ -300,7 +300,7 @@ def main(cell_outlines, intervals):
         # confirm if the following is necessary
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
-        gdf_nc.to_parquet('merged_cell_polygons.parquet')
+        gdf_nc.to_parquet('processed_cell_polygons.parquet')
 
 if __name__ == '__main__':
 
