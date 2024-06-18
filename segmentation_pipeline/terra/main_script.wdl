@@ -29,9 +29,7 @@ workflow MAIN_WORKFLOW {
     
     # Int num_VMs_in_use = read_int(get_tile_intervals.num_VMs_in_use_file)
 
-    Array[Array[Int]] nested_array_num_VMs_in_use = calling_intervals['number_of_VMs']
-    Array[Int] array_num_VMs_in_use = nested_array_num_VMs_in_use[0]
-    Int num_VMs_in_use = array_num_VMs_in_use[0]
+    Int num_VMs_in_use = calling_intervals['number_of_VMs'][0][0]
 
     Int num_of_tiles = calling_intervals['number_of_tiles'][0][0]
     
