@@ -185,7 +185,7 @@ def main(cell_outlines, intervals):
                     ioa_1 = 0
                     df_intersect.loc[inst_row, 'ioa_1'] = 0
 
-                else area_1 > 0:
+                else:
                     ioa_1 = area_intersection/area_1
                     df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
                 
@@ -193,13 +193,14 @@ def main(cell_outlines, intervals):
                     ioa_2 = 0
                     df_intersect.loc[inst_row, 'ioa_2'] = 0
                 
-                else area_2 > 0:
+                else:
                     ioa_2 = area_intersection/area_2
                     df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
 
                 if area_1 <= area_2:
                     ioa_small = ioa_1
                     df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
+                    
                 else:
                     ioa_small = ioa_2
                     df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
