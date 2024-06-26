@@ -163,21 +163,47 @@ def main(cell_outlines, intervals):
             area_union = poly_1.union(poly_2).area
             
             iou = area_intersection/area_union
-            
-            ioa_1 = area_intersection/area_1
-            ioa_2 = area_intersection/area_2
-            
-            if area_1 <= area_2:
-                ioa_small = ioa_1
-            else:
-                ioa_small = ioa_2
-
             df_intersect.loc[inst_row, 'iou'] = iou
             df_intersect.loc[inst_row, 'area_1'] = area_1
-            df_intersect.loc[inst_row, 'area_2'] = area_2    
-            df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
-            df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
-            df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
+            df_intersect.loc[inst_row, 'area_2'] = area_2  
+            
+            if area_1 > 0 and area_2 > 0:
+                ioa_1 = area_intersection/area_1
+                ioa_2 = area_intersection/area_2
+                
+                if area_1 <= area_2:
+                    ioa_small = ioa_1
+                else:
+                    ioa_small = ioa_2
+    
+                df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
+                df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
+                df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
+
+            else:
+                if area_1 <= 0:
+                    ioa_1 = 0
+                    df_intersect.loc[inst_row, 'ioa_1'] = 0
+
+                else area_1 > 0:
+                    ioa_1 = area_intersection/area_1
+                    df_intersect.loc[inst_row, 'ioa_1'] = ioa_1
+                
+                if area_2 <= 0:
+                    ioa_2 = 0
+                    df_intersect.loc[inst_row, 'ioa_2'] = 0
+                
+                else area_2 > 0:
+                    ioa_2 = area_intersection/area_2
+                    df_intersect.loc[inst_row, 'ioa_2'] = ioa_2
+
+                if area_1 <= area_2:
+                    ioa_small = ioa_1
+                    df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
+                else:
+                    ioa_small = ioa_2
+                    df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
+                
 
         print("df_intersect after ioa calculation", df_intersect)
         # rank by easiest to resolve
@@ -238,7 +264,11 @@ def main(cell_outlines, intervals):
                 for index in possible_intersections:
 
                     poly_intersect = gdf_nc.loc[index, 'geometry']
-                    ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
+
+                    if min(poly.area, poly_intersect.area) > 0:
+                        ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
+                    else:
+                        ioa_merged = 0
                     
                     # find the polygon with the highest intersection and calculate ioa_merge  
                     
