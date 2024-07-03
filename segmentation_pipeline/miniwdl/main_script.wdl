@@ -3,6 +3,7 @@ version 1.0
 import "./modular_wdl_scripts/tile.wdl" as TILE
 import "./modular_wdl_scripts/cellpose.wdl" as CELLPOSE
 import "./modular_wdl_scripts/merge.wdl" as MERGE
+import "./modular_wdl_scripts/partition_transcripts.wdl" as PARTITION
 
 workflow MAIN_WORKFLOW {
     input {
@@ -10,6 +11,7 @@ workflow MAIN_WORKFLOW {
         Int overlap # overlap between tiles
 
         File image_path # path to DAPI image
+        File transcript_path # path to detected_transcripts.csv file
 
         Int diameter # cellpose: size of cell
         Float flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
@@ -52,6 +54,11 @@ workflow MAIN_WORKFLOW {
 
     call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
                 intervals=get_tile_intervals.intervals
+    }
+
+    call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
+        input: transcript_file = transcript_path, 
+        cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons
     }
     
 }
