@@ -4,12 +4,14 @@ task partitioning_transcript_cell_by_gene {
     input {
         File transcript_file
         File cell_polygon_file
+        Int transcript_chunk_size 
     }
 
     command <<<
 
         python /opt/partition_transcripts.py --transcript_file ~{transcript_file} \
-                                --cell_polygon_file ~{cell_polygon_file}
+                                --cell_polygon_file ~{cell_polygon_file} \
+                                --transcript_chunk_size ~{transcript_chunk_size}
     >>>
 
     output {
@@ -17,7 +19,7 @@ task partitioning_transcript_cell_by_gene {
     }
 
     runtime {
-        docker: "jishar7/partition_transcripts_for_mac@sha256:ec84ba9c49e193f3224bea09a43f45794ad57d2ce54cc1e987820b37399a0e22"
+        docker: "jishar7/partition_transcripts_for_mac@sha256:be4243ddff6f66350d883534bb45f3a49513e23fc8735765cab9d3130a5ab5e7"
         memory: "10GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

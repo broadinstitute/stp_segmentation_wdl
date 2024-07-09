@@ -20,6 +20,8 @@ workflow MAIN_WORKFLOW {
         Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
         Int optional_channel 
         Int amount_of_VMs 
+
+        Int transcript_chunk_size 
     }
 
     call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
@@ -59,7 +61,8 @@ workflow MAIN_WORKFLOW {
 
     call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
         input: transcript_file = transcript_path, 
-        cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons
+        cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
+        transcript_chunk_size = transcript_chunk_size
     }
     
 }
