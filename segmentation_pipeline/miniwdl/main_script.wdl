@@ -16,7 +16,7 @@ workflow MAIN_WORKFLOW {
         Float cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
         String model_type # cellpose : model_type='cyto' or model_type='nuclei'
         Int segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
-
+        Int optional_channel 
         Int amount_of_VMs 
     }
 
@@ -45,7 +45,8 @@ workflow MAIN_WORKFLOW {
                             flow_thresh= flow_thresh, 
                             cell_prob_thresh= cell_prob_thresh,
                             model_type= model_type, 
-                            segment_channel= segment_channel
+                            segment_channel= segment_channel,
+                            optional_channel = optional_channel
         }
           
     }
