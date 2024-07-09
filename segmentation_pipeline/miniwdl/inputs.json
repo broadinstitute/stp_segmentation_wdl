@@ -4,11 +4,7 @@
     "MAIN_WORKFLOW.flow_thresh": 0.4,
     "MAIN_WORKFLOW.overlap": 200,
     "MAIN_WORKFLOW.diameter": 74,
-<<<<<<< Updated upstream
-    "MAIN_WORKFLOW.image_path": "../segmentation_data/toy_data_10000x10000/merscope_data1/original_cropped_image.tif",
-=======
     "MAIN_WORKFLOW.image_path": "../../segmentation_data/toy_data_10000x10000/merscope_data1/cropped_multi_channel_image.tiff",
->>>>>>> Stashed changes
     "MAIN_WORKFLOW.segment_channel": 0,
     "MAIN_WORKFLOW.optional_channel": 1,
     "MAIN_WORKFLOW.tiles_dimension": 2000,
