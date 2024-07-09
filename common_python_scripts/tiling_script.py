@@ -42,10 +42,15 @@ def main(input_image, intervals, out_path, shard_index):
 
         meta.to_csv(out_path + f"/tile_metadata_{shard_index}_{index}.csv")
 
-        current_tile = image[y_min:y_max, x_min:x_max]
+        if len(image.shape) == 2:
+            print("in first if")
+            current_tile = image[y_min:y_max, x_min:x_max]
+            cv.imwrite(out_path + f"/tiled_image_{shard_index}_{index}.tiff", current_tile)   
 
-        cv.imwrite(out_path + f"/tiled_image_{shard_index}_{index}.tiff", current_tile)        
-        #j=j+1
+        elif len(image.shape) == 3:
+            print("in second if")
+            current_tile = image[:, y_min:y_max, x_min:x_max]
+            tf.imwrite(out_path + f"/tiled_image_{shard_index}_{index}.tiff", current_tile, photometric='minisblack')
 
 
 if __name__ == '__main__':

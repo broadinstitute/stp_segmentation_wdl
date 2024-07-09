@@ -1,11 +1,14 @@
 {
     "MAIN_WORKFLOW.cell_prob_thresh": 0.0,
-    "MAIN_WORKFLOW.model_type": "nuclei",
+    "MAIN_WORKFLOW.model_type": "cyto",
     "MAIN_WORKFLOW.flow_thresh": 0.4,
     "MAIN_WORKFLOW.overlap": 200,
     "MAIN_WORKFLOW.diameter": 74,
-    "MAIN_WORKFLOW.image_path": "../segmentation_data/toy_data_10000x10000/merscope_data1/original_cropped_image.tif",
+    "MAIN_WORKFLOW.image_path": "../../segmentation_data/toy_data_10000x10000/merscope_data1/cropped_multi_channel_image.tiff",
     "MAIN_WORKFLOW.segment_channel": 0,
+    "MAIN_WORKFLOW.optional_channel": 1,
     "MAIN_WORKFLOW.tiles_dimension": 2000,
-    "MAIN_WORKFLOW.amount_of_VMs": 6
+    "MAIN_WORKFLOW.amount_of_VMs": 6,
+    "MAIN_WORKFLOW.transcript_path": "../../segmentation_data/toy_data_10000x10000/merscope_data1/subset_coordinates.csv",
+    "MAIN_WORKFLOW.transcript_chunk_size": 10000    
 }

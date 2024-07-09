@@ -37,8 +37,13 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
     else:
         print("Unsupported image format. Please provide a TIFF (.tif/.tiff) or JPEG (.jpg/.jpeg) image.")
     
-    image_width = image.shape[1]
-    image_height = image.shape[0]
+    if len(image.shape) == 2:
+        image_width = image.shape[1]
+        image_height = image.shape[0]
+
+    elif len(image.shape) == 3:
+        image_width = image.shape[2]
+        image_height = image.shape[1]
     
     # given the number of tiles, figure out size of tiles
     tile_width = tiles_dimension
