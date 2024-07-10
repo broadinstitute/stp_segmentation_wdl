@@ -20,7 +20,7 @@ task get_tile_intervals {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_terra@sha256:ed018ce0b45149c2f4bf6f84ca5852bd70003becbec9704736a9d84af01cb6cd"
+        docker: "jishar7/tiling_for_terra@sha256:0fb461d55fac6ee72b29df2e8bbdf562a6701cc91fb86cc7ff20dfa208fe93d2"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
@@ -49,7 +49,7 @@ task get_tile {
     }
 
     runtime {
-        docker: "jishar7/tiling_for_terra@sha256:ed018ce0b45149c2f4bf6f84ca5852bd70003becbec9704736a9d84af01cb6cd"
+        docker: "jishar7/tiling_for_terra@sha256:0fb461d55fac6ee72b29df2e8bbdf562a6701cc91fb86cc7ff20dfa208fe93d2"
         memory: "20GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

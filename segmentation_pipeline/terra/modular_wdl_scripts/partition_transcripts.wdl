@@ -4,12 +4,14 @@ task partitioning_transcript_cell_by_gene {
     input {
         File transcript_file
         File cell_polygon_file
+        Int transcript_chunk_size 
     }
 
     command <<<
 
         python /opt/partition_transcripts.py --transcript_file ~{transcript_file} \
-                                --cell_polygon_file ~{cell_polygon_file}
+                                --cell_polygon_file ~{cell_polygon_file} \
+                                --transcript_chunk_size ~{transcript_chunk_size}
     >>>
 
     output {
