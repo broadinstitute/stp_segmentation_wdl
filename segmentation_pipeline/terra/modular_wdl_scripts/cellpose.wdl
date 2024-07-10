@@ -8,6 +8,7 @@ task run_cellpose_nuclear {
         Float cell_prob_thresh
         String model_type
         Int segment_channel
+        Int optional_channel
     }
 
     command <<<
@@ -26,6 +27,7 @@ task run_cellpose_nuclear {
                                 --flow_threshold ~{flow_thresh} \
                                 --cellprob_threshold ~{cell_prob_thresh} \
                                 --chan ~{segment_channel} \
+                                --chan2 ~{optional_channel} \
                                 --savedir "$(pwd)"  \
                                 --no_npy
             
@@ -42,7 +44,7 @@ task run_cellpose_nuclear {
 
     runtime {
         continueOnReturnCode: [0, 1]
-        docker: "jishar7/cellpose_for_terra@sha256:3ac418181abd6d532112e405ffa7c2c002a27691048ecfadbedc41ea9376da7a"
+        docker: "jishar7/cellpose_for_mac@sha256:e3614459dd29e98a1864e710045e3e52888e7d96753a659b74511f73b19eca66"
         memory: "100GB"
         preemptible: 2
         maxRetries: 0
