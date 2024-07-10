@@ -4,14 +4,12 @@ import "./modular_wdl_scripts/tile.wdl" as TILE
 import "./modular_wdl_scripts/cellpose.wdl" as CELLPOSE
 import "./modular_wdl_scripts/merge.wdl" as MERGE
 import "./modular_wdl_scripts/partition_transcripts.wdl" as PARTITION
+import "./modular_wdl_scripts/create_toy_data.wdl" as TOY
 
 workflow MAIN_WORKFLOW {
     input {
         Int tiles_dimension # tile width and height
         Int overlap # overlap between tiles
-
-        File image_path # path to DAPI image
-        File transcript_path # path to detected_transcripts.csv file
 
         Int diameter # cellpose: size of cell
         Float flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
@@ -22,9 +20,22 @@ workflow MAIN_WORKFLOW {
         Int amount_of_VMs 
 
         Int transcript_chunk_size 
-    }
 
-    call TILE.get_tile_intervals as get_tile_intervals {input: image_path=image_path,
+        Array[Int] toy_data_x_interval
+        Array[Int] toy_data_y_interval
+        File transform_file
+        File detected_transcripts_file
+
+        Array[File] image_paths_list  
+    }
+    
+    call TOY.create_toy_data as create_toy_data {input: image_paths_list=image_paths_list,
+                                    toy_data_x_interval=toy_data_x_interval,
+                                    toy_data_y_interval=toy_data_y_interval,
+                                    transform_file=transform_file,
+                                    detected_transcripts_file=detected_transcripts_file}
+
+    call TILE.get_tile_intervals as get_tile_intervals {input: image_path=create_toy_data.toy_multi_channel_image,
                                     tiles_dimension=tiles_dimension,
                                     overlap=overlap,
                                     amount_of_VMs=amount_of_VMs}
@@ -39,7 +50,7 @@ workflow MAIN_WORKFLOW {
 
         String index_for_intervals = "~{i}"
 
-        call TILE.get_tile as get_tile {input: image_path=image_path,
+        call TILE.get_tile as get_tile {input: image_path=create_toy_data.toy_multi_channel_image,
 								intervals=get_tile_intervals.intervals,
                                 shard_index=index_for_intervals}
 
@@ -60,7 +71,7 @@ workflow MAIN_WORKFLOW {
     }
 
     call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
-        input: transcript_file = transcript_path, 
+        input: transcript_file = create_toy_data.toy_coordinates, 
         cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
         transcript_chunk_size = transcript_chunk_size
     }
