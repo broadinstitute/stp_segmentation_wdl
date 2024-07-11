@@ -29,7 +29,7 @@ task get_tile_intervals {
 }
 
 
-task get_tile {
+task create_tile {
     input {
         File image_path
 		File intervals

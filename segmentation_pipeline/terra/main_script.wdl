@@ -50,12 +50,12 @@ workflow MAIN_WORKFLOW {
 
         String index_for_intervals = "~{i}"
 
-        call TILE.get_tile as get_tile {input: image_path=create_toy_data.toy_multi_channel_image,
+        call TILE.create_tile as create_tile {input: image_path=create_toy_data.toy_multi_channel_image,
 								intervals=get_tile_intervals.intervals,
                                 shard_index=index_for_intervals}
 
         call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
-                            image_path=get_tile.tiled_image,
+                            image_path=create_tile.tiled_image,
                             diameter= diameter, 
                             flow_thresh= flow_thresh, 
                             cell_prob_thresh= cell_prob_thresh,
