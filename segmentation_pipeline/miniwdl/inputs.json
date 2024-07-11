@@ -1,6 +1,6 @@
 {
     "MAIN_WORKFLOW.cell_prob_thresh": 0.0,
-    "MAIN_WORKFLOW.model_type": "nuclei",
+    "MAIN_WORKFLOW.model_type": "cyto",
     "MAIN_WORKFLOW.flow_thresh": 0.4,
     "MAIN_WORKFLOW.overlap": 200,
     "MAIN_WORKFLOW.diameter": 74,
