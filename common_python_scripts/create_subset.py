@@ -2,6 +2,7 @@ import numpy as np
 import tifffile as tiff
 import argparse
 import pandas as pd
+import cv2
 
 def main(image_paths_list, subset_data_x_interval, subset_data_y_interval, transform_file, detected_transcripts_file, technology):
 
@@ -13,6 +14,7 @@ def main(image_paths_list, subset_data_x_interval, subset_data_y_interval, trans
     subset_data_y_interval = subset_data_y_interval.split(',')
 
     start_y, end_y, start_x, end_x = int(subset_data_y_interval[0]), int(subset_data_y_interval[1]), int(subset_data_x_interval[0]), int(subset_data_x_interval[1])
+    clahe = cv2.createCLAHE()
 
     for image_path in image_paths_list:
 
@@ -21,7 +23,7 @@ def main(image_paths_list, subset_data_x_interval, subset_data_y_interval, trans
             series = image_file.series[0]
             plane = series.pages[0]
 
-            subset_channel_image = plane.asarray()[start_x:end_x, start_y:end_y]
+            subset_channel_image = clahe.apply(plane.asarray()[start_x:end_x, start_y:end_y])
 
             channel_images.append(subset_channel_image)
 
