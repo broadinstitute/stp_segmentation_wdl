@@ -4,7 +4,7 @@ import "./modular_wdl_scripts/tile.wdl" as TILE
 import "./modular_wdl_scripts/cellpose.wdl" as CELLPOSE
 import "./modular_wdl_scripts/merge.wdl" as MERGE
 import "./modular_wdl_scripts/partition_transcripts.wdl" as PARTITION
-import "./modular_wdl_scripts/create_toy_data.wdl" as TOY
+import "./modular_wdl_scripts/create_subset.wdl" as SUBSET
 
 workflow MAIN_WORKFLOW {
     input {
@@ -21,21 +21,24 @@ workflow MAIN_WORKFLOW {
 
         Int transcript_chunk_size 
 
-        Array[Int] toy_data_x_interval
-        Array[Int] toy_data_y_interval
+        Array[Int] subset_data_x_interval
+        Array[Int] subset_data_y_interval
         File transform_file
         File detected_transcripts_file
 
         Array[File] image_paths_list  
-    }
-    
-    call TOY.create_toy_data as create_toy_data {input: image_paths_list=image_paths_list,
-                                    toy_data_x_interval=toy_data_x_interval,
-                                    toy_data_y_interval=toy_data_y_interval,
-                                    transform_file=transform_file,
-                                    detected_transcripts_file=detected_transcripts_file}
 
-    call TILE.get_tile_intervals as get_tile_intervals {input: image_path=create_toy_data.toy_multi_channel_image,
+        String technology # XENIUM or MERSCOPE
+    }
+
+    call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
+                                    subset_data_x_interval=subset_data_x_interval,
+                                    subset_data_y_interval=subset_data_y_interval,
+                                    transform_file=transform_file,
+                                    detected_transcripts_file=detected_transcripts_file,
+                                    technology=technology}
+
+    call TILE.get_tile_intervals as get_tile_intervals {input: image_path=create_subset.subset_multi_channel_image,
                                     tiles_dimension=tiles_dimension,
                                     overlap=overlap,
                                     amount_of_VMs=amount_of_VMs}
@@ -50,11 +53,11 @@ workflow MAIN_WORKFLOW {
 
         String index_for_intervals = "~{i}"
 
-        call TILE.create_tile as create_tile {input: image_path=create_toy_data.toy_multi_channel_image,
+        call TILE.create_tile as create_tile {input: image_path=create_subset.subset_multi_channel_image,
 								intervals=get_tile_intervals.intervals,
                                 shard_index=index_for_intervals}
 
-        call CELLPOSE.run_cellpose_nuclear as run_cellpose_nuclear {input: 
+        call CELLPOSE.run_cellpose as run_cellpose {input: 
                             image_path=create_tile.tiled_image,
                             diameter= diameter, 
                             flow_thresh= flow_thresh, 
@@ -66,14 +69,15 @@ workflow MAIN_WORKFLOW {
           
     }
 
-    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose_nuclear.outlines,
+    call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose.outlines,
                 intervals=get_tile_intervals.intervals
     }
 
     call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
-        input: transcript_file = create_toy_data.toy_coordinates, 
+        input: transcript_file = create_subset.subset_coordinates, 
         cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
-        transcript_chunk_size = transcript_chunk_size
+        transcript_chunk_size = transcript_chunk_size,
+        technology = technology
     }
     
 }

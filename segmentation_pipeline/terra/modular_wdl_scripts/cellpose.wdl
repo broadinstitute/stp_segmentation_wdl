@@ -1,5 +1,5 @@
 version 1.0
-task run_cellpose_nuclear {
+task run_cellpose {
 
 	input {       
     	Array[File] image_path
