@@ -47,7 +47,7 @@ def main(input_image, intervals, out_path, shard_index):
             current_tile = image[y_min:y_max, x_min:x_max]
             cv.imwrite(out_path + f"/tiled_image_{shard_index}_{index}.tiff", current_tile)   
 
-        elif len(image.shape) == 3:
+        elif len(image.shape) > 2:
             print("in second if")
             current_tile = image[:, y_min:y_max, x_min:x_max]
             tf.imwrite(out_path + f"/tiled_image_{shard_index}_{index}.tiff", current_tile, photometric='minisblack')

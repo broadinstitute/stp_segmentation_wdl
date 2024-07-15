@@ -1,5 +1,5 @@
 version 1.0
-task run_cellpose_nuclear {
+task run_cellpose {
 
 	input {       
     	Array[File] image_path
@@ -8,6 +8,7 @@ task run_cellpose_nuclear {
         Float cell_prob_thresh
         String model_type
         Int segment_channel
+        Int optional_channel
     }
 
     command <<<
@@ -26,6 +27,7 @@ task run_cellpose_nuclear {
                                 --flow_threshold ~{flow_thresh} \
                                 --cellprob_threshold ~{cell_prob_thresh} \
                                 --chan ~{segment_channel} \
+                                --chan2 ~{optional_channel} \
                                 --savedir "$(pwd)"  \
                                 --no_npy
             

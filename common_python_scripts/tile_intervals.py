@@ -41,7 +41,7 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
         image_width = image.shape[1]
         image_height = image.shape[0]
 
-    elif len(image.shape) == 3:
+    elif len(image.shape) > 2:
         image_width = image.shape[2]
         image_height = image.shape[1]
     

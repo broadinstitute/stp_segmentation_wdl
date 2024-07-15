@@ -4,7 +4,7 @@ from shapely.geometry import Point
 import numpy as np
 import argparse
 
-def main(transcript_file, cell_polygon_file, transcript_chunk_size):
+def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     def find_containing_polygon(transcript):
         point = transcript.geometry
@@ -24,7 +24,16 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size):
         return transcript_chunk
 
     transcript_df = pd.read_csv(transcript_file)
-    transcript_df['geometry'] = transcript_df.apply(lambda row: Point(row['global_x'], row['global_y']), axis=1)
+
+    if technology == 'MERSCOPE':
+        x_col = 'global_x'
+        y_col = 'global_y'       
+
+    elif technology == 'XENIUM':
+        x_col = 'x_location'
+        y_col = 'y_location'  
+
+    transcript_df['geometry'] = transcript_df.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
     transcripts_gdf = gpd.GeoDataFrame(transcript_df, geometry='geometry')
 
     cell_polygons_gdf = gpd.read_parquet(cell_polygon_file)
@@ -34,6 +43,11 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size):
     cell_polygons_gdf.rename(columns={'level_0': 'cell_ids'}, inplace=True)
 
     cell_polygons_sindex = cell_polygons_gdf.sindex
+
+    cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
+    cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
+
+    cell_polygons_gdf[['cell_ids', 'area', 'centroid']].to_parquet("cell_polygons_metadata.parquet")
 
     transcript_chunks_indices = np.array_split(transcripts_gdf.index.to_list(), np.ceil(len(transcripts_gdf) / transcript_chunk_size))
 
@@ -49,12 +63,23 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size):
     partitioned_transcripts = gpd.GeoDataFrame(partitioned_transcripts, geometry='geometry')
 
     partitioned_transcripts['cell_index'].fillna(-1, inplace=True)
-    partitioned_transcripts = partitioned_transcripts.rename(columns={'Unnamed: 0': 'transcript_id'})
-    partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+    
+    if technology == 'MERSCOPE':
+        partitioned_transcripts = partitioned_transcripts.rename(columns={'Unnamed: 0': 'transcript_id'})
 
-    cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
+    partitioned_transcripts.to_parquet("partitioned_transcripts.parquet")
+    partitioned_transcripts[['transcript_id', 'cell_index']].to_parquet("partitioned_transcripts_metadata.parquet")
+
+    if technology == 'MERSCOPE':
+        partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+        cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
+
+    elif technology == 'XENIUM': 
+        partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['feature_name', 'cell_index']).size().reset_index(name='count')
+        cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='feature_name', values='count', fill_value=0)
 
     cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv')
+    cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
 
 if __name__ == '__main__':
 
@@ -62,8 +87,10 @@ if __name__ == '__main__':
     parser.add_argument('--transcript_file')
     parser.add_argument('--cell_polygon_file')
     parser.add_argument('--transcript_chunk_size', type = int)  
+    parser.add_argument('--technology')  
     args = parser.parse_args()
 
     main(transcript_file = args.transcript_file,  
         cell_polygon_file = args.cell_polygon_file,
-        transcript_chunk_size = args.transcript_chunk_size)
+        transcript_chunk_size = args.transcript_chunk_size,
+        technology = args.technology)
