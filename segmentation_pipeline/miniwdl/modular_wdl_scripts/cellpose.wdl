@@ -9,12 +9,12 @@ task run_cellpose {
         String model_type
         Int segment_channel
         Int optional_channel
+        String shard_index
     }
 
     command <<<
-        index=0
 
-        IFS=', ' read -r -a combined_file_array <<< "~{sep=', ' image_path}"
+        IFS=', ' read -r -a combined_file_array <<< "$(echo "~{sep=', ' image_path}" | tr ', ' '\n' | grep "tiled_image_~{shard_index}_.*\.tiff" | tr '\n' ', ')"
 
         for value in "${combined_file_array[@]}"; do
             python -m cellpose --image_path "$value" \
@@ -30,8 +30,7 @@ task run_cellpose {
                                 --chan2 ~{optional_channel} \
                                 --savedir "$(pwd)"  \
                                 --no_npy
-            
-            ((index++))
+                                
         done
     >>>
 

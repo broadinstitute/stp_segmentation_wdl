@@ -2,19 +2,20 @@ import numpy as np
 import tifffile as tiff
 import argparse
 import pandas as pd
-import cv2
+from skimage.exposure import equalize_adapthist
+from tiling_script import tiling_script
+import tile_intervals
+import os
 
-def main(image_paths_list, subset_data_x_interval, subset_data_y_interval, transform_file, detected_transcripts_file, technology):
+def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs):
 
     channel_images = []
 
     image_paths_list = image_paths_list.split(',')
 
-    subset_data_x_interval = subset_data_x_interval.split(',')
-    subset_data_y_interval = subset_data_y_interval.split(',')
+    subset_data_y_x_interval = subset_data_y_x_interval.split(',')
 
-    start_y, end_y, start_x, end_x = int(subset_data_y_interval[0]), int(subset_data_y_interval[1]), int(subset_data_x_interval[0]), int(subset_data_x_interval[1])
-    clahe = cv2.createCLAHE()
+    start_y, end_y, start_x, end_x = int(subset_data_y_x_interval[0]), int(subset_data_y_x_interval[1]), int(subset_data_y_x_interval[2]), int(subset_data_y_x_interval[3])
 
     for image_path in image_paths_list:
 
@@ -23,13 +24,21 @@ def main(image_paths_list, subset_data_x_interval, subset_data_y_interval, trans
             series = image_file.series[0]
             plane = series.pages[0]
 
-            subset_channel_image = clahe.apply(plane.asarray()[start_x:end_x, start_y:end_y])
+            subset_channel_image = equalize_adapthist(plane.asarray()[start_x:end_x, start_y:end_y], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
 
             channel_images.append(subset_channel_image)
 
     subset_multi_channel_image = np.stack(channel_images, axis=0)
 
-    tiff.imwrite('subset_multi_channel_image.tiff', subset_multi_channel_image, photometric='minisblack', metadata={'axes': 'CYX'})
+    listed_intervals = tile_intervals.tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs)
+    num_VMs_in_use = listed_intervals['number_of_VMs'][0][0]
+    out_path=os.getcwd()
+
+    for shard_index in range(num_VMs_in_use):
+
+        tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
+
+    #tiff.imwrite('subset_multi_channel_image.tiff', subset_multi_channel_image, photometric='minisblack', metadata={'axes': 'CYX'})
 
     if technology == 'MERSCOPE':
         transform_df = pd.read_csv(transform_file, header=None, delimiter=" ")
@@ -99,16 +108,20 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='composite_image_creation')
     parser.add_argument('--image_paths_list')
-    parser.add_argument('--subset_data_x_interval')
-    parser.add_argument('--subset_data_y_interval')
+    parser.add_argument('--subset_data_y_x_interval')
     parser.add_argument('--transform_file')
     parser.add_argument('--detected_transcripts_file')
     parser.add_argument('--technology')
+    parser.add_argument('--tiles_dimension', type=float)
+    parser.add_argument('--overlap', type=float)
+    parser.add_argument('--amount_of_VMs', type=float)
     args = parser.parse_args()
 
     main(image_paths_list = args.image_paths_list,  
-        subset_data_x_interval = args.subset_data_x_interval,
-        subset_data_y_interval = args.subset_data_y_interval,
+        subset_data_y_x_interval = args.subset_data_y_x_interval,
         transform_file = args.transform_file,
         detected_transcripts_file = args.detected_transcripts_file,
-        technology = args.technology)
+        technology = args.technology,
+        tiles_dimension = args.tiles_dimension, 
+        overlap = args.overlap, 
+        amount_of_VMs = args.amount_of_VMs)
