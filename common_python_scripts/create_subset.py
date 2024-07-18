@@ -7,6 +7,7 @@ from tiling_script import tiling_script
 import tile_intervals
 import os
 import pyarrow.parquet as pq
+import imagecodecs
 
 def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs):
 
