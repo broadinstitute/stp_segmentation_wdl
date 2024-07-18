@@ -6,6 +6,7 @@ from skimage.exposure import equalize_adapthist
 from tiling_script import tiling_script
 import tile_intervals
 import os
+import pyarrow.parquet as pq
 
 def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs):
 
@@ -41,42 +42,90 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     #tiff.imwrite('subset_multi_channel_image.tiff', subset_multi_channel_image, photometric='minisblack', metadata={'axes': 'CYX'})
 
     if technology == 'MERSCOPE':
-        transform_df = pd.read_csv(transform_file, header=None, delimiter=" ")
-        transformation_matrix = np.array([transform_df[0], transform_df[1], transform_df[2]])    
 
-        detected_transcripts_df = pd.read_csv(detected_transcripts_file)
+        transform_df = pd.read_csv(transform_file, header=None, delimiter=" ")
+
+        transformation_matrix = np.array([
+                                    [transform_df[0][0], transform_df[1][0], transform_df[2][0]],
+                                    [transform_df[0][1], transform_df[1][1], transform_df[2][1]],
+                                    [transform_df[0][2], transform_df[1][2], transform_df[2][2]]
+                                ])
+        
+        inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+
+        pixel_bounds = np.array([[start_x, start_y, 1],
+                                    [end_x, end_y, 1]])
+
+        # Convert pixel bounds to micron coordinates
+        micron_coordinates = np.dot(inverse_transformation_matrix, pixel_bounds.T).T
+
+        # Removing the homogeneous coordinate, if not necessary
+        micron_coordinates = micron_coordinates[:, :2]
+
+        x_min = micron_coordinates[0,0]
+        x_max = micron_coordinates[1,0]
+
+        y_min = micron_coordinates[0,1]
+        y_max = micron_coordinates[1,1]
+
         x_col = 'global_x'
         y_col = 'global_y'       
+
+        chunk_size = 100000
+        trx_subset = pd.DataFrame()
+
+        for chunk in pd.read_csv(detected_transcripts_file, chunksize=chunk_size):
+            
+            trx_subset_temp = chunk[(chunk[x_col] >= x_min) & 
+                        (chunk[x_col] < x_max) & 
+                        (chunk[y_col] >= y_min) & 
+                        (chunk[y_col] < y_max) 
+                        ]
+
+            trx_subset = pd.concat([trx_subset, trx_subset_temp])
 
     elif technology == 'XENIUM':
         transformation_matrix = pd.read_csv(transform_file).values[:3,:3]
 
-        detected_transcripts_df = pd.read_parquet(detected_transcripts_file)
+        inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+
+        pixel_bounds = np.array([[start_x, start_y, 1],
+                                    [end_x, end_y, 1]])
+
+        # Convert pixel bounds to micron coordinates
+        micron_coordinates = np.dot(inverse_transformation_matrix, pixel_bounds.T).T
+
+        # Removing the homogeneous coordinate, if not necessary
+        micron_coordinates = micron_coordinates[:, :2]
+
+        x_min = micron_coordinates[0,0]
+        x_max = micron_coordinates[1,0]
+
+        y_min = micron_coordinates[0,1]
+        y_max = micron_coordinates[1,1]
+
         x_col = 'x_location'
         y_col = 'y_location'  
+        
+        batch_size = 100000
+        batch_list = []
+        trx_subset = pd.DataFrame()
 
-    inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+        parquet_file = pq.ParquetFile(detected_transcripts_file)
+        
+        for batch in parquet_file.iter_batches(batch_size=batch_size):
 
-    pixel_bounds = np.array([[start_x, start_y, 1],
-                                [end_x, end_y, 1]])
+            batch_df = batch.to_pandas()
 
-    # Convert pixel bounds to micron coordinates
-    micron_coordinates = np.dot(inverse_transformation_matrix, pixel_bounds.T).T
+            trx_subset_temp = batch_df[
+                (batch_df[x_col] >= x_min) & 
+                (batch_df[x_col] < x_max) & 
+                (batch_df[y_col] >= y_min) & 
+                (batch_df[y_col] < y_max)
+            ]
+            batch_list.append(trx_subset_temp)
 
-    # Removing the homogeneous coordinate, if not necessary
-    micron_coordinates = micron_coordinates[:, :2]
-
-    x_min = micron_coordinates[0,0]
-    x_max = micron_coordinates[1,0]
-
-    y_min = micron_coordinates[0,1]
-    y_max = micron_coordinates[1,1]
-
-    trx_subset = detected_transcripts_df[(detected_transcripts_df[x_col] >= x_min) & 
-                (detected_transcripts_df[x_col] < x_max) & 
-                (detected_transcripts_df[y_col] >= y_min) & 
-                (detected_transcripts_df[y_col] < y_max) 
-                ]
+        trx_subset = pd.concat(batch_list, ignore_index=True)
 
     temp = trx_subset[[x_col, y_col]].values
     transcript_positions = np.ones((temp.shape[0], temp.shape[1]+1))
