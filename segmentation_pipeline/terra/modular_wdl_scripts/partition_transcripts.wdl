@@ -15,7 +15,7 @@ task partitioning_transcript_cell_by_gene {
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology}
 
-        cp ~{cell_polygon_file} "processed_cell_polygons.parquet"
+        cp ~{cell_polygon_file} "cell_polygons.parquet"
 
     >>>
 
@@ -29,7 +29,7 @@ task partitioning_transcript_cell_by_gene {
 
     runtime {
         docker: "jishar7/partition_transcripts_for_terra@sha256:59e9a5025b07cc5ecc2b1939a977dc8e9d42b38b48ee31747a4a39f37b004da4"
-        memory: "10GB"
+        memory: "50GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
     }

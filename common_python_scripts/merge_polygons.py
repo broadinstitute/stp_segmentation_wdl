@@ -98,7 +98,7 @@ def main(cell_outlines, intervals):
 
         #gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
 
-        gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
+        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
 
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
