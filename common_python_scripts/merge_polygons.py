@@ -96,13 +96,18 @@ def main(cell_outlines, intervals):
 
         print("inside if statement, num of tiles check")
 
-        gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
+        #gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
+
+        gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
+
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
         # confirm if the following is necessary
         gdf.columns = [str(col) for col in gdf.columns]
 
-        gdf.to_parquet('processed_cell_polygons.parquet')
+        print(gdf.columns)
+
+        gdf.to_parquet('cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
@@ -240,12 +245,7 @@ def main(cell_outlines, intervals):
             if len(possible_intersections) == 0:
                 
                 new_data = {
-                    0: None,
-                    'index': 'merged',
-                    'geometry': poly,
-                    'shard': None,
-                    'job': None,
-                    'color': 'red'
+                    'geometry': poly
                 }
                 
                 # add poly to gdf_nc because there is no conflict  
@@ -293,7 +293,7 @@ def main(cell_outlines, intervals):
 
                     # add polygon_merged to gdf_nc
                     
-                    new_data = {0: None,'geometry': poly_merged,'shard': None,'job': None,'color': 'red'}
+                    new_data = {'geometry': poly_merged}
                 
                     # add poly to gdf_nc because there is no conflict  
                     new_row = gpd.GeoDataFrame([new_data])
@@ -303,7 +303,7 @@ def main(cell_outlines, intervals):
                 else:
             
                     # add poly to gdf_nc becuse there is a small conflict    
-                    new_data = {0: None,'geometry': poly,'shard': None,'job': None,'color': 'red'} 
+                    new_data = {'geometry': poly} 
                     new_row = gpd.GeoDataFrame([new_data])
                     gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))                      
         
@@ -319,8 +319,8 @@ def main(cell_outlines, intervals):
                 
                 # do not merge conflicted cells and add both to gdf_nc
                 
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_1, ioa_small_thresh)
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_2, ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_1, ioa_thresh=ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_2, ioa_thresh=ioa_small_thresh)
             
             elif inst_ioa_small >= ioa_small_thresh:
                 
@@ -334,15 +334,16 @@ def main(cell_outlines, intervals):
 
                 poly_merged = poly_1.union(poly_2)
                 
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_merged, ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
+        #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
+        gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
         # confirm if the following is necessary
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
-        gdf_nc.to_parquet('processed_cell_polygons.parquet')
+        gdf_nc.to_parquet('cell_polygons.parquet')
 
 if __name__ == '__main__':
 
