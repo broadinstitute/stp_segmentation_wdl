@@ -26,7 +26,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             series = image_file.series[0]
             plane = series.pages[0]
 
-            subset_channel_image = equalize_adapthist(plane.asarray()[start_x:end_x, start_y:end_y], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
+            subset_channel_image = equalize_adapthist(plane.asarray()[start_y:end_y, start_x:end_x], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
 
             channel_images.append(subset_channel_image)
 
