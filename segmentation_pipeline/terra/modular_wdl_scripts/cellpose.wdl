@@ -6,7 +6,7 @@ task run_cellpose {
         Int diameter
         Float flow_thresh
         Float cell_prob_thresh
-        String model_type
+        File model_type
         Int segment_channel
         Int optional_channel
         String shard_index
