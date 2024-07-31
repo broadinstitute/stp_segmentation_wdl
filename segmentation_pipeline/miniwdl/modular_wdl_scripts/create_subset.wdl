@@ -38,7 +38,7 @@ task create_subset {
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_mac@sha256:71a75e23e68e19b004584f206a4ec99b4a5ff1349ed19a52e69485ea5738f17a"
+        docker: "jishar7/subset_data_for_mac@sha256:51c677a2226d5770430971e8cb0f1b98d6e2b0fa6a5d25bd7a258a1f1b8135cd"
         memory: "10GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
