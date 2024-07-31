@@ -12,6 +12,7 @@ RUN pip install pyarrow==16.1.0
 RUN pip install scikit-image==0.24.0
 RUN pip install opencv-python==4.10.0.82
 RUN pip install imagecodecs==2024.6.1
+RUN pip install scipy==1.14.0
 
 COPY common_python_scripts/create_subset.py /opt/create_subset.py
 COPY common_python_scripts/tiling_script.py /opt/tiling_script.py

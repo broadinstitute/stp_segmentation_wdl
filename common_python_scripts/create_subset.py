@@ -8,8 +8,9 @@ import tile_intervals
 import os
 import pyarrow.parquet as pq
 import imagecodecs
+from scipy.ndimage import gaussian_filter
 
-def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs):
+def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel):
 
     channel_images = []
 
@@ -18,29 +19,6 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     subset_data_y_x_interval = subset_data_y_x_interval.split(',')
 
     start_y, end_y, start_x, end_x = int(subset_data_y_x_interval[0]), int(subset_data_y_x_interval[1]), int(subset_data_y_x_interval[2]), int(subset_data_y_x_interval[3])
-
-    for image_path in image_paths_list:
-
-        with tiff.TiffFile(image_path, is_ome=False) as image_file:
-
-            series = image_file.series[0]
-            plane = series.pages[0]
-
-            subset_channel_image = equalize_adapthist(plane.asarray()[start_y:end_y, start_x:end_x], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
-
-            channel_images.append(subset_channel_image)
-
-    subset_multi_channel_image = np.stack(channel_images, axis=0)
-
-    listed_intervals = tile_intervals.tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs)
-    num_VMs_in_use = listed_intervals['number_of_VMs'][0][0]
-    out_path=os.getcwd()
-
-    for shard_index in range(num_VMs_in_use):
-
-        tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
-
-    #tiff.imwrite('subset_multi_channel_image.tiff', subset_multi_channel_image, photometric='minisblack', metadata={'axes': 'CYX'})
 
     if technology == 'MERSCOPE':
 
@@ -154,6 +132,48 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
     np.savetxt('subset_transformation_matrix.csv', transformation_matrix_subset, delimiter=' ', fmt='%d')
 
+    for image_path in image_paths_list:
+
+        with tiff.TiffFile(image_path, is_ome=False) as image_file:
+
+            series = image_file.series[0]
+            plane = series.pages[0]
+
+            subset_channel_image = equalize_adapthist(plane.asarray()[start_y:end_y, start_x:end_x], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
+
+            channel_images.append(subset_channel_image)
+
+    if transcript_plot_as_channel == 1:
+        array_x = trx_subset[x_col].values
+        array_y = trx_subset[y_col].values
+
+        image_size = (end_y-start_y, end_x-start_x)
+
+        transcript_image = np.zeros(image_size, dtype=np.uint8)
+
+        x_coords = np.clip(array_x.astype(int), 0, image_size[1] - 1)
+        y_coords = np.clip(array_y.astype(int), 0, image_size[0] - 1)
+
+        intensity = 255
+        point_size = 3
+
+        for x, y in zip(x_coords, y_coords):
+            transcript_image[max(0, y-point_size//2):min(image_size[0], y+point_size//2+1),
+                max(0, x-point_size//2):min(image_size[1], x+point_size//2+1)] = intensity
+            
+        blurred_transcript_image = gaussian_filter(transcript_image, sigma=45)
+        channel_images.append(blurred_transcript_image)
+    
+    subset_multi_channel_image = np.stack(channel_images, axis=0)
+
+    listed_intervals = tile_intervals.tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs)
+    num_VMs_in_use = listed_intervals['number_of_VMs'][0][0]
+    out_path=os.getcwd()
+
+    for shard_index in range(num_VMs_in_use):
+
+        tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='composite_image_creation')
@@ -165,6 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('--tiles_dimension', type=float)
     parser.add_argument('--overlap', type=float)
     parser.add_argument('--amount_of_VMs', type=float)
+    parser.add_argument('--transcript_plot_as_channel', type=int)
     args = parser.parse_args()
 
     main(image_paths_list = args.image_paths_list,  
@@ -174,4 +195,5 @@ if __name__ == '__main__':
         technology = args.technology,
         tiles_dimension = args.tiles_dimension, 
         overlap = args.overlap, 
-        amount_of_VMs = args.amount_of_VMs)
+        amount_of_VMs = args.amount_of_VMs,
+        transcript_plot_as_channel = args.transcript_plot_as_channel)

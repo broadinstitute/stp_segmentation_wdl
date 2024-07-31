@@ -27,6 +27,8 @@ workflow MAIN_WORKFLOW {
         Array[File] image_paths_list  
 
         String technology # XENIUM or MERSCOPE
+
+        Int transcript_plot_as_channel # 1 for yes, 0 for no
     }
 
     call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
@@ -36,7 +38,8 @@ workflow MAIN_WORKFLOW {
                                     technology=technology,
                                     tiles_dimension=tiles_dimension, 
                                     overlap=overlap, 
-                                    amount_of_VMs=amount_of_VMs}
+                                    amount_of_VMs=amount_of_VMs,
+                                    transcript_plot_as_channel=transcript_plot_as_channel}
 
     Map[String, Array[Array[Float]]] calling_intervals = read_json(create_subset.intervals)
     Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
