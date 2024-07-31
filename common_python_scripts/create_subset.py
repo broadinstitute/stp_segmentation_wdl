@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 import imagecodecs
 from scipy.ndimage import gaussian_filter
 
-def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel):
+def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma):
 
     channel_images = []
 
@@ -161,7 +161,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             transcript_image[max(0, y-point_size//2):min(image_size[0], y+point_size//2+1),
                 max(0, x-point_size//2):min(image_size[1], x+point_size//2+1)] = intensity
             
-        blurred_transcript_image = gaussian_filter(transcript_image, sigma=45)
+        blurred_transcript_image = gaussian_filter(transcript_image, sigma=sigma)
         channel_images.append(blurred_transcript_image)
     
     subset_multi_channel_image = np.stack(channel_images, axis=0)
@@ -186,6 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--overlap', type=float)
     parser.add_argument('--amount_of_VMs', type=float)
     parser.add_argument('--transcript_plot_as_channel', type=int)
+    parser.add_argument('--sigma', type=int)
     args = parser.parse_args()
 
     main(image_paths_list = args.image_paths_list,  
@@ -196,4 +197,5 @@ if __name__ == '__main__':
         tiles_dimension = args.tiles_dimension, 
         overlap = args.overlap, 
         amount_of_VMs = args.amount_of_VMs,
-        transcript_plot_as_channel = args.transcript_plot_as_channel)
+        transcript_plot_as_channel = args.transcript_plot_as_channel,
+        sigma = args.sigma)

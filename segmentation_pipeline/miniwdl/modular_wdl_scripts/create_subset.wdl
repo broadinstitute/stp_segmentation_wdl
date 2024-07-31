@@ -11,6 +11,7 @@ task create_subset {
         Float overlap
         Float amount_of_VMs 
         Int transcript_plot_as_channel
+        Int sigma
     }
 
     command <<<
@@ -23,7 +24,8 @@ task create_subset {
                                        --tiles_dimension ~{tiles_dimension} \
                                        --overlap ~{overlap} \
                                        --amount_of_VMs ~{amount_of_VMs} \
-                                       --transcript_plot_as_channel ~{transcript_plot_as_channel}
+                                       --transcript_plot_as_channel ~{transcript_plot_as_channel} \
+                                       --sigma ~{sigma}
 
     >>>
 
