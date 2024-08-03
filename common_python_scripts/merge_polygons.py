@@ -167,7 +167,11 @@ def main(cell_outlines, intervals):
             area_intersection = poly_1.intersection(poly_2).area
             area_union = poly_1.union(poly_2).area
             
+            if area_union <= 0:
+                continue
+
             iou = area_intersection/area_union
+
             df_intersect.loc[inst_row, 'iou'] = iou
             df_intersect.loc[inst_row, 'area_1'] = area_1
             df_intersect.loc[inst_row, 'area_2'] = area_2  

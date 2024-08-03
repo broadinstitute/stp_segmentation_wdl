@@ -17,9 +17,8 @@ task merge_segmentation_dfs {
         File processed_cell_polygons = "cell_polygons.parquet"
     }
 
-
     runtime {
-        docker: "jishar7/merge_polygons_for_mac@sha256:a68983851dc21de4a4c23157275e04da8cf0d4516201a8fc8c9cbb8445522cc1"
+        docker: "jishar7/merge_polygons_for_mac@sha256:d810512458857232e90c3a289790623455c0127ff2b0170bc0da609daecdd4a8"
         memory: "10GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
