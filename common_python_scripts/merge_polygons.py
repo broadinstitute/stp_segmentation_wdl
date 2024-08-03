@@ -314,6 +314,18 @@ def main(cell_outlines, intervals):
             return gdf_nc
 
 
+        def fix_invalid_geometries(gdf_nc):
+            # Function to fix invalid geometries
+            def fix_geometry(geom):
+                if not geom.is_valid:
+                    return geom.buffer(0)
+                return geom
+            
+            gdf_nc['geometry'] = gdf_nc['geometry'].apply(fix_geometry)
+            return gdf_nc
+
+        gdf_nc = fix_invalid_geometries(gdf_nc)
+
         # loop through df_intersect
         for inst_row in df_intersect.index.tolist():
             
