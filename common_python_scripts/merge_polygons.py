@@ -5,9 +5,11 @@ import pandas as pd
 import geopandas as gpd
 from google.cloud import storage
 from shapely.geometry import Polygon, box
+from shapely.validation import make_valid
 from shapely.affinity import translate
 import matplotlib.pyplot as plt
 import warnings
+
 
 def main(cell_outlines, intervals):
 
@@ -266,9 +268,15 @@ def main(cell_outlines, intervals):
                 max_ioa_merged = 0
                 max_ioa_merged_index = 0
                 
+                if not poly.is_valid:
+                    poly = make_valid(poly)
+
                 for index in possible_intersections:
 
                     poly_intersect = gdf_nc.loc[index, 'geometry']
+
+                    if not poly_intersect.is_valid:
+                        poly_intersect = make_valid(poly_intersect)
 
                     if min(poly.area, poly_intersect.area) > 0:
                         ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
