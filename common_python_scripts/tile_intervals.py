@@ -1,18 +1,9 @@
 import cv2 as cv
-import numpy as np
 import tifffile as tf
-import math
-import os
-import ast
 import utils
-import argparse
-import csv
 import json
-import pandas as pd
 
-def main(input_image, tiles_dimension, overlap, amount_of_VMs):
-
-    def distribute_tasks(total_tasks, max_vms):
+def distribute_tasks(total_tasks, max_vms):
 
         if max_vms >= 25:
             max_vms = 25
@@ -29,21 +20,23 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
 
         return distribution
 
-    # read in tif/jpeg file
-    if input_image.lower().endswith(('.tif', '.tiff')):
-        image = tf.imread(input_image)
-    elif input_image.lower().endswith(('.jpg', '.jpeg')):
-        image = cv.imread(input_image)
-    else:
-        print("Unsupported image format. Please provide a TIFF (.tif/.tiff) or JPEG (.jpg/.jpeg) image.")
-    
-    if len(image.shape) == 2:
-        image_width = image.shape[1]
-        image_height = image.shape[0]
+def tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs):
 
-    elif len(image.shape) > 2:
-        image_width = image.shape[2]
-        image_height = image.shape[1]
+    # read in tif/jpeg file
+    #if subset_multi_channel_image.lower().endswith(('.tif', '.tiff')):
+    #    image = tf.imread(subset_multi_channel_image)
+    #elif subset_multi_channel_image.lower().endswith(('.jpg', '.jpeg')):
+    #    image = cv.imread(subset_multi_channel_image)
+    #else:
+    #    print("Unsupported image format. Please provide a TIFF (.tif/.tiff) or JPEG (.jpg/.jpeg) image.")
+    
+    if len(subset_multi_channel_image.shape) == 2:
+        image_width = float(subset_multi_channel_image.shape[1])
+        image_height = float(subset_multi_channel_image.shape[0])
+
+    elif len(subset_multi_channel_image.shape) > 2:
+        image_width = float(subset_multi_channel_image.shape[2])
+        image_height = float(subset_multi_channel_image.shape[1])
     
     # given the number of tiles, figure out size of tiles
     tile_width = tiles_dimension
@@ -53,7 +46,7 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
                     tile_width = tile_width, tile_height = tile_height, 
                     overlap = overlap)
     
-    distribution = distribute_tasks(total_tasks=len(tile_boundaries_list), max_vms=amount_of_VMs)
+    distribution = distribute_tasks(total_tasks=len(tile_boundaries_list), max_vms=int(amount_of_VMs))
     
     listed_intervals = {}
     listed_intervals['number_of_VMs'] = [[len(distribution.keys())]]
@@ -74,17 +67,4 @@ def main(input_image, tiles_dimension, overlap, amount_of_VMs):
     with open("intervals.json", "w") as json_file:
         json.dump(listed_intervals, json_file)
 
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description='Tile merfish')
-    parser.add_argument('--input_image')
-    parser.add_argument('--tiles_dimension', type = int),
-    parser.add_argument('--overlap', type = int),
-    parser.add_argument('--amount_of_VMs', type = int)
-    args = parser.parse_args()
-
-    main(input_image = args.input_image,  
-        tiles_dimension = args.tiles_dimension,
-        overlap = args.overlap,
-        amount_of_VMs = args.amount_of_VMs)
+    return listed_intervals
