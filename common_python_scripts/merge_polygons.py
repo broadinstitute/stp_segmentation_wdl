@@ -168,9 +168,9 @@ def main(cell_outlines, intervals):
             area_union = poly_1.union(poly_2).area
             
             if area_union <= 0:
-                continue
-
-            iou = area_intersection/area_union
+                iou = 0
+            else:
+                iou = area_intersection/area_union
 
             df_intersect.loc[inst_row, 'iou'] = iou
             df_intersect.loc[inst_row, 'area_1'] = area_1
@@ -312,19 +312,6 @@ def main(cell_outlines, intervals):
                     gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))                      
         
             return gdf_nc
-
-
-        def fix_invalid_geometries(gdf_nc):
-            # Function to fix invalid geometries
-            def fix_geometry(geom):
-                if not geom.is_valid:
-                    return geom.buffer(0)
-                return geom
-            
-            gdf_nc['geometry'] = gdf_nc['geometry'].apply(fix_geometry)
-            return gdf_nc
-
-        gdf_nc = fix_invalid_geometries(gdf_nc)
 
         # loop through df_intersect
         for inst_row in df_intersect.index.tolist():
