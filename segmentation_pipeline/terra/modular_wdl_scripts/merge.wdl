@@ -18,7 +18,7 @@ task merge_segmentation_dfs {
     }
 
     runtime {
-        docker: "jishar7/merge_polygons_for_terra@sha256:2b91062544ff9eadcce4a6237adff34071bef97bfeb79528a81c4753fd841538"
+        docker: "jishar7/merge_polygons_for_terra@sha256:d64ec98980b1baef637b9c1e336f25408955df049ddca46e44e6337c8c9f8665"
         memory: "50GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

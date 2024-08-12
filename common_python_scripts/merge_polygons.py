@@ -282,7 +282,8 @@ def main(cell_outlines, intervals):
                     poly_intersect = gdf_nc.loc[index, 'geometry']
 
                     if not poly_intersect.is_valid:
-                        poly_intersect = make_valid(poly_intersect)
+                        poly_intersect = make_valid(poly_intersect).buffer(0)
+                        poly_intersect = poly_intersect.simplify(tolerance)
 
                     if min(poly.area, poly_intersect.area) > 0:
                         ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
@@ -302,7 +303,10 @@ def main(cell_outlines, intervals):
                     poly_intersect = gdf_nc.loc[max_ioa_merged_index, 'geometry']
                     
                     # poly_merged = ...
-                    
+
+                    poly_intersect = make_valid(poly_intersect).buffer(0)
+                    poly_intersect = poly_intersect.simplify(tolerance)
+
                     poly_merged = poly_intersect.union(poly)
                     
                     # delete intersecting polygon in gdf_nc
@@ -348,6 +352,12 @@ def main(cell_outlines, intervals):
                 
                 poly_1 = gdf_.loc[id_1, 'geometry']
                 poly_2 = gdf_.loc[id_2, 'geometry']
+
+                poly_1 = make_valid(poly_1).buffer(0)
+                poly_1 = poly_1.simplify(tolerance)
+
+                poly_2 = make_valid(poly_2).buffer(0)
+                poly_2 = poly_2.simplify(tolerance)
 
                 poly_merged = poly_1.union(poly_2)
                 
