@@ -12,7 +12,8 @@ import warnings
 
 
 def main(cell_outlines, intervals):
-
+    
+    tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
 
     def list_blobs_paths(bucket, prefix):
@@ -160,10 +161,15 @@ def main(cell_outlines, intervals):
 
             poly_1 = gdf.loc[cell_1, 'geometry']
 
-            area_1 = poly_1.area
-
             poly_2 = gdf.loc[cell_2, 'geometry']
 
+            poly_1 = make_valid(poly_1).buffer(0)
+            poly_2 = make_valid(poly_2).buffer(0)
+            
+            poly_1 = poly_1.simplify(tolerance)
+            poly_2 = poly_2.simplify(tolerance)
+
+            area_1 = poly_1.area
             area_2 = poly_2.area
             
             area_intersection = poly_1.intersection(poly_2).area
