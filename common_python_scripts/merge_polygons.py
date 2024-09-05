@@ -111,11 +111,12 @@ def main(cell_outlines, intervals):
         print(gdf.columns)
 
         gdf.to_parquet('cell_polygons.parquet')
+        gdf.to_parquet('raw_cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
     else:
-
+        gdf.to_parquet('raw_cell_polygons.parquet')
         print("inside else statement, num of tiles check")
         gdf_tile.reset_index(inplace=True)
 
