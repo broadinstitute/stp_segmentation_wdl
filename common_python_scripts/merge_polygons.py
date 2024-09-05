@@ -163,6 +163,11 @@ def main(cell_outlines, intervals):
 
             poly_2 = gdf.loc[cell_2, 'geometry']
 
+            if isinstance(poly_1, pd.Series):
+                poly_1 = poly_1.values[0]  
+            if isinstance(poly_2, pd.Series):
+                poly_2 = poly_2.values[0]
+
             poly_1 = make_valid(poly_1).buffer(0)
             poly_2 = make_valid(poly_2).buffer(0)
             
