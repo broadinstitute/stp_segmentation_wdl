@@ -5,12 +5,15 @@ import pandas as pd
 import geopandas as gpd
 from google.cloud import storage
 from shapely.geometry import Polygon, box
+from shapely.validation import make_valid
 from shapely.affinity import translate
 import matplotlib.pyplot as plt
 import warnings
 
-def main(cell_outlines, intervals):
 
+def main(cell_outlines, intervals):
+    
+    tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
 
     def list_blobs_paths(bucket, prefix):
@@ -96,13 +99,18 @@ def main(cell_outlines, intervals):
 
         print("inside if statement, num of tiles check")
 
-        gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
+        #gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
+
+        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
+
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
         # confirm if the following is necessary
         gdf.columns = [str(col) for col in gdf.columns]
 
-        gdf.to_parquet('processed_cell_polygons.parquet')
+        print(gdf.columns)
+
+        gdf.to_parquet('cell_polygons.parquet')
     # # trying to make unique indices
     # gdf.reset_index(inplace=True)
 
@@ -153,16 +161,25 @@ def main(cell_outlines, intervals):
 
             poly_1 = gdf.loc[cell_1, 'geometry']
 
-            area_1 = poly_1.area
-
             poly_2 = gdf.loc[cell_2, 'geometry']
 
+            poly_1 = make_valid(poly_1).buffer(0)
+            poly_2 = make_valid(poly_2).buffer(0)
+            
+            poly_1 = poly_1.simplify(tolerance)
+            poly_2 = poly_2.simplify(tolerance)
+
+            area_1 = poly_1.area
             area_2 = poly_2.area
             
             area_intersection = poly_1.intersection(poly_2).area
             area_union = poly_1.union(poly_2).area
             
-            iou = area_intersection/area_union
+            if area_union <= 0:
+                iou = 0
+            else:
+                iou = area_intersection/area_union
+
             df_intersect.loc[inst_row, 'iou'] = iou
             df_intersect.loc[inst_row, 'area_1'] = area_1
             df_intersect.loc[inst_row, 'area_2'] = area_2  
@@ -240,12 +257,7 @@ def main(cell_outlines, intervals):
             if len(possible_intersections) == 0:
                 
                 new_data = {
-                    0: None,
-                    'index': 'merged',
-                    'geometry': poly,
-                    'shard': None,
-                    'job': None,
-                    'color': 'red'
+                    'geometry': poly
                 }
                 
                 # add poly to gdf_nc because there is no conflict  
@@ -262,9 +274,16 @@ def main(cell_outlines, intervals):
                 max_ioa_merged = 0
                 max_ioa_merged_index = 0
                 
+                if not poly.is_valid:
+                    poly = make_valid(poly)
+
                 for index in possible_intersections:
 
                     poly_intersect = gdf_nc.loc[index, 'geometry']
+
+                    if not poly_intersect.is_valid:
+                        poly_intersect = make_valid(poly_intersect).buffer(0)
+                        poly_intersect = poly_intersect.simplify(tolerance)
 
                     if min(poly.area, poly_intersect.area) > 0:
                         ioa_merged = poly_intersect.intersection(poly).area / min(poly.area, poly_intersect.area)
@@ -284,7 +303,10 @@ def main(cell_outlines, intervals):
                     poly_intersect = gdf_nc.loc[max_ioa_merged_index, 'geometry']
                     
                     # poly_merged = ...
-                    
+
+                    poly_intersect = make_valid(poly_intersect).buffer(0)
+                    poly_intersect = poly_intersect.simplify(tolerance)
+
                     poly_merged = poly_intersect.union(poly)
                     
                     # delete intersecting polygon in gdf_nc
@@ -293,7 +315,7 @@ def main(cell_outlines, intervals):
 
                     # add polygon_merged to gdf_nc
                     
-                    new_data = {0: None,'geometry': poly_merged,'shard': None,'job': None,'color': 'red'}
+                    new_data = {'geometry': poly_merged}
                 
                     # add poly to gdf_nc because there is no conflict  
                     new_row = gpd.GeoDataFrame([new_data])
@@ -303,12 +325,11 @@ def main(cell_outlines, intervals):
                 else:
             
                     # add poly to gdf_nc becuse there is a small conflict    
-                    new_data = {0: None,'geometry': poly,'shard': None,'job': None,'color': 'red'} 
+                    new_data = {'geometry': poly} 
                     new_row = gpd.GeoDataFrame([new_data])
                     gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))                      
         
             return gdf_nc
-
 
         # loop through df_intersect
         for inst_row in df_intersect.index.tolist():
@@ -319,8 +340,8 @@ def main(cell_outlines, intervals):
                 
                 # do not merge conflicted cells and add both to gdf_nc
                 
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_1, ioa_small_thresh)
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_2, ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_1, ioa_thresh=ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_2, ioa_thresh=ioa_small_thresh)
             
             elif inst_ioa_small >= ioa_small_thresh:
                 
@@ -332,17 +353,24 @@ def main(cell_outlines, intervals):
                 poly_1 = gdf_.loc[id_1, 'geometry']
                 poly_2 = gdf_.loc[id_2, 'geometry']
 
+                poly_1 = make_valid(poly_1).buffer(0)
+                poly_1 = poly_1.simplify(tolerance)
+
+                poly_2 = make_valid(poly_2).buffer(0)
+                poly_2 = poly_2.simplify(tolerance)
+
                 poly_merged = poly_1.union(poly_2)
                 
-                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc, poly_merged, ioa_small_thresh)
+                gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
+        #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
+        gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
         # confirm if the following is necessary
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
-        gdf_nc.to_parquet('processed_cell_polygons.parquet')
+        gdf_nc.to_parquet('cell_polygons.parquet')
 
 if __name__ == '__main__':
 

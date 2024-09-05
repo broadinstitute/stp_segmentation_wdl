@@ -14,12 +14,12 @@ task merge_segmentation_dfs {
     >>>
 
     output {
-        File processed_cell_polygons = "processed_cell_polygons.parquet"
+        File processed_cell_polygons = "cell_polygons.parquet"
     }
 
     runtime {
-        docker: "jishar7/merge_polygons_for_terra@sha256:e92c712f66ce3870670de22d0263ea13079f77a7a9f31c864aa4a33bd2b08b9f"
-        memory: "10GB"
+        docker: "jishar7/merge_polygons_for_terra@sha256:d64ec98980b1baef637b9c1e336f25408955df049ddca46e44e6337c8c9f8665"
+        memory: "50GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
     }
