@@ -2,6 +2,7 @@ import cv2 as cv
 import tifffile as tf
 import utils
 import json
+import geopandas as gpd
 
 def distribute_tasks(total_tasks, max_vms):
 
@@ -42,10 +43,13 @@ def tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_
     tile_width = tiles_dimension
     tile_height = tiles_dimension
     
-    tile_boundaries_list = utils.tile_coords(image_width = image_width, image_height = image_height,
+    tile_boundaries_list, tile_polygons = utils.tile_coords(image_width = image_width, image_height = image_height,
                     tile_width = tile_width, tile_height = tile_height, 
                     overlap = overlap)
     
+    tile_gdf = gpd.GeoDataFrame(geometry=tile_polygons)
+    tile_gdf.to_parquet('tile_polygons.parquet')
+
     distribution = distribute_tasks(total_tasks=len(tile_boundaries_list), max_vms=int(amount_of_VMs))
     
     listed_intervals = {}

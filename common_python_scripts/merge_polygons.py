@@ -116,7 +116,10 @@ def main(cell_outlines, intervals):
     # gdf.reset_index(inplace=True)
 
     else:
+        gdf.index = [str(x) for x in gdf.index.tolist()]
+        gdf.columns = [str(col) for col in gdf.columns]
         gdf.to_parquet('raw_cell_polygons.parquet')
+
         print("inside else statement, num of tiles check")
         gdf_tile.reset_index(inplace=True)
 
@@ -369,6 +372,10 @@ def main(cell_outlines, intervals):
                 
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
+        for index, geom in enumerate(gdf_nc.geometry.geom_type):
+            if geom == 'MultiPolygon':
+                gdf_nc.geometry[index] = max(gdf_nc.geometry[index].geoms, key=lambda p: p.area)
+
         #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 

@@ -1,4 +1,5 @@
 import numpy as np
+from shapely.geometry import Polygon, box
 
 def tile_coords(image_height, image_width,
                 tile_height, tile_width, 
@@ -19,6 +20,7 @@ def tile_coords(image_height, image_width,
     """
     
     tile_boundaries_list = []
+    tile_polygons = []
 
     y_min = 0
     while y_min < image_height:
@@ -32,8 +34,12 @@ def tile_coords(image_height, image_width,
 
             tile_boundaries_list.append([y_min, y_max, x_min, x_max])
 
+            tile_corners = [(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)]
+            tile_polygon = Polygon(tile_corners)
+            tile_polygons.append(tile_polygon)
+
             x_min += (tile_width - overlap)  # Move to the next tile with overlap
 
         y_min += (tile_height - overlap)  # Move to the next row of tiles with overlap
     
-    return tile_boundaries_list
+    return tile_boundaries_list, tile_polygons
