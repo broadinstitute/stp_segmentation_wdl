@@ -116,9 +116,10 @@ def main(cell_outlines, intervals):
     # gdf.reset_index(inplace=True)
 
     else:
-        gdf.index = [str(x) for x in gdf.index.tolist()]
-        gdf.columns = [str(col) for col in gdf.columns]
-        gdf.to_parquet('raw_cell_polygons.parquet')
+        gdf_copy = gdf.copy()
+        gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
+        gdf_copy.columns = [str(col) for col in gdf_copy.columns]
+        gdf_copy.to_parquet('raw_cell_polygons.parquet')
 
         print("inside else statement, num of tiles check")
         gdf_tile.reset_index(inplace=True)
