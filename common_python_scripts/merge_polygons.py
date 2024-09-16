@@ -373,9 +373,29 @@ def main(cell_outlines, intervals):
                 
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        for index, geom in enumerate(gdf_nc.geometry.geom_type):
-            if geom == 'MultiPolygon':
-                gdf_nc.geometry[index] = max(gdf_nc.geometry[index].geoms, key=lambda p: p.area)
+        def find_valid_buffer(geom, initial_step=0.01, max_iterations=100):
+
+            step = initial_step
+            
+            buffer_direction = 1
+            
+            for i in range(max_iterations):
+                buffered_geom = geom.buffer(step * buffer_direction).buffer(step * (-buffer_direction)).simplify(tolerance=1, preserve_topology=True)
+                
+                if buffered_geom.is_valid and buffered_geom.geom_type == 'Polygon':
+                    return buffered_geom
+                
+                step += initial_step
+            
+            if geom.geom_type == 'MultiPolygon':
+                largest_polygon = max(geom.geoms, key=lambda p: p.area)
+                return largest_polygon
+            
+            return geom
+
+        for index, value in enumerate(gdf_nc.geometry.geom_type=='MultiPolygon'):
+            if value == True:
+                gdf_nc.iloc[index].geometry = find_valid_buffer(geom=gdf_nc.iloc[index].geometry)
 
         #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
