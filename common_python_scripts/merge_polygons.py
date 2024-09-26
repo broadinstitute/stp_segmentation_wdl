@@ -31,8 +31,6 @@ def main(cell_outlines, intervals):
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
-    #del data_json['number_of_VMs']
-
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
     gdf = None
@@ -40,9 +38,6 @@ def main(cell_outlines, intervals):
     gdf_tile = gpd.GeoDataFrame()
 
     color_index = 0
-
-    print("intervals json")
-    print(data_json)
 
     for inst_path in cell_outlines:
         
@@ -93,30 +88,23 @@ def main(cell_outlines, intervals):
         else: 
             gdf = pd.concat([gdf, inst_gdf], axis=0)
 
-    print("gdf", gdf)
-
     if data_json['number_of_tiles'][0][0] == 1:
-
-        print("inside if statement, num of tiles check")
-
-        #gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
 
         gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
 
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
-        # confirm if the following is necessary
         gdf.columns = [str(col) for col in gdf.columns]
 
-        print(gdf.columns)
-
         gdf.to_parquet('cell_polygons.parquet')
-    # # trying to make unique indices
-    # gdf.reset_index(inplace=True)
+        gdf.to_parquet('raw_cell_polygons.parquet')
 
     else:
+        gdf_copy = gdf.copy()
+        gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
+        gdf_copy.columns = [str(col) for col in gdf_copy.columns]
+        gdf_copy.to_parquet('raw_cell_polygons.parquet')
 
-        print("inside else statement, num of tiles check")
         gdf_tile.reset_index(inplace=True)
 
         all_cells = gdf.index.tolist()
@@ -147,7 +135,6 @@ def main(cell_outlines, intervals):
 
         list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
 
-        print("df_intersect before ioa calculation", df_intersect)
         # Calculating Overlap Area Parameters
 
         for inst_row in df_intersect.index.tolist():
@@ -162,6 +149,11 @@ def main(cell_outlines, intervals):
             poly_1 = gdf.loc[cell_1, 'geometry']
 
             poly_2 = gdf.loc[cell_2, 'geometry']
+
+            if isinstance(poly_1, pd.Series):
+                poly_1 = poly_1.values[0]  
+            if isinstance(poly_2, pd.Series):
+                poly_2 = poly_2.values[0]
 
             poly_1 = make_valid(poly_1).buffer(0)
             poly_2 = make_valid(poly_2).buffer(0)
@@ -222,8 +214,6 @@ def main(cell_outlines, intervals):
                     ioa_small = ioa_2
                     df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
                 
-
-        print("df_intersect after ioa calculation", df_intersect)
         # rank by easiest to resolve
         df_intersect.sort_values(by='ioa_small', ascending=False, inplace=True)    
 
@@ -264,9 +254,9 @@ def main(cell_outlines, intervals):
                 new_row = gpd.GeoDataFrame([new_data])
                 gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))
 
-            # elif poly intersects with one or more gdf_nc polygons
+            # else poly intersects with one or more gdf_nc polygons
             
-            elif len(possible_intersections) != 0:
+            else:
 
                 # Assumption: the polygon we are adding to gdf_nc should only ever have to be 
                 # merged with one polygon from gdf_nc.
@@ -320,8 +310,7 @@ def main(cell_outlines, intervals):
                     # add poly to gdf_nc because there is no conflict  
                     new_row = gpd.GeoDataFrame([new_data])
                     gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))            
-                # else 
-
+               
                 else:
             
                     # add poly to gdf_nc becuse there is a small conflict    
@@ -333,41 +322,59 @@ def main(cell_outlines, intervals):
 
         # loop through df_intersect
         for inst_row in df_intersect.index.tolist():
-            
+
             inst_ioa_small = df_intersect.loc[inst_row, 'ioa_small']
             
+            id_1 = df_intersect.loc[inst_row, 'id_1']
+            id_2 = df_intersect.loc[inst_row, 'id_2']
+
+            poly_1 = gdf_.loc[id_1, 'geometry']
+            poly_2 = gdf_.loc[id_2, 'geometry']
+
+            poly_1 = make_valid(poly_1).buffer(0)
+            poly_1 = poly_1.simplify(tolerance)
+
+            poly_2 = make_valid(poly_2).buffer(0)
+            poly_2 = poly_2.simplify(tolerance)
+                
             if inst_ioa_small < ioa_small_thresh :
-                
-                # do not merge conflicted cells and add both to gdf_nc
-                
+
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_1, ioa_thresh=ioa_small_thresh)
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_2, ioa_thresh=ioa_small_thresh)
-            
-            elif inst_ioa_small >= ioa_small_thresh:
-                
-                # merge cells and add merged cell to gdf_nc
-                
-                id_1 = df_intersect.loc[inst_row, 'id_1']
-                id_2 = df_intersect.loc[inst_row, 'id_2']
-                
-                poly_1 = gdf_.loc[id_1, 'geometry']
-                poly_2 = gdf_.loc[id_2, 'geometry']
 
-                poly_1 = make_valid(poly_1).buffer(0)
-                poly_1 = poly_1.simplify(tolerance)
-
-                poly_2 = make_valid(poly_2).buffer(0)
-                poly_2 = poly_2.simplify(tolerance)
+            else:
 
                 poly_merged = poly_1.union(poly_2)
-                
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
+        def find_valid_buffer(geom, initial_step=0.01, max_iterations=100):
+
+            step = initial_step
+            
+            buffer_direction = 1
+            
+            for i in range(max_iterations):
+                buffered_geom = geom.buffer(step * buffer_direction).buffer(step * (-buffer_direction)).simplify(tolerance=1, preserve_topology=True)
+                
+                if buffered_geom.is_valid and buffered_geom.geom_type == 'Polygon':
+                    return buffered_geom
+                
+                step += initial_step
+            
+            if geom.geom_type == 'MultiPolygon':
+                largest_polygon = max(geom.geoms, key=lambda p: p.area)
+                return largest_polygon
+            
+            return geom
+
+        for index, value in enumerate(gdf_nc.geometry.geom_type=='MultiPolygon'):
+            if value == True:
+                gdf_nc.iloc[index].geometry = find_valid_buffer(geom=gdf_nc.iloc[index].geometry)
+
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
         gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
-        # confirm if the following is necessary
+
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
         gdf_nc.to_parquet('cell_polygons.parquet')

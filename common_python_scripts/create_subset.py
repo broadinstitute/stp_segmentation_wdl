@@ -13,6 +13,7 @@ from scipy.ndimage import gaussian_filter
 def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma):
 
     channel_images = []
+    mean_intensity_of_channels = {}
 
     image_paths_list = image_paths_list.split(',')
 
@@ -132,7 +133,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
     np.savetxt('subset_transformation_matrix.csv', transformation_matrix_subset, delimiter=' ', fmt='%d')
 
-    for image_path in image_paths_list:
+    for image_index, image_path in enumerate(image_paths_list):
 
         with tiff.TiffFile(image_path, is_ome=False) as image_file:
 
@@ -141,7 +142,12 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
             subset_channel_image = equalize_adapthist(plane.asarray()[start_y:end_y, start_x:end_x], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
 
+            mean_intensity_of_channels[f"{image_index}_indexed_image"] = np.mean(subset_channel_image)
+
             channel_images.append(subset_channel_image)
+
+    mean_intensity_of_channels_df = pd.DataFrame(mean_intensity_of_channels)
+    mean_intensity_of_channels_df.to_csv('mean_intensity_of_channels.csv', index=False)
 
     if transcript_plot_as_channel == 1:
         array_x = trx_subset[x_col].values
