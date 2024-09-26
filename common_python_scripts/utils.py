@@ -30,8 +30,6 @@ def tile_coords(image_height, image_width,
         while x_min < image_width:
             x_max = min(x_min + tile_width, image_width)  # Adjust x_max if it exceeds image width
 
-            #tile_boundaries_list.append(y_min, y_max, x_min, x_max)
-
             tile_boundaries_list.append([y_min, y_max, x_min, x_max])
 
             tile_corners = [(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)]
