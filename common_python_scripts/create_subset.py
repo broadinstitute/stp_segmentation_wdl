@@ -146,7 +146,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
             channel_images.append(subset_channel_image)
 
-    mean_intensity_of_channels_df = pd.DataFrame(mean_intensity_of_channels)
+    mean_intensity_of_channels_df = pd.DataFrame(mean_intensity_of_channels, index=[0])
     mean_intensity_of_channels_df.to_csv('mean_intensity_of_channels.csv', index=False)
 
     if transcript_plot_as_channel == 1:
