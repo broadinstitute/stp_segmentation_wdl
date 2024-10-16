@@ -23,13 +23,13 @@ def shrink_tile(tile, trim_amount, intersecting_sides, grid_bounds):
 
     # Check if the tile is on the boundary of the grid
     if 'left' in intersecting_sides and minx != grid_minx:
-        minx += shrink_amount
+        minx += trim_amount
     if 'right' in intersecting_sides and maxx != grid_maxx:
-        maxx -= shrink_amount
+        maxx -= trim_amount
     if 'top' in intersecting_sides and maxy != grid_maxy:
-        maxy -= shrink_amount
+        maxy -= trim_amount
     if 'bottom' in intersecting_sides and miny != grid_miny:
-        miny += shrink_amount
+        miny += trim_amount
 
     return box(minx, miny, maxx, maxy)
 
