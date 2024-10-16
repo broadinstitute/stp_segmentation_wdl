@@ -31,6 +31,8 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
+    number_of_tiles = data_json['number_of_tiles'][0][0]
+
     del data_json['number_of_VMs']
     del data_json['number_of_tiles']
 
@@ -125,7 +127,7 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         else: 
             gdf = pd.concat([gdf, inst_gdf], axis=0)
 
-    if data_json['number_of_tiles'][0][0] == 1:
+    if number_of_tiles == 1:
 
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
