@@ -34,6 +34,7 @@ workflow MAIN_WORKFLOW {
 
         Int transcript_plot_as_channel # 1 for yes, 0 for no
         Int sigma
+        Int trim_amount
     }
 
     call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
@@ -45,7 +46,8 @@ workflow MAIN_WORKFLOW {
                                     overlap=overlap, 
                                     amount_of_VMs=amount_of_VMs,
                                     transcript_plot_as_channel=transcript_plot_as_channel,
-                                    sigma=sigma}
+                                    sigma=sigma,
+                                    trim_amount=trim_amount}
 
     Map[String, Array[Array[Float]]] calling_intervals = read_json(create_subset.intervals)
     Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
@@ -69,13 +71,15 @@ workflow MAIN_WORKFLOW {
     }
 
     call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose.outlines,
-                intervals=create_subset.intervals
+                intervals=create_subset.intervals,
+                original_tile_polygons=create_subset.original_tile_polygons,
+                trimmed_tile_polygons=create_subset.trimmed_tile_polygons
     }
 
     call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
         input: transcript_file = create_subset.subset_coordinates, 
         cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
-        raw_cell_polygon_file = merge_segmentation_dfs.raw_cell_polygons,
+        pre_merged_cell_polygons = merge_segmentation_dfs.pre_merged_cell_polygons,
         transcript_chunk_size = transcript_chunk_size,
         technology = technology
     }

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-def main(cell_outlines, intervals):
+def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons):
     
     tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
@@ -31,11 +31,45 @@ def main(cell_outlines, intervals):
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
+    del data_json['number_of_VMs']
+    del data_json['number_of_tiles']
+
+    trimmed_tile_gdf = gpd.read_parquet(trimmed_tile_polygons)
+    original_tile_gdf = gpd.read_parquet(original_tile_polygons)
+
+    def update_data_json_with_trimmed_bounds(trimmed_gdf, data_json):
+        # Flatten the list of bounds in trimmed_gdf to match the order in data_json
+        trimmed_bounds = [row['rearranged_bounds'] for idx, row in trimmed_gdf.iterrows()]
+        
+        trimmed_data_json = {}
+        
+        # Counter to track the current position in trimmed_bounds list
+        bound_counter = 0
+        
+        # Iterate through each key and the list of bounds in data_json
+        for key, original_bounds_list in data_json.items():
+            # Determine how many tiles are stored in this key (length of bounds list)
+
+            num_tiles_in_key = len(original_bounds_list)
+            
+            # Extract the corresponding number of trimmed bounds from trimmed_gdf
+            trimmed_bounds_subset = trimmed_bounds[bound_counter:bound_counter + num_tiles_in_key]
+            
+            trimmed_data_json[key] = []
+            # Replace the bounds in data_json with the trimmed bounds
+            for i in range(num_tiles_in_key):
+                trimmed_data_json[key].append(trimmed_bounds_subset[i])
+            
+            # Move the counter forward by the number of tiles processed
+            bound_counter += num_tiles_in_key
+
+        return trimmed_data_json
+
+    trimmed_data_json = update_data_json_with_trimmed_bounds(trimmed_gdf=trimmed_tile_gdf, data_json=data_json)
+        
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
     gdf = None
-
-    gdf_tile = gpd.GeoDataFrame()
 
     color_index = 0
 
@@ -61,21 +95,24 @@ def main(cell_outlines, intervals):
 
         # Create a GeoDataFrame
         inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
-
-        # look up translation 
-        #inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
-        inst_coords = data_json[str(shard_index)][int(job_id)]
         
-        y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]
+        trimmed_inst_coords = trimmed_data_json[str(shard_index)][int(job_id)]
+    
+        original_inst_coords = data_json[str(shard_index)][int(job_id)]
         
-        geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
+        y_min, y_max, x_min, x_max = [int(x) for x in trimmed_inst_coords]
+        trimmed_geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
         
-        tile_name = str(x_min) + '_' + str(x_max) + '_' + str(y_min) + '_' + str(y_max)
+        y_min, y_max, x_min, x_max = [int(x) for x in original_inst_coords]
+        original_geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
         
-        gdf_tile.loc[tile_name, 'geometry'] = geo_tile
-
-        # Translate all geometries at once
         inst_gdf['geometry'] = inst_gdf.geometry.apply(translate, xoff=x_min, yoff=y_min)
+        
+        point_within_trimmed_tile = inst_gdf['geometry'].apply(lambda point: point.intersects(trimmed_geo_tile))
+        
+        inst_gdf['point_within_trimmed_tile'] = point_within_trimmed_tile
+            
+        inst_gdf = inst_gdf[inst_gdf['point_within_trimmed_tile']==True]
         
         inst_color = color_list[color_index%len(color_list)]
         
@@ -90,22 +127,20 @@ def main(cell_outlines, intervals):
 
     if data_json['number_of_tiles'][0][0] == 1:
 
-        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
-
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
         gdf.columns = [str(col) for col in gdf.columns]
+        gdf.to_parquet('pre_merged_cell_polygons.parquet')
+
+        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
 
         gdf.to_parquet('cell_polygons.parquet')
-        gdf.to_parquet('raw_cell_polygons.parquet')
 
     else:
         gdf_copy = gdf.copy()
         gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
         gdf_copy.columns = [str(col) for col in gdf_copy.columns]
-        gdf_copy.to_parquet('raw_cell_polygons.parquet')
-
-        gdf_tile.reset_index(inplace=True)
+        gdf_copy.to_parquet('pre_merged_cell_polygons.parquet')
 
         all_cells = gdf.index.tolist()
 
@@ -384,7 +419,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='merging')
     parser.add_argument('--cell_outlines')
     parser.add_argument('--intervals')
+    parser.add_argument('--original_tile_polygons')
+    parser.add_argument('--trimmed_tile_polygons')
     args = parser.parse_args()
 
     main(cell_outlines = args.cell_outlines,  
-        intervals = args.intervals)
+        intervals = args.intervals,
+        original_tile_polygons = args.original_tile_polygons,
+        trimmed_tile_polygons = args.trimmed_tile_polygons)
