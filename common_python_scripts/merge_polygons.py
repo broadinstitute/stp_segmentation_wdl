@@ -132,6 +132,7 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
         gdf.columns = [str(col) for col in gdf.columns]
+        gdf.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
         gdf.to_parquet('pre_merged_cell_polygons.parquet')
 
         gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
@@ -142,6 +143,7 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         gdf_copy = gdf.copy()
         gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
         gdf_copy.columns = [str(col) for col in gdf_copy.columns]
+        gdf_copy.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
         gdf_copy.to_parquet('pre_merged_cell_polygons.parquet')
 
         all_cells = gdf.index.tolist()

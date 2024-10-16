@@ -47,7 +47,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
-    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata.parquet")
+    cell_polygons_gdf[['cell_index', 'area', 'centroid']].to_parquet("cell_metadata.parquet")
 
     cell_polygons_sindex = cell_polygons_gdf.sindex
 
@@ -71,12 +71,12 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
     partitioned_transcripts = partitioned_transcripts.rename(columns={transcript_id: 'transcript_index'})
     partitioned_transcripts.rename(columns={gene: 'gene'}, inplace=True)
 
-    partitioned_transcripts['assigned'] = [ 'red' if i != -1.0 else 'white' for i in partitioned_transcripts['cell_index'].values]
+    partitioned_transcripts['assigned'] = [ True if i != -1.0 else False for i in partitioned_transcripts['cell_index'].values]
     partitioned_transcripts['cell_index'] = partitioned_transcripts['cell_index'].astype(int)
-    red_counts = partitioned_transcripts[partitioned_transcripts['assigned'] == 'red'].groupby('cell_index').size()
+    assigned_counts = partitioned_transcripts[partitioned_transcripts['assigned'] == True].groupby('cell_index').size()
 
-    cell_polygons_gdf['cell_index'] =  cell_polygons_gdf['cell_index'].astype(int)
-    filtered_cell_indices = red_counts[red_counts == 0].index
+    cell_polygons_gdf.index = cell_polygons_gdf.index.astype(int)
+    filtered_cell_indices = assigned_counts[assigned_counts == 0].index
 
     cell_polygons_gdf = cell_polygons_gdf.drop(filtered_cell_indices, axis=0)
 
