@@ -47,7 +47,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
-    cell_polygons_gdf[['cell_index', 'area', 'centroid']].to_parquet("cell_metadata.parquet")
+    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata.parquet")
 
     cell_polygons_sindex = cell_polygons_gdf.sindex
 
