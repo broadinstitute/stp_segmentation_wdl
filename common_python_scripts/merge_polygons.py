@@ -259,7 +259,7 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         # initialize gdf_nc
         gdf_nc = gdf.loc[list_no_conflict_cells]
         gdf_nc.reset_index(inplace=True)
-        gdf_nc.drop([0], axis=1, inplace=True)
+        gdf_nc.drop([0, 'point_within_trimmed_tile'], axis=1, inplace=True)
 
         gdf_ = gdf.reset_index()
         ioa_small_thresh = 0.5
@@ -386,29 +386,14 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
                 poly_merged = poly_1.union(poly_2)
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        def find_valid_buffer(geom, initial_step=0.01, max_iterations=100):
-
-            step = initial_step
-            
-            buffer_direction = 1
-            
-            for i in range(max_iterations):
-                buffered_geom = geom.buffer(step * buffer_direction).buffer(step * (-buffer_direction)).simplify(tolerance=1, preserve_topology=True)
-                
-                if buffered_geom.is_valid and buffered_geom.geom_type == 'Polygon':
-                    return buffered_geom
-                
-                step += initial_step
-            
-            if geom.geom_type == 'MultiPolygon':
-                largest_polygon = max(geom.geoms, key=lambda p: p.area)
+        def get_largest_polygon(geometry):
+            if geometry.geom_type == 'MultiPolygon':
+                largest_polygon = max(geometry.geoms, key=lambda p: p.area)
                 return largest_polygon
-            
-            return geom
+            else:
+                return geometry
 
-        for index, value in enumerate(gdf_nc.geometry.geom_type=='MultiPolygon'):
-            if value == True:
-                gdf_nc.iloc[index].geometry = find_valid_buffer(geom=gdf_nc.iloc[index].geometry)
+        gdf_nc['geometry'] = gdf_nc['geometry'].apply(get_largest_polygon)
 
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
