@@ -71,12 +71,18 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
     partitioned_transcripts = partitioned_transcripts.rename(columns={transcript_id: 'transcript_index'})
     partitioned_transcripts.rename(columns={gene: 'gene'}, inplace=True)
 
+    partitioned_transcripts['cell_index'] = partitioned_transcripts['cell_index'].astype(int)
+    cell_polygons_gdf.index = cell_polygons_gdf.index.astype(int)
+    cell_polygons_gdf = cell_polygons_gdf[cell_polygons_gdf.index.isin(partitioned_transcripts['cell_index'])]
+
     partitioned_transcripts[['transcript_index', 'cell_index', 'gene']].to_parquet("partitioned_transcripts_metadata.parquet")
     partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
     cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
 
     cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
+
+    cell_polygons_gdf.to_parquet('cell_polygons.parquet')
 
 if __name__ == '__main__':
 

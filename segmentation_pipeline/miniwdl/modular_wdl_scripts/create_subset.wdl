@@ -35,10 +35,11 @@ task create_subset {
         File intervals = "intervals.json"
         Array[File] tile_metadata = glob("tile_metadata_*.csv")
         Array[File] tiled_image = glob("tiled_image_*.tiff")
+        File tile_polygons = "tile_polygons.parquet"
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_mac@sha256:51c677a2226d5770430971e8cb0f1b98d6e2b0fa6a5d25bd7a258a1f1b8135cd"
+        docker: "jishar7/subset_data_for_mac@sha256:21020489a65c74d56cd8da178692d70589a34fe686524c87774ef7be29284e17"
         memory: "10GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

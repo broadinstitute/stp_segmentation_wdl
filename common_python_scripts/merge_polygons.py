@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-def main(cell_outlines, intervals):
+def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons):
     
     tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
@@ -31,18 +31,49 @@ def main(cell_outlines, intervals):
     with open(intervals, 'r') as file:
         data_json = json.load(file)
 
-    #del data_json['number_of_VMs']
+    number_of_tiles = data_json['number_of_tiles'][0][0]
 
+    del data_json['number_of_VMs']
+    del data_json['number_of_tiles']
+
+    trimmed_tile_gdf = gpd.read_parquet(trimmed_tile_polygons)
+    original_tile_gdf = gpd.read_parquet(original_tile_polygons)
+
+    def update_data_json_with_trimmed_bounds(trimmed_gdf, data_json):
+        # Flatten the list of bounds in trimmed_gdf to match the order in data_json
+        trimmed_bounds = [row['rearranged_bounds'] for idx, row in trimmed_gdf.iterrows()]
+        
+        trimmed_data_json = {}
+        
+        # Counter to track the current position in trimmed_bounds list
+        bound_counter = 0
+        
+        # Iterate through each key and the list of bounds in data_json
+        for key, original_bounds_list in data_json.items():
+            # Determine how many tiles are stored in this key (length of bounds list)
+
+            num_tiles_in_key = len(original_bounds_list)
+            
+            # Extract the corresponding number of trimmed bounds from trimmed_gdf
+            trimmed_bounds_subset = trimmed_bounds[bound_counter:bound_counter + num_tiles_in_key]
+            
+            trimmed_data_json[key] = []
+            # Replace the bounds in data_json with the trimmed bounds
+            for i in range(num_tiles_in_key):
+                trimmed_data_json[key].append(trimmed_bounds_subset[i])
+            
+            # Move the counter forward by the number of tiles processed
+            bound_counter += num_tiles_in_key
+
+        return trimmed_data_json
+
+    trimmed_data_json = update_data_json_with_trimmed_bounds(trimmed_gdf=trimmed_tile_gdf, data_json=data_json)
+        
     color_list = ['red', 'blue', 'green', 'yellow', 'purple', 'black', 'orange', 'grey', 'pink', 'brown']
 
     gdf = None
 
-    gdf_tile = gpd.GeoDataFrame()
-
     color_index = 0
-
-    print("intervals json")
-    print(data_json)
 
     for inst_path in cell_outlines:
         
@@ -66,21 +97,24 @@ def main(cell_outlines, intervals):
 
         # Create a GeoDataFrame
         inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
-
-        # look up translation 
-        #inst_coords = data_json[str(shard_index)][int(job_id)].split(', ')
-        inst_coords = data_json[str(shard_index)][int(job_id)]
         
-        y_min, y_max, x_min, x_max = [int(x) for x in inst_coords]
+        trimmed_inst_coords = trimmed_data_json[str(shard_index)][int(job_id)]
+    
+        original_inst_coords = data_json[str(shard_index)][int(job_id)]
         
-        geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
+        y_min, y_max, x_min, x_max = [int(x) for x in trimmed_inst_coords]
+        trimmed_geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
         
-        tile_name = str(x_min) + '_' + str(x_max) + '_' + str(y_min) + '_' + str(y_max)
+        y_min, y_max, x_min, x_max = [int(x) for x in original_inst_coords]
+        original_geo_tile = Polygon([(x_min, y_min), (x_min, y_max), (x_max, y_max), (x_max, y_min)])
         
-        gdf_tile.loc[tile_name, 'geometry'] = geo_tile
-
-        # Translate all geometries at once
         inst_gdf['geometry'] = inst_gdf.geometry.apply(translate, xoff=x_min, yoff=y_min)
+        
+        point_within_trimmed_tile = inst_gdf['geometry'].apply(lambda point: point.intersects(trimmed_geo_tile))
+        
+        inst_gdf['point_within_trimmed_tile'] = point_within_trimmed_tile
+            
+        inst_gdf = inst_gdf[inst_gdf['point_within_trimmed_tile']==True]
         
         inst_color = color_list[color_index%len(color_list)]
         
@@ -93,31 +127,24 @@ def main(cell_outlines, intervals):
         else: 
             gdf = pd.concat([gdf, inst_gdf], axis=0)
 
-    print("gdf", gdf)
-
-    if data_json['number_of_tiles'][0][0] == 1:
-
-        print("inside if statement, num of tiles check")
-
-        #gdf.index = ['tmp'+ str(x) for x in gdf.index.tolist()]
-
-        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
+    if number_of_tiles == 1:
 
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
-        # confirm if the following is necessary
         gdf.columns = [str(col) for col in gdf.columns]
+        gdf.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
+        gdf.to_parquet('pre_merged_cell_polygons.parquet')
 
-        print(gdf.columns)
+        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
 
         gdf.to_parquet('cell_polygons.parquet')
-    # # trying to make unique indices
-    # gdf.reset_index(inplace=True)
 
     else:
-
-        print("inside else statement, num of tiles check")
-        gdf_tile.reset_index(inplace=True)
+        gdf_copy = gdf.copy()
+        gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
+        gdf_copy.columns = [str(col) for col in gdf_copy.columns]
+        gdf_copy.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
+        gdf_copy.to_parquet('pre_merged_cell_polygons.parquet')
 
         all_cells = gdf.index.tolist()
 
@@ -147,7 +174,6 @@ def main(cell_outlines, intervals):
 
         list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
 
-        print("df_intersect before ioa calculation", df_intersect)
         # Calculating Overlap Area Parameters
 
         for inst_row in df_intersect.index.tolist():
@@ -162,6 +188,11 @@ def main(cell_outlines, intervals):
             poly_1 = gdf.loc[cell_1, 'geometry']
 
             poly_2 = gdf.loc[cell_2, 'geometry']
+
+            if isinstance(poly_1, pd.Series):
+                poly_1 = poly_1.values[0]  
+            if isinstance(poly_2, pd.Series):
+                poly_2 = poly_2.values[0]
 
             poly_1 = make_valid(poly_1).buffer(0)
             poly_2 = make_valid(poly_2).buffer(0)
@@ -222,15 +253,13 @@ def main(cell_outlines, intervals):
                     ioa_small = ioa_2
                     df_intersect.loc[inst_row, 'ioa_small'] = ioa_small
                 
-
-        print("df_intersect after ioa calculation", df_intersect)
         # rank by easiest to resolve
         df_intersect.sort_values(by='ioa_small', ascending=False, inplace=True)    
 
         # initialize gdf_nc
         gdf_nc = gdf.loc[list_no_conflict_cells]
         gdf_nc.reset_index(inplace=True)
-        gdf_nc.drop([0], axis=1, inplace=True)
+        gdf_nc.drop([0, 'point_within_trimmed_tile'], axis=1, inplace=True)
 
         gdf_ = gdf.reset_index()
         ioa_small_thresh = 0.5
@@ -264,9 +293,9 @@ def main(cell_outlines, intervals):
                 new_row = gpd.GeoDataFrame([new_data])
                 gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))
 
-            # elif poly intersects with one or more gdf_nc polygons
+            # else poly intersects with one or more gdf_nc polygons
             
-            elif len(possible_intersections) != 0:
+            else:
 
                 # Assumption: the polygon we are adding to gdf_nc should only ever have to be 
                 # merged with one polygon from gdf_nc.
@@ -320,8 +349,7 @@ def main(cell_outlines, intervals):
                     # add poly to gdf_nc because there is no conflict  
                     new_row = gpd.GeoDataFrame([new_data])
                     gdf_nc = gpd.GeoDataFrame(pd.concat([gdf_nc, new_row], ignore_index=True))            
-                # else 
-
+               
                 else:
             
                     # add poly to gdf_nc becuse there is a small conflict    
@@ -333,41 +361,44 @@ def main(cell_outlines, intervals):
 
         # loop through df_intersect
         for inst_row in df_intersect.index.tolist():
-            
+
             inst_ioa_small = df_intersect.loc[inst_row, 'ioa_small']
             
+            id_1 = df_intersect.loc[inst_row, 'id_1']
+            id_2 = df_intersect.loc[inst_row, 'id_2']
+
+            poly_1 = gdf_.loc[id_1, 'geometry']
+            poly_2 = gdf_.loc[id_2, 'geometry']
+
+            poly_1 = make_valid(poly_1).buffer(0)
+            poly_1 = poly_1.simplify(tolerance)
+
+            poly_2 = make_valid(poly_2).buffer(0)
+            poly_2 = poly_2.simplify(tolerance)
+                
             if inst_ioa_small < ioa_small_thresh :
-                
-                # do not merge conflicted cells and add both to gdf_nc
-                
+
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_1, ioa_thresh=ioa_small_thresh)
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_2, ioa_thresh=ioa_small_thresh)
-            
-            elif inst_ioa_small >= ioa_small_thresh:
-                
-                # merge cells and add merged cell to gdf_nc
-                
-                id_1 = df_intersect.loc[inst_row, 'id_1']
-                id_2 = df_intersect.loc[inst_row, 'id_2']
-                
-                poly_1 = gdf_.loc[id_1, 'geometry']
-                poly_2 = gdf_.loc[id_2, 'geometry']
 
-                poly_1 = make_valid(poly_1).buffer(0)
-                poly_1 = poly_1.simplify(tolerance)
-
-                poly_2 = make_valid(poly_2).buffer(0)
-                poly_2 = poly_2.simplify(tolerance)
+            else:
 
                 poly_merged = poly_1.union(poly_2)
-                
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
-        #gdf_nc.index = ['tmp'+ str(x) for x in gdf_nc.index.tolist()]
+        def get_largest_polygon(geometry):
+            if geometry.geom_type == 'MultiPolygon':
+                largest_polygon = max(geometry.geoms, key=lambda p: p.area)
+                return largest_polygon
+            else:
+                return geometry
+
+        gdf_nc['geometry'] = gdf_nc['geometry'].apply(get_largest_polygon)
+
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
         gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
-        # confirm if the following is necessary
+
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
         gdf_nc.to_parquet('cell_polygons.parquet')
@@ -377,7 +408,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='merging')
     parser.add_argument('--cell_outlines')
     parser.add_argument('--intervals')
+    parser.add_argument('--original_tile_polygons')
+    parser.add_argument('--trimmed_tile_polygons')
     args = parser.parse_args()
 
     main(cell_outlines = args.cell_outlines,  
-        intervals = args.intervals)
+        intervals = args.intervals,
+        original_tile_polygons = args.original_tile_polygons,
+        trimmed_tile_polygons = args.trimmed_tile_polygons)
