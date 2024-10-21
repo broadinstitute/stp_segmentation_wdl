@@ -12,6 +12,7 @@ task create_subset {
         Float amount_of_VMs 
         Int transcript_plot_as_channel
         Int sigma
+        Int trim_amount
     }
 
     command <<<
@@ -25,7 +26,8 @@ task create_subset {
                                        --overlap ~{overlap} \
                                        --amount_of_VMs ~{amount_of_VMs} \
                                        --transcript_plot_as_channel ~{transcript_plot_as_channel} \
-                                       --sigma ~{sigma}
+                                       --sigma ~{sigma} \
+                                       --trim_amount ~{trim_amount}
 
     >>>
 
@@ -35,10 +37,13 @@ task create_subset {
         File intervals = "intervals.json"
         Array[File] tile_metadata = glob("tile_metadata_*.csv")
         Array[File] tiled_image = glob("tiled_image_*.tiff")
+        File original_tile_polygons = "original_tile_polygons.parquet"
+        File trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
+        File mean_intensity_of_channels = "mean_intensity_of_channels.csv"
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:3d771148898f08aac8fb0cde70a69ce0fd6a4505f1f7558b17c4bf638e527cfd"
+        docker: "jishar7/subset_data_for_terra@sha256:093973a32a201f19c6518ab35901e9c05361e35c7722118f9fadd6f95646e88d"
         memory: "100GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
