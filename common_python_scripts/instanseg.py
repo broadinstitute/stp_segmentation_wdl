@@ -16,7 +16,7 @@ import geopandas as gpd
 import glob
 import argparse
 
-def main(image_paths_list):
+def main(image_paths_list, image_pixel_size):
 
     def patched_save_output(self, image_path: str, labels: torch.Tensor, image_array=None, save_overlay=False, save_geojson=False):
         if isinstance(image_path, str):
@@ -69,7 +69,7 @@ def main(image_paths_list):
         save_output=True,
         save_overlay=True,
         save_geojson=True,
-        pixel_size=0.2125,
+        pixel_size=image_pixel_size,
         normalisation_subsampling_factor=10,
         target = "cells"
     )
@@ -96,8 +96,10 @@ def main(image_paths_list):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='composite_image_creation')
+    parser = argparse.ArgumentParser(description='instanseg')
     parser.add_argument('--image_paths_list')
+    parser.add_argument('--image_pixel_size', type=float)
     args = parser.parse_args()
 
-    main(image_paths_list = args.image_paths_list)
+    main(image_paths_list = args.image_paths_list,
+         image_pixel_size = args.image_pixel_size)

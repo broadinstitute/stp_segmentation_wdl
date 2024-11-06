@@ -25,6 +25,8 @@ workflow MAIN_WORKFLOW {
         Int? transcript_chunk_size 
 
         Array[Int]? subset_data_y_x_interval
+        Float image_pixel_size
+
         File? transform_file
         File? detected_transcripts_file
 
@@ -42,7 +44,8 @@ workflow MAIN_WORKFLOW {
 
     if (algorithm == "INSTANSEG") {
         call INSTANSEG.instanseg as instanseg {input: 
-                image_paths_list=image_paths_list
+                image_paths_list=image_paths_list,
+                image_pixel_size=image_pixel_size
         }
     }
 

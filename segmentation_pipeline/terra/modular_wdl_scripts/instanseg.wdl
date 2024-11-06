@@ -3,11 +3,13 @@ task instanseg {
 
     input {
         Array[File] image_paths_list
+        Float image_pixel_size
     }
 
     command <<<
 
-        python /opt/instanseg.py --image_paths_list ~{sep=',' image_paths_list}
+        python /opt/instanseg.py --image_paths_list ~{sep=',' image_paths_list} \
+                                --image_pixel_size ~{image_pixel_size}
 
     >>>
 
@@ -16,7 +18,7 @@ task instanseg {
     }
 
     runtime {
-        docker: "jishar7/instanseg@sha256:3fa64531976b150ae22b9854b568569cdbf7e108fd3fd5fffe9d2dcbeec8d004"
+        docker: "jishar7/instanseg@sha256:ac93dd9e509cbb371eef9dfa0378fec6cf37f80512309f57338be98c368e85f8"
         memory: "120GB"
         preemptible: 2
         cpu: 32
