@@ -1,6 +1,6 @@
 import imagecodecs
 import tifffile
-from common_python_scripts.run_instanseg import InstanSeg
+from instanseg import InstanSeg
 import numpy as np
 from aicsimageio import AICSImage
 import torch
@@ -96,7 +96,7 @@ def main(image_paths_list, image_pixel_size):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='instanseg')
+    parser = argparse.ArgumentParser(description='instanseg_implementation')
     parser.add_argument('--image_paths_list')
     parser.add_argument('--image_pixel_size', type=float)
     args = parser.parse_args()
