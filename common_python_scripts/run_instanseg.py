@@ -76,12 +76,7 @@ def main(image_paths_list, image_pixel_size):
 
     geojson_files = glob.glob("*.geojson")
 
-    if geojson_files:
-        geojson_file_path = geojson_files[0]
-    else:
-        print("No GeoJSON file found.")
-
-    with open(geojson_file_path) as file:
+    with open(geojson_files[0]) as file:
         data = json.load(file)
 
     polygons = []
