@@ -44,7 +44,8 @@ def main(image_paths_list, image_pixel_size):
 
             geojson = json.dumps(features)
             geojson_path = Path(image_path).parent / (new_stem + ".geojson")
-            with open(os.path.join(geojson_path), "w") as outfile:
+            print("Saving geojson...")
+            with open(geojson_path, "w") as outfile:
                 outfile.write(geojson)
 
         if save_overlay:
@@ -58,7 +59,7 @@ def main(image_paths_list, image_pixel_size):
     InstanSeg.save_output = patched_save_output
 
     image_paths_list = image_paths_list.split(',')
-    
+    print(image_paths_list)
     image = tifffile.imread(image_paths_list[0])
 
     instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader="bioio", verbosity=1)
@@ -70,11 +71,11 @@ def main(image_paths_list, image_pixel_size):
         save_overlay=True,
         save_geojson=True,
         pixel_size=image_pixel_size,
-        normalisation_subsampling_factor=10,
         target = "cells"
     )
 
     geojson_files = glob.glob("*.geojson")
+    print(geojson_files)
 
     with open(geojson_files[0]) as file:
         data = json.load(file)
