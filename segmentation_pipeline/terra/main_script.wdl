@@ -24,7 +24,7 @@ workflow MAIN_WORKFLOW {
 
         Int? transcript_chunk_size 
 
-        Array[Int?] subset_data_y_x_interval
+        Array[Int]? subset_data_y_x_interval
         File? transform_file
         File? detected_transcripts_file
 
