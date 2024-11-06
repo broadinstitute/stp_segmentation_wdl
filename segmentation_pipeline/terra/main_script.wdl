@@ -33,7 +33,7 @@ workflow MAIN_WORKFLOW {
         String? technology # XENIUM or MERSCOPE
         String algorithm # CELLPOSE or INSTANSEG
 
-        In? transcript_plot_as_channel # 1 for yes, 0 for no
+        Int? transcript_plot_as_channel # 1 for yes, 0 for no
         Int? sigma
         Int? trim_amount
     }

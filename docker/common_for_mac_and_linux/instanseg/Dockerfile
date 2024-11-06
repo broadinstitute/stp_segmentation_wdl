@@ -23,12 +23,15 @@ RUN pip install --no-cache-dir \
     tifffile \
     imagecodecs \
     aicsimageio \
-    instanseg \
+    instanseg-torch[full] \
     bioio \
     fastremap \
     scikit-image \
     shapely \
-    geopandas
+    geopandas \
+    bioio \
+    bioio-ome-tiff \
+    bioio-ome-zarr
 
 COPY common_python_scripts/instanseg.py /opt/instanseg.py
 RUN chmod +x /opt/instanseg.py
