@@ -2,7 +2,7 @@ version 1.0
 task run_baysor {
 
     input {
-        Array[File] detected_transcripts_cellID_geo_csv
+        File detected_transcripts_file
         Int size
         Float prior_confidence
     }
