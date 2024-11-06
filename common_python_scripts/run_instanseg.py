@@ -1,6 +1,6 @@
 import imagecodecs
 import tifffile
-from instanseg import InstanSeg
+from common_python_scripts.run_instanseg import InstanSeg
 import numpy as np
 from aicsimageio import AICSImage
 import torch

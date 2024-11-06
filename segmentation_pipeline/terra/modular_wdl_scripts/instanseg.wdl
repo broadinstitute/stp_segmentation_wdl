@@ -8,7 +8,7 @@ task instanseg {
 
     command <<<
 
-        python /opt/instanseg.py --image_paths_list ~{sep=',' image_paths_list} \
+        python /opt/run_instanseg.py --image_paths_list ~{sep=',' image_paths_list} \
                                 --image_pixel_size ~{image_pixel_size}
 
     >>>
@@ -18,7 +18,7 @@ task instanseg {
     }
 
     runtime {
-        docker: "jishar7/instanseg@sha256:ac93dd9e509cbb371eef9dfa0378fec6cf37f80512309f57338be98c368e85f8"
+        docker: "jishar7/instanseg@sha256:ca7d2a40c9637881421a495a0ece85878d7b69b4062eded548dda3254ba265d5"
         memory: "120GB"
         preemptible: 2
         cpu: 32

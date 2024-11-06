@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir \
     bioio-ome-tiff \
     bioio-ome-zarr
 
-COPY common_python_scripts/instanseg.py /opt/instanseg.py
-RUN chmod +x /opt/instanseg.py
+COPY common_python_scripts/run_instanseg.py /opt/run_instanseg.py
+RUN chmod +x /opt/run_instanseg.py
 
 ENTRYPOINT ["/bin/bash", "-l", "-c", "/bin/bash"]
