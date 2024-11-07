@@ -44,7 +44,11 @@ def main(image_paths_list, image_pixel_size):
 
             geojson = json.dumps(features)
             geojson_path = Path(image_path).parent / (new_stem + ".geojson")
+            
+            print(geojson_path)
             print("Saving geojson...")
+            print(geojson)
+            
             with open(geojson_path, "w") as outfile:
                 outfile.write(geojson)
 
