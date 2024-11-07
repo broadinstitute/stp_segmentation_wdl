@@ -47,7 +47,6 @@ def main(image_paths_list, image_pixel_size):
             
             print(geojson_path)
             print("Saving geojson...")
-            print(geojson)
             
             with open(geojson_path, "w") as outfile:
                 outfile.write(geojson)
@@ -77,6 +76,9 @@ def main(image_paths_list, image_pixel_size):
         pixel_size=image_pixel_size,
         target = "cells"
     )
+
+    print("Current Working Directory:", os.getcwd())
+    print("Files and Directories:", os.listdir(os.getcwd()))
 
     geojson_files = glob.glob("*.geojson")
     print(geojson_files)
