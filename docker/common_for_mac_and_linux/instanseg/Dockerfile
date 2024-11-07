@@ -30,7 +30,9 @@ RUN pip install --no-cache-dir \
     geopandas==1.0.1 \
     bioio==1.1.0 \
     bioio-ome-tiff \
-    bioio-ome-zarr
+    bioio-ome-zarr \
+    pyarrow==16.1.0 \
+    fastparquet==2024.5.0
 
 COPY common_python_scripts/run_instanseg.py /opt/run_instanseg.py
 RUN chmod +x /opt/run_instanseg.py
