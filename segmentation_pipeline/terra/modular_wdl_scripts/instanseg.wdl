@@ -3,7 +3,7 @@ task instanseg {
 
     input {
         Array[File] image_paths_list
-        Float image_pixel_size
+        Float? image_pixel_size
     }
 
     command <<<

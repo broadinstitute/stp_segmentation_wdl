@@ -14,7 +14,6 @@ workflow MAIN_WORKFLOW {
         Int? diameter # cellpose: size of cell
         Float? flow_thresh # cellpose: parameter is the maximum allowed error of the flows for each mask. The default is flow_threshold=0.4. Increase this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.
         Float? cell_prob_thresh # cellpose: the default is cellprob_threshold=0.0. Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Similarly, increase this threshold if cellpose is returning too ROIs particularly from dim areas.
-        
         File? pretrained_model # cellpose : if there is a pretrained cellpose2 model
         String? model_type # cellpose : if a default model is to be used, model_type='cyto' or model_type='nuclei'    
         
@@ -25,7 +24,7 @@ workflow MAIN_WORKFLOW {
         Int transcript_chunk_size 
 
         Array[Int]? subset_data_y_x_interval
-        Float image_pixel_size
+        Float? image_pixel_size
 
         File? transform_file
         File detected_transcripts_file
@@ -45,14 +44,14 @@ workflow MAIN_WORKFLOW {
     if (algorithm == "INSTANSEG") {
         call INSTANSEG.instanseg as instanseg {input: 
                 image_paths_list=image_paths_list,
-                image_pixel_size=image_pixel_size
+                image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
-            input: transcript_file = detected_transcripts_file, 
-            cell_polygon_file = instanseg.processed_cell_polygons,
-            transcript_chunk_size = transcript_chunk_size,
-            technology = technology
+            input: transcript_file=detected_transcripts_file, 
+            cell_polygon_file=instanseg.processed_cell_polygons,
+            transcript_chunk_size=transcript_chunk_size,
+            technology=technology
         }
     }
 
@@ -98,11 +97,11 @@ workflow MAIN_WORKFLOW {
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
-            input: transcript_file = create_subset.subset_coordinates, 
-            cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
-            pre_merged_cell_polygons = merge_segmentation_dfs.pre_merged_cell_polygons,
-            transcript_chunk_size = transcript_chunk_size,
-            technology = technology
+            input: transcript_file=create_subset.subset_coordinates, 
+            cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
+            pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
+            transcript_chunk_size=transcript_chunk_size,
+            technology=technology
         }
     }
     
