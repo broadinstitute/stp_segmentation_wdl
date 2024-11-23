@@ -22,17 +22,17 @@ workflow MAIN_WORKFLOW {
         Int? optional_channel 
         Float amount_of_VMs 
 
-        Int? transcript_chunk_size 
+        Int transcript_chunk_size 
 
         Array[Int]? subset_data_y_x_interval
         Float image_pixel_size
 
         File? transform_file
-        File? detected_transcripts_file
+        File detected_transcripts_file
 
         Array[File] image_paths_list  
 
-        String? technology # XENIUM or MERSCOPE
+        String technology # XENIUM or MERSCOPE
         String algorithm # CELLPOSE or INSTANSEG
 
         Int? transcript_plot_as_channel # 1 for yes, 0 for no
@@ -51,8 +51,8 @@ workflow MAIN_WORKFLOW {
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
             input: transcript_file = detected_transcripts_file, 
             cell_polygon_file = instanseg.processed_cell_polygons,
-            transcript_chunk_size = if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 100000,
-            technology = if defined(technology) then select_first([technology]) else 'None'
+            transcript_chunk_size = transcript_chunk_size,
+            technology = technology
         }
     }
 
@@ -61,8 +61,8 @@ workflow MAIN_WORKFLOW {
         call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
                                         transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model,
-                                        detected_transcripts_file=if defined(detected_transcripts_file) then select_first([detected_transcripts_file]) else dummy_pretrained_model,
-                                        technology=if defined(technology) then select_first([technology]) else 'None',
+                                        detected_transcripts_file=detected_transcripts_file,
+                                        technology=technology,
                                         tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0, 
                                         overlap=if defined(overlap) then select_first([overlap]) else 0.0, 
                                         amount_of_VMs=amount_of_VMs,
@@ -101,8 +101,8 @@ workflow MAIN_WORKFLOW {
             input: transcript_file = create_subset.subset_coordinates, 
             cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons = merge_segmentation_dfs.pre_merged_cell_polygons,
-            transcript_chunk_size = if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
-            technology = if defined(technology) then select_first([technology]) else 'None'
+            transcript_chunk_size = transcript_chunk_size,
+            technology = technology
         }
     }
     
