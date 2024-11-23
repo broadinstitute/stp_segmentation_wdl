@@ -99,7 +99,7 @@ workflow MAIN_WORKFLOW {
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_CP { 
             input: transcript_file=create_subset.subset_coordinates, 
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
-            pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
+            pre_merged_cell_polygons= merge_segmentation_dfs.pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
             technology=technology
         }

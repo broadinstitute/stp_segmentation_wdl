@@ -16,7 +16,7 @@ task partitioning_transcript_cell_by_gene {
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology}
 
-        if [ -z "${my_var}" ]; then
+        if [ -z "${pre_merged_cell_polygons}" ]; then
             echo "pre_merged_cell_polygons variable is undefined or empty"
         else
             cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
