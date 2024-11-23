@@ -4,10 +4,11 @@ task partitioning_transcript_cell_by_gene {
     input {
         File transcript_file
         File cell_polygon_file
-        File? pre_merged_cell_polygons
         Int transcript_chunk_size 
         String technology
     }
+
+    File? pre_merged_cell_polygons
 
     command <<<
 
