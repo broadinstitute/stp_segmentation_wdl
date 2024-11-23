@@ -47,6 +47,13 @@ workflow MAIN_WORKFLOW {
                 image_paths_list=image_paths_list,
                 image_pixel_size=image_pixel_size
         }
+
+        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
+            input: transcript_file = detected_transcripts_file, 
+            cell_polygon_file = instanseg.processed_cell_polygons,
+            transcript_chunk_size = if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 100000,
+            technology = if defined(technology) then select_first([technology]) else 'None'
+        }
     }
 
     if (algorithm == "CELLPOSE") {
@@ -95,7 +102,7 @@ workflow MAIN_WORKFLOW {
             cell_polygon_file = merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons = merge_segmentation_dfs.pre_merged_cell_polygons,
             transcript_chunk_size = if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
-            technology = if defined(technology) then select_first([technology]) else 'None',
+            technology = if defined(technology) then select_first([technology]) else 'None'
         }
     }
     

@@ -4,7 +4,6 @@ task run_baysor {
     input {
         File detected_transcripts_file
         Int size
-        Float prior_confidence
     }
 
 	command <<<
@@ -27,7 +26,6 @@ task run_baysor {
                 -g="barcode_id" \
                 --no-ncv-estimation \
                 -s=~{size} \
-                --prior-segmentation-confidence=~{prior_confidence} \
                 "$value" ::cell
         
             mv segmentation.csv "segmentation_$index.csv"

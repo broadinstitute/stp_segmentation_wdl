@@ -4,7 +4,7 @@ task partitioning_transcript_cell_by_gene {
     input {
         File transcript_file
         File cell_polygon_file
-        File pre_merged_cell_polygons
+        File? pre_merged_cell_polygons
         Int transcript_chunk_size 
         String technology
     }
@@ -16,7 +16,11 @@ task partitioning_transcript_cell_by_gene {
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology}
 
-        cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
+        if [ -z "${my_var}" ]; then
+            echo "pre_merged_cell_polygons variable is undefined or empty"
+        else
+            cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
+        fi 
 
     >>>
 
@@ -30,7 +34,7 @@ task partitioning_transcript_cell_by_gene {
     }
 
     runtime {
-        docker: "jishar7/partition_transcripts_for_terra@sha256:df298ad62fce18e8fead4ce439d4524d1ed4b350cd03d1f4ba55dce1aafe98d5"
+        docker: "jishar7/partition_transcripts_for_terra@sha256:b2d1047fd69d41c89cb2438c70d36ceb4efb54e8160b62d07bbb0b9eead74ea5"
         memory: "100GB"
         preemptible: 10
         disks: "local-disk 200 HDD"

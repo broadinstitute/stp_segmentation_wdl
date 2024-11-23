@@ -53,16 +53,34 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     partitioned_transcripts = gpd.GeoDataFrame()
 
-    for chunk in pd.read_csv(transcript_file, chunksize=transcript_chunk_size):
+    if transcript_file.endswith(".csv"):
 
-        chunk['geometry'] = chunk.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
-        chunked_transcripts_gdf = gpd.GeoDataFrame(chunk, geometry='geometry')
+        for chunk in pd.read_csv(transcript_file, chunksize=transcript_chunk_size):
 
-        chunk_result = process_chunk(transcript_chunk = chunked_transcripts_gdf, 
-                                    cell_polygons_gdf = cell_polygons_gdf, 
-                                    cell_polygons_sindex = cell_polygons_sindex)
+            chunk['geometry'] = chunk.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
+            chunked_transcripts_gdf = gpd.GeoDataFrame(chunk, geometry='geometry')
 
-        partitioned_transcripts = pd.concat([partitioned_transcripts, chunk_result], ignore_index=True)
+            chunk_result = process_chunk(transcript_chunk = chunked_transcripts_gdf, 
+                                        cell_polygons_gdf = cell_polygons_gdf, 
+                                        cell_polygons_sindex = cell_polygons_sindex)
+
+            partitioned_transcripts = pd.concat([partitioned_transcripts, chunk_result], ignore_index=True)
+
+    elif transcript_file.endswith(".parquet"):
+        
+        transcript_df = pd.read_parquet(transcript_file)
+        num_rows = len(transcript_df)
+        chunks = [transcript_df.iloc[i:i + transcript_chunk_size] for i in range(0, num_rows, transcript_chunk_size)]
+
+        for chunk in chunks:
+            chunk['geometry'] = chunk.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
+            chunked_transcripts_gdf = gpd.GeoDataFrame(chunk, geometry='geometry')
+
+            chunk_result = process_chunk(transcript_chunk=chunked_transcripts_gdf, 
+                                        cell_polygons_gdf=cell_polygons_gdf, 
+                                        cell_polygons_sindex=cell_polygons_sindex)
+
+            partitioned_transcripts = pd.concat([partitioned_transcripts, chunk_result], ignore_index=True)
 
     partitioned_transcripts = gpd.GeoDataFrame(partitioned_transcripts, geometry='geometry')
 
