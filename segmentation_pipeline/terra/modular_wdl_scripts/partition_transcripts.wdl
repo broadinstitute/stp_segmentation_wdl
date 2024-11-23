@@ -30,7 +30,7 @@ task partitioning_transcript_cell_by_gene {
         File cell_polygons_metadata = "cell_metadata.parquet"
         File partitioned_transcripts_metadata = "partitioned_transcripts_metadata.parquet"
         File cell_by_gene_matrix_parquet = "cell_by_gene_matrix.parquet"
-        File moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
+        File? moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
     }
 
     runtime {
