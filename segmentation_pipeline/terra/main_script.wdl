@@ -47,7 +47,7 @@ workflow MAIN_WORKFLOW {
                 image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0
         }
 
-        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
+        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS { 
             input: transcript_file=detected_transcripts_file, 
             cell_polygon_file=instanseg.processed_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
@@ -96,7 +96,7 @@ workflow MAIN_WORKFLOW {
                     trimmed_tile_polygons=create_subset.trimmed_tile_polygons
         }
 
-        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene { 
+        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_CP { 
             input: transcript_file=create_subset.subset_coordinates, 
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
