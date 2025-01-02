@@ -111,9 +111,9 @@ workflow MAIN_WORKFLOW {
         }
 
         call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose.outlines,
-                    intervals=create_subset.intervals,
-                    original_tile_polygons=create_subset.original_tile_polygons,
-                    trimmed_tile_polygons=create_subset.trimmed_tile_polygons
+                    intervals=if defined(create_subset.intervals) then select_first([create_subset.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
+                    original_tile_polygons=if defined(create_subset.original_tile_polygons) then select_first([create_subset.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
+                    trimmed_tile_polygons=if defined(create_subset.trimmed_tile_polygons) then select_first([create_subset.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet"
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_CP { 
