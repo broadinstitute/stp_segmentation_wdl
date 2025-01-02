@@ -40,10 +40,11 @@ workflow MAIN_WORKFLOW {
     }
 
     File dummy_pretrained_model = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/models/dummy_model"
+    File dummy_pre_merged_cell_polygons = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_pre_merged_cell_polygons.parquet"
 
     if (algorithm == "INSTANSEG") {
 
-        call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
+        call SUBSET.create_subset as create_subset_IS {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
                                         transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model,
                                         detected_transcripts_file=detected_transcripts_file,
@@ -61,8 +62,9 @@ workflow MAIN_WORKFLOW {
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS { 
-            input: transcript_file=detected_transcripts_file, 
+            input: transcript_file=create_subset_IS.subset_coordinates, 
             cell_polygon_file=instanseg.processed_cell_polygons,
+            pre_merged_cell_polygons=dummy_pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
             technology=technology
         }
