@@ -84,9 +84,9 @@ workflow MAIN_WORKFLOW {
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
                                         trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
 
-        Map[String, Array[Array[Float]]] calling_intervals = read_json(create_subset.intervals)
-        Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
-        
+        Map[String, Array[Array[Float]]]? calling_intervals = read_json(create_subset.intervals)
+        Int? num_VMs_in_use = if defined(calling_intervals) then select_first([round(calling_intervals['number_of_VMs'][0][0])]) else 0
+
         scatter (i in range(num_VMs_in_use)) {
 
             String index_for_intervals = "~{i}"
