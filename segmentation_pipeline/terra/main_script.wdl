@@ -54,7 +54,8 @@ workflow MAIN_WORKFLOW {
                                         amount_of_VMs=amount_of_VMs,
                                         transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
-                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
+                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0,
+                                        algorithm=algorithm}
         
         call INSTANSEG.instanseg as instanseg {input: 
                 image_paths_list=image_paths_list,
@@ -82,10 +83,14 @@ workflow MAIN_WORKFLOW {
                                         amount_of_VMs=amount_of_VMs,
                                         transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
-                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
+                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0,
+                                        algorithm=algorithm}
 
-        Map[String, Array[Array[Float]]]? calling_intervals = if defined(create_subset.intervals) then select_first([read_json(create_subset.intervals)]) else { "a": [[0.0]] }
-        Int? num_VMs_in_use = if defined(calling_intervals) then select_first([round(calling_intervals['number_of_VMs'][0][0])]) else 0
+        
+        File calling_intervals_file = if defined(create_subset.intervals) then select_first([create_subset.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
+        Map[String, Array[Array[Float]]] calling_intervals = read_json(calling_intervals_file)
+
+        Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
 
         scatter (i in range(num_VMs_in_use)) {
 
