@@ -42,6 +42,19 @@ workflow MAIN_WORKFLOW {
     File dummy_pretrained_model = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/models/dummy_model"
 
     if (algorithm == "INSTANSEG") {
+
+        call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
+                                        subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
+                                        transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model,
+                                        detected_transcripts_file=detected_transcripts_file,
+                                        technology=technology,
+                                        tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0, 
+                                        overlap=if defined(overlap) then select_first([overlap]) else 0.0, 
+                                        amount_of_VMs=amount_of_VMs,
+                                        transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
+                                        sigma=if defined(sigma) then select_first([sigma]) else 0,
+                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
+        
         call INSTANSEG.instanseg as instanseg {input: 
                 image_paths_list=image_paths_list,
                 image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0

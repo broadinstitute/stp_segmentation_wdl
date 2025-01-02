@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 import imagecodecs
 from scipy.ndimage import gaussian_filter
 
-def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma, trim_amount=50):
+def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma, algorithm, trim_amount=50):
 
     channel_images = []
     mean_intensity_of_channels = {}
@@ -172,13 +172,15 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     
     subset_multi_channel_image = np.stack(channel_images, axis=0)
 
-    listed_intervals = tile_intervals.tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs, trim_amount)
-    num_VMs_in_use = listed_intervals['number_of_VMs'][0][0]
-    out_path=os.getcwd()
+    if algorithm != 'INSTANSEG':
 
-    for shard_index in range(num_VMs_in_use):
+        listed_intervals = tile_intervals.tile_intervals(subset_multi_channel_image, tiles_dimension, overlap, amount_of_VMs, trim_amount)
+        num_VMs_in_use = listed_intervals['number_of_VMs'][0][0]
+        out_path=os.getcwd()
 
-        tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
+        for shard_index in range(num_VMs_in_use):
+
+            tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
 
 if __name__ == '__main__':
 
@@ -193,6 +195,7 @@ if __name__ == '__main__':
     parser.add_argument('--amount_of_VMs', type=float)
     parser.add_argument('--transcript_plot_as_channel', type=int)
     parser.add_argument('--sigma', type=int)
+    parser.add_argument('--algorithm', type=str)
     parser.add_argument('--trim_amount', type=int)
     args = parser.parse_args()
 
@@ -206,4 +209,5 @@ if __name__ == '__main__':
         amount_of_VMs = args.amount_of_VMs,
         transcript_plot_as_channel = args.transcript_plot_as_channel,
         sigma = args.sigma,
+        algorithm = args.algorithm,
         trim_amount = args.trim_amount)
