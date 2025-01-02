@@ -12,6 +12,7 @@ from scipy.ndimage import gaussian_filter
 
 def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma, algorithm, trim_amount=50):
 
+    print("inside subset script")
     channel_images = []
     mean_intensity_of_channels = {}
 
@@ -65,6 +66,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             trx_subset = pd.concat([trx_subset, trx_subset_temp])
 
     elif technology == 'XENIUM':
+        print("start subset procedure")
         transformation_matrix = pd.read_csv(transform_file).values[:3,:3]
 
         inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
@@ -132,7 +134,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     ])
 
     np.savetxt('subset_transformation_matrix.csv', transformation_matrix_subset, delimiter=' ', fmt='%d')
-
+    print("done subset procedure")
     for image_index, image_path in enumerate(image_paths_list):
 
         with tiff.TiffFile(image_path, is_ome=False) as image_file:
@@ -148,7 +150,9 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
     mean_intensity_of_channels_df = pd.DataFrame(mean_intensity_of_channels, index=[0])
     mean_intensity_of_channels_df.to_csv('mean_intensity_of_channels.csv', index=False)
-
+    
+    print("done image channel intensity")
+    
     if transcript_plot_as_channel == 1:
         array_x = trx_subset[x_col].values
         array_y = trx_subset[y_col].values
@@ -182,6 +186,8 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
             tiling_script(subset_multi_channel_image, listed_intervals, shard_index, out_path)
 
+    print("complete")
+    
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='composite_image_creation')

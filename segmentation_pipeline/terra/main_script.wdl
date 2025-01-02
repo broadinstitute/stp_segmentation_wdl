@@ -54,8 +54,8 @@ workflow MAIN_WORKFLOW {
                                         amount_of_VMs=amount_of_VMs,
                                         transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
-                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0,
-                                        algorithm=algorithm}
+                                        algorithm=algorithm,
+                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
         
         call INSTANSEG.instanseg as instanseg {input: 
                 image_paths_list=image_paths_list,
