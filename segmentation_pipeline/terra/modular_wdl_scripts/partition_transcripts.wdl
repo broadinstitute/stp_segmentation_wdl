@@ -16,7 +16,13 @@ task partitioning_transcript_cell_by_gene {
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology}
 
-        cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
+        pre_merged_cell_polygons_filename=$(basename ~{pre_merged_cell_polygons})
+
+        if [ ${pre_merged_cell_polygons_filename} == "dummy_pre_merged_cell_polygons.parquet" ]; then
+            echo "pre_merged_cell_polygons variable is undefined or empty"
+        else
+            cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
+        fi 
 
     >>>
 
@@ -26,11 +32,11 @@ task partitioning_transcript_cell_by_gene {
         File cell_polygons_metadata = "cell_metadata.parquet"
         File partitioned_transcripts_metadata = "partitioned_transcripts_metadata.parquet"
         File cell_by_gene_matrix_parquet = "cell_by_gene_matrix.parquet"
-        File moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
+        File? moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
     }
 
     runtime {
-        docker: "jishar7/partition_transcripts_for_terra@sha256:df298ad62fce18e8fead4ce439d4524d1ed4b350cd03d1f4ba55dce1aafe98d5"
+        docker: "jishar7/partition_transcripts_for_terra@sha256:00797835bb6f4ac2495733ce828598f33aa568fdf69f6c9447bb9860acf7c522"
         memory: "100GB"
         preemptible: 10
         disks: "local-disk 200 HDD"

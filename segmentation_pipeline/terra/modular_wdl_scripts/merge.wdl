@@ -3,11 +3,12 @@ task merge_segmentation_dfs {
 
     input {
         Array[Array[File]] outlines
-        Array[File] outline_files = flatten(outlines)
         File intervals
         File original_tile_polygons
         File trimmed_tile_polygons
     }
+
+    Array[File] outline_files = flatten(outlines)
 
     command <<<
 

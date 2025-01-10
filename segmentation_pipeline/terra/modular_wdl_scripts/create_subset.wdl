@@ -13,6 +13,7 @@ task create_subset {
         Int transcript_plot_as_channel
         Int sigma
         Int trim_amount
+        String algorithm
     }
 
     command <<<
@@ -27,6 +28,7 @@ task create_subset {
                                        --amount_of_VMs ~{amount_of_VMs} \
                                        --transcript_plot_as_channel ~{transcript_plot_as_channel} \
                                        --sigma ~{sigma} \
+                                       --algorithm ~{algorithm} \
                                        --trim_amount ~{trim_amount}
 
     >>>
@@ -34,16 +36,16 @@ task create_subset {
     output {
         File subset_coordinates = "subset_coordinates.csv"
         File subset_transformation_matrix = "subset_transformation_matrix.csv"
-        File intervals = "intervals.json"
-        Array[File] tile_metadata = glob("tile_metadata_*.csv")
-        Array[File] tiled_image = glob("tiled_image_*.tiff")
-        File original_tile_polygons = "original_tile_polygons.parquet"
-        File trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
+        File? intervals = "intervals.json"
+        Array[File]? tile_metadata = glob("tile_metadata_*.csv")
+        Array[File]? tiled_image = glob("tiled_image_*.tiff")
+        File? original_tile_polygons = "original_tile_polygons.parquet"
+        File? trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
         File mean_intensity_of_channels = "mean_intensity_of_channels.csv"
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:093973a32a201f19c6518ab35901e9c05361e35c7722118f9fadd6f95646e88d"
+        docker: "jishar7/subset_data_for_terra@sha256:f931b77673c91fd8ae51300f6ff9bcf57ca72ff374c45020abdfefd1042e1355"
         memory: "100GB"
         preemptible: 2
         disks: "local-disk 200 HDD"

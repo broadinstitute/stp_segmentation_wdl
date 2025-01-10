@@ -3,14 +3,14 @@ task run_cellpose {
 
 	input {       
     	Array[File] image_path
-        Int diameter
-        Float flow_thresh
-        Float cell_prob_thresh
+        Int? diameter
+        Float? flow_thresh
+        Float? cell_prob_thresh
         File? pretrained_model
         String? model_type
-        Int segment_channel
-        Int optional_channel
-        String shard_index
+        Int? segment_channel
+        Int? optional_channel
+        String? shard_index
         File dummy_pretrained_model
     }
 
