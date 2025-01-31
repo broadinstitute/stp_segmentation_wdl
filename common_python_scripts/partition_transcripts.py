@@ -5,11 +5,6 @@ import numpy as np
 import argparse
 from shapely.affinity import affine_transform
 
-def apply_affine_transform(geometry, affine_matrix):
-    if isinstance(geometry, MultiPolygon):
-        return MultiPolygon([affine_transform(polygon, affine_matrix) for polygon in geometry.geoms])
-    return affine_transform(geometry, affine_matrix)
-
 def main(transcript_file, original_transcript_file, cell_polygon_file, transcript_chunk_size, technology, transform_file):
 
     def find_containing_polygon(transcript):
@@ -101,12 +96,15 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     cell_polygons_gdf.to_parquet('cell_polygons_mosaic_space.parquet')
 
     transformation_matrix = pd.read_csv(transform_file).values[:3,:3]
-    affine_matrix = transformation_matrix[:2, :]
 
-    cell_polygons_gdf['transformed_geometry'] = cell_polygons_gdf['geometry'].apply(apply_affine_transform, affine_matrix=affine_matrix)
+    transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
 
-    cell_polygons_gdf.drop(['geometry'], axis=1, inplace=True)
-    cell_polygons_gdf.rename(columns={'transformed_geometry': 'geometry'}, inplace=True)
+    cell_polygons_gdf['geometry'] = cell_polygons_gdf['geometry'].apply(lambda geom: affine_transform(geom, [transformation_matrix_inverse[0, 0], 
+                                                                                           transformation_matrix_inverse[0, 1], 
+                                                                                           transformation_matrix_inverse[1, 0], 
+                                                                                           transformation_matrix_inverse[1, 1], 
+                                                                                           transformation_matrix_inverse[0, 2], 
+                                                                                           transformation_matrix_inverse[1, 2]]))
 
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
