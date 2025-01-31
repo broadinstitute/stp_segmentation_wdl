@@ -3,18 +3,22 @@ task partitioning_transcript_cell_by_gene {
 
     input {
         File transcript_file
+        File original_transcript_file
         File cell_polygon_file
         File pre_merged_cell_polygons
         Int transcript_chunk_size 
         String technology
+        File transform_file
     }
 
     command <<<
 
         python /opt/partition_transcripts.py --transcript_file ~{transcript_file} \
+                                --original_transcript_file ~{original_transcript_file} \
                                 --cell_polygon_file ~{cell_polygon_file} \
                                 --transcript_chunk_size ~{transcript_chunk_size} \
-                                --technology ~{technology}
+                                --technology ~{technology} \
+                                --transform_file ~{transform_file}
 
         pre_merged_cell_polygons_filename=$(basename ~{pre_merged_cell_polygons})
 
@@ -28,9 +32,12 @@ task partitioning_transcript_cell_by_gene {
 
     output {
         File cell_by_gene_matrix_csv = "cell_by_gene_matrix.csv"
-        File filtered_cell_polygon_file = "cell_polygons.parquet"
-        File cell_polygons_metadata = "cell_metadata.parquet"
-        File partitioned_transcripts_metadata = "partitioned_transcripts_metadata.parquet"
+        File filtered_cell_polygon_file_mosaic = "cell_polygons_mosaic_space.parquet"
+        File filtered_cell_polygon_file_micron = "cell_polygons_micron_space.parquet"
+        File cell_polygons_metadata_mosaic = "cell_metadata_mosaic_space.parquet"
+        File cell_polygons_metadata_micron = "cell_metadata_micron_space.parquet"
+        File partitioned_transcripts_mosaic = "transcripts_mosaic_space.parquet"
+        File partitioned_transcripts_micron = "transcripts_micron_space.parquet"
         File cell_by_gene_matrix_parquet = "cell_by_gene_matrix.parquet"
         File? moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
     }

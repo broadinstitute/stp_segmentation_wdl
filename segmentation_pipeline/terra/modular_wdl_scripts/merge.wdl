@@ -6,6 +6,7 @@ task merge_segmentation_dfs {
         File intervals
         File original_tile_polygons
         File trimmed_tile_polygons
+        String merge_approach
     }
 
     Array[File] outline_files = flatten(outlines)
@@ -15,7 +16,8 @@ task merge_segmentation_dfs {
         python /opt/merge_polygons.py --cell_outlines ~{sep=',' outline_files} \
                                 --intervals ~{intervals} \
                                 --original_tile_polygons ~{original_tile_polygons} \
-                                --trimmed_tile_polygons ~{trimmed_tile_polygons}
+                                --trimmed_tile_polygons ~{trimmed_tile_polygons} \
+                                --merge_approach ~{merge_approach}
     >>>
 
     output {

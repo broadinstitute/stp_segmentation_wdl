@@ -37,6 +37,8 @@ workflow MAIN_WORKFLOW {
         Int? transcript_plot_as_channel # 1 for yes, 0 for no
         Int? sigma
         Int? trim_amount
+
+        String? merge_approach
     }
 
     File dummy_pretrained_model = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/models/dummy_model"
@@ -113,15 +115,18 @@ workflow MAIN_WORKFLOW {
         call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose.outlines,
                     intervals=if defined(create_subset.intervals) then select_first([create_subset.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
                     original_tile_polygons=if defined(create_subset.original_tile_polygons) then select_first([create_subset.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
-                    trimmed_tile_polygons=if defined(create_subset.trimmed_tile_polygons) then select_first([create_subset.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet"
+                    trimmed_tile_polygons=if defined(create_subset.trimmed_tile_polygons) then select_first([create_subset.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
+                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_CP { 
             input: transcript_file=create_subset.subset_coordinates, 
+            original_transcript_file=detected_transcripts_file,
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons= merge_segmentation_dfs.pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
-            technology=technology
+            technology=technology,
+            transform_file=transform_file
         }
     }
     

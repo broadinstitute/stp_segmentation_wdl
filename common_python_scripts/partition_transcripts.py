@@ -1,10 +1,16 @@
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon, MultiPolygon
 import numpy as np
 import argparse
+from shapely.affinity import affine_transform
 
-def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
+def apply_affine_transform(geometry, affine_matrix):
+    if isinstance(geometry, MultiPolygon):
+        return MultiPolygon([affine_transform(polygon, affine_matrix) for polygon in geometry.geoms])
+    return affine_transform(geometry, affine_matrix)
+
+def main(transcript_file, original_transcript_file, cell_polygon_file, transcript_chunk_size, technology, transform_file):
 
     def find_containing_polygon(transcript):
         point = transcript.geometry
@@ -45,10 +51,6 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     cell_polygons_gdf.set_index('cell_index', inplace=True)
 
-    cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
-    cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
-    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata.parquet")
-
     cell_polygons_sindex = cell_polygons_gdf.sindex
 
     partitioned_transcripts = gpd.GeoDataFrame()
@@ -68,32 +70,63 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology):
 
     partitioned_transcripts['cell_index'].fillna(-1, inplace=True)
     partitioned_transcripts = partitioned_transcripts[partitioned_transcripts['cell_index'] != -1]
-    partitioned_transcripts = partitioned_transcripts.rename(columns={transcript_id: 'transcript_index'})
-    partitioned_transcripts.rename(columns={gene: 'gene'}, inplace=True)
+    partitioned_transcripts = partitioned_transcripts.rename(columns={transcript_id: 'transcript_index', gene: 'gene'})
 
     partitioned_transcripts['cell_index'] = partitioned_transcripts['cell_index'].astype(int)
     cell_polygons_gdf.index = cell_polygons_gdf.index.astype(int)
     cell_polygons_gdf = cell_polygons_gdf[cell_polygons_gdf.index.isin(partitioned_transcripts['cell_index'])]
 
-    partitioned_transcripts[['transcript_index', 'cell_index', 'gene']].to_parquet("partitioned_transcripts_metadata.parquet")
     partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
     cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
-
+    
     cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
 
-    cell_polygons_gdf.to_parquet('cell_polygons.parquet')
+    partitioned_transcripts.drop(['cell_id'], axis=1, inplace=True)
+    partitioned_transcripts.to_parquet("transcripts_mosaic_space.parquet")
+
+    if original_transcript_file.endswith(".parquet"):
+        original_transcripts = pd.read_parquet(original_transcript_file)
+    else:
+        original_transcripts = pd.read_csv(original_transcript_file)
+
+    partitioned_transcripts[x_col] = original_transcripts[x_col]
+    partitioned_transcripts[y_col] = original_transcripts[y_col]
+
+    partitioned_transcripts.to_parquet("transcripts_micron_space.parquet")
+
+    cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
+    cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
+    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_mosaic_space.parquet")
+    cell_polygons_gdf.to_parquet('cell_polygons_mosaic_space.parquet')
+
+    transformation_matrix = pd.read_csv(transform_file).values[:3,:3]
+    affine_matrix = transformation_matrix[:2, :]
+
+    cell_polygons_gdf['transformed_geometry'] = cell_polygons_gdf['geometry'].apply(apply_affine_transform, affine_matrix=affine_matrix)
+
+    cell_polygons_gdf.drop(['geometry'], axis=1, inplace=True)
+    cell_polygons_gdf.rename(columns={'transformed_geometry': 'geometry'}, inplace=True)
+
+    cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
+    cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
+    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
+    cell_polygons_gdf.to_parquet('cell_polygons_micron_space.parquet')
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='partitioning')
     parser.add_argument('--transcript_file')
+    parser.add_argument('--original_transcript_file')
     parser.add_argument('--cell_polygon_file')
     parser.add_argument('--transcript_chunk_size', type = int)  
     parser.add_argument('--technology')  
+    parser.add_argument('--transform_file')
     args = parser.parse_args()
 
-    main(transcript_file = args.transcript_file,  
+    main(transcript_file = args.transcript_file, 
+        original_transcript_file = args.original_transcript_file, 
         cell_polygon_file = args.cell_polygon_file,
         transcript_chunk_size = args.transcript_chunk_size,
-        technology = args.technology)
+        technology = args.technology,
+        transform_file = args.transform_file)
