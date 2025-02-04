@@ -123,10 +123,10 @@ workflow MAIN_WORKFLOW {
             input: transcript_file=create_subset.subset_coordinates, 
             original_transcript_file=detected_transcripts_file,
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
-            pre_merged_cell_polygons= merge_segmentation_dfs.pre_merged_cell_polygons,
+            pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
             technology=technology,
-            transform_file=transform_file
+            transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model
         }
     }
     
