@@ -3,7 +3,6 @@ task partitioning_transcript_cell_by_gene {
 
     input {
         File transcript_file
-        File original_transcript_file
         File cell_polygon_file
         File pre_merged_cell_polygons
         Int transcript_chunk_size 
@@ -14,19 +13,11 @@ task partitioning_transcript_cell_by_gene {
     command <<<
 
         python /opt/partition_transcripts.py --transcript_file ~{transcript_file} \
-                                --original_transcript_file ~{original_transcript_file} \
                                 --cell_polygon_file ~{cell_polygon_file} \
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology} \
-                                --transform_file ~{transform_file}
-
-        pre_merged_cell_polygons_filename=$(basename ~{pre_merged_cell_polygons})
-
-        if [ ${pre_merged_cell_polygons_filename} == "dummy_pre_merged_cell_polygons.parquet" ]; then
-            echo "pre_merged_cell_polygons variable is undefined or empty"
-        else
-            cp ~{pre_merged_cell_polygons} "pre_merged_cell_polygons.parquet"
-        fi 
+                                --transform_file ~{transform_file} \
+                                --pre_merged_cell_polygons ~{pre_merged_cell_polygons}
 
     >>>
 
@@ -40,7 +31,7 @@ task partitioning_transcript_cell_by_gene {
     }
 
     runtime {
-        docker: "jishar7/partition_transcripts_for_terra@sha256:76a7446c8dabac863a842e7e1bfb53028a8b83b63bec4689571ced1f6b8dcd74"
+        docker: "jishar7/partition_transcripts_for_terra@sha256:9670ae50bc525882f78208dadb25fe87d7033caaba9822303b9ae90348228c23"
         memory: "100GB"
         preemptible: 10
         disks: "local-disk 200 HDD"
