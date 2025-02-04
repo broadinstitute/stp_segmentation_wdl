@@ -26,7 +26,7 @@ workflow MAIN_WORKFLOW {
         Array[Int]? subset_data_y_x_interval
         Float? image_pixel_size
 
-        File? transform_file
+        File transform_file
         File detected_transcripts_file
 
         Array[File] image_paths_list  
@@ -48,7 +48,7 @@ workflow MAIN_WORKFLOW {
 
         call SUBSET.create_subset as create_subset_IS {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
-                                        transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model,
+                                        transform_file=transform_file,
                                         detected_transcripts_file=detected_transcripts_file,
                                         technology=technology,
                                         tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0, 
@@ -66,10 +66,12 @@ workflow MAIN_WORKFLOW {
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS { 
             input: transcript_file=create_subset_IS.subset_coordinates, 
+            original_transcript_file=detected_transcripts_file,
             cell_polygon_file=instanseg.processed_cell_polygons,
             pre_merged_cell_polygons=dummy_pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
-            technology=technology
+            technology=technology,
+            transform_file=transform_file
         }
     }
 
@@ -77,7 +79,7 @@ workflow MAIN_WORKFLOW {
 
         call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
-                                        transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model,
+                                        transform_file=transform_file,
                                         detected_transcripts_file=detected_transcripts_file,
                                         technology=technology,
                                         tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0, 
@@ -126,7 +128,7 @@ workflow MAIN_WORKFLOW {
             pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
             transcript_chunk_size=transcript_chunk_size,
             technology=technology,
-            transform_file=if defined(transform_file) then select_first([transform_file]) else dummy_pretrained_model
+            transform_file=transform_file
         }
     }
     
