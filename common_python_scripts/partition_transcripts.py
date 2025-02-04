@@ -42,6 +42,7 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
 
     cell_polygons_gdf.rename(columns={'index': 'cell_index'}, inplace=True)
     cell_polygons_gdf.rename(columns={'geometry': 'geometry_image_space'}, inplace=True)
+    cell_polygons_gdf.set_geometry("geometry_image_space", inplace=True)
 
     cell_polygons_gdf['cell_index'] = cell_polygons_gdf['cell_index'].astype(str)
 
@@ -98,8 +99,6 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
 
     transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
 
-    cell_polygons_gdf.set_geometry("geometry_image_space")
-
     cell_polygons_gdf['geometry'] = cell_polygons_gdf['geometry_image_space'].apply(lambda geom: affine_transform(geom, [transformation_matrix_inverse[0, 0], 
                                                                                            transformation_matrix_inverse[0, 1], 
                                                                                            transformation_matrix_inverse[1, 0], 
@@ -110,7 +109,7 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
 
-    cell_polygons_gdf.set_geometry("geometry")
+    cell_polygons_gdf.set_geometry("geometry", inplace=True)
 
     cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
     cell_polygons_gdf.to_parquet('cell_polygons.parquet')
