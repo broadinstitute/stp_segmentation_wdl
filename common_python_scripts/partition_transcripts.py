@@ -5,31 +5,31 @@ import numpy as np
 import argparse
 from shapely.affinity import affine_transform
 
-def find_containing_polygon(transcript):
-    point = transcript.geometry
-    possible_matches_index = list(cell_polygons_sindex.query(point, predicate='intersects'))
-
-    if len(possible_matches_index) == 0:
-        return None
-
-    return possible_matches_index[0]
-
-def process_chunk(transcript_chunk, cell_polygons_gdf, cell_polygons_sindex):
-    if not transcript_chunk.empty:
-        transcript_chunk['cell_index'] = transcript_chunk.apply(find_containing_polygon, axis=1)
-    else:
-        transcript_chunk['cell_index'] = None
-
-    return transcript_chunk
-
-def apply_affine_transform(x, y, transformation_matrix_inverse):
-    coords = np.array([x, y, 1])
-    
-    transformed_coords = np.dot(transformation_matrix_inverse, coords)
-
-    return transformed_coords[0], transformed_coords[1]
-
 def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, transform_file, pre_merged_cell_polygons=None):
+
+    def find_containing_polygon(transcript):
+        point = transcript.geometry
+        possible_matches_index = list(cell_polygons_sindex.query(point, predicate='intersects'))
+
+        if len(possible_matches_index) == 0:
+            return None
+
+        return possible_matches_index[0]
+
+    def process_chunk(transcript_chunk, cell_polygons_gdf, cell_polygons_sindex):
+        if not transcript_chunk.empty:
+            transcript_chunk['cell_index'] = transcript_chunk.apply(find_containing_polygon, axis=1)
+        else:
+            transcript_chunk['cell_index'] = None
+
+        return transcript_chunk
+    
+    def apply_affine_transform(x, y, transformation_matrix_inverse):
+        coords = np.array([x, y, 1])
+        
+        transformed_coords = np.dot(transformation_matrix_inverse, coords)
+
+        return transformed_coords[0], transformed_coords[1]
 
     if technology == 'MERSCOPE':
         x_col = 'global_x'
