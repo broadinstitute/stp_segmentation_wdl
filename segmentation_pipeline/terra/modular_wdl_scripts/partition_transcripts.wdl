@@ -32,12 +32,9 @@ task partitioning_transcript_cell_by_gene {
 
     output {
         File cell_by_gene_matrix_csv = "cell_by_gene_matrix.csv"
-        File filtered_cell_polygon_file_mosaic = "cell_polygons_mosaic_space.parquet"
-        File filtered_cell_polygon_file_micron = "cell_polygons_micron_space.parquet"
-        File cell_polygons_metadata_mosaic = "cell_metadata_mosaic_space.parquet"
-        File cell_polygons_metadata_micron = "cell_metadata_micron_space.parquet"
-        File partitioned_transcripts_mosaic = "transcripts_mosaic_space.parquet"
-        File partitioned_transcripts_micron = "transcripts_micron_space.parquet"
+        File filtered_cell_polygon_file = "cell_polygons.parquet"
+        File cell_polygons_metadata = "cell_metadata_micron_space.parquet"
+        File partitioned_transcripts = "transcripts.parquet"
         File cell_by_gene_matrix_parquet = "cell_by_gene_matrix.parquet"
         File? moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
     }

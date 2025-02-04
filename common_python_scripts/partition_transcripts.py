@@ -41,6 +41,7 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     cell_polygons_gdf.reset_index(inplace=True)
 
     cell_polygons_gdf.rename(columns={'index': 'cell_index'}, inplace=True)
+    cell_polygons_gdf.rename(columns={'geometry': 'geometry_image_space'}, inplace=True)
 
     cell_polygons_gdf['cell_index'] = cell_polygons_gdf['cell_index'].astype(str)
 
@@ -78,7 +79,8 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
 
     partitioned_transcripts.drop(['cell_id'], axis=1, inplace=True)
-    partitioned_transcripts.to_parquet("transcripts_mosaic_space.parquet")
+
+    partitioned_transcripts.rename(columns={x_col: 'x_image_coords', y_col: 'y_image_coords'}, inplace=True)
 
     if original_transcript_file.endswith(".parquet"):
         original_transcripts = pd.read_parquet(original_transcript_file)
@@ -88,18 +90,15 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     partitioned_transcripts[x_col] = original_transcripts[x_col]
     partitioned_transcripts[y_col] = original_transcripts[y_col]
 
-    partitioned_transcripts.to_parquet("transcripts_micron_space.parquet")
+    partitioned_transcripts.rename(columns={x_col: 'x', y_col: 'y'}, inplace=True)
 
-    cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
-    cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
-    cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_mosaic_space.parquet")
-    cell_polygons_gdf.to_parquet('cell_polygons_mosaic_space.parquet')
+    partitioned_transcripts.to_parquet("transcripts.parquet")
 
     transformation_matrix = pd.read_csv(transform_file).values[:3,:3]
 
     transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
 
-    cell_polygons_gdf['geometry'] = cell_polygons_gdf['geometry'].apply(lambda geom: affine_transform(geom, [transformation_matrix_inverse[0, 0], 
+    cell_polygons_gdf['geometry'] = cell_polygons_gdf['geometry_image_space'].apply(lambda geom: affine_transform(geom, [transformation_matrix_inverse[0, 0], 
                                                                                            transformation_matrix_inverse[0, 1], 
                                                                                            transformation_matrix_inverse[1, 0], 
                                                                                            transformation_matrix_inverse[1, 1], 
@@ -109,7 +108,7 @@ def main(transcript_file, original_transcript_file, cell_polygon_file, transcrip
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
     cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
-    cell_polygons_gdf.to_parquet('cell_polygons_micron_space.parquet')
+    cell_polygons_gdf.to_parquet('cell_polygons.parquet')
 
 if __name__ == '__main__':
 
