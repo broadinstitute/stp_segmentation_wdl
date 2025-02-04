@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons):
+def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons, merge_approach='larger'):
     
     tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
@@ -335,8 +335,18 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
 
                     poly_intersect = make_valid(poly_intersect).buffer(0)
                     poly_intersect = poly_intersect.simplify(tolerance)
+                    
+                    if merge_approach == 'union':
+                        poly_merged = poly_intersect.union(poly)
 
-                    poly_merged = poly_intersect.union(poly)
+                    elif merge_approach == 'larger':
+                        poly_merged = poly if poly.area > poly_intersect.area else poly_intersect
+
+                    elif merge_approach == 'smaller':
+                        poly_merged = poly_intersect if poly.area > poly_intersect.area else poly
+
+                    elif merge_approach == 'intersection':
+                        poly_merged = poly_intersect.intersection(poly)
                     
                     # delete intersecting polygon in gdf_nc
                     
@@ -382,8 +392,19 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_2, ioa_thresh=ioa_small_thresh)
 
             else:
+                
+                if merge_approach == 'union':
+                    poly_merged = poly_1.union(poly_2)
 
-                poly_merged = poly_1.union(poly_2)
+                elif merge_approach == 'larger':
+                    poly_merged = poly_1 if poly_1.area > poly_2.area else poly_2
+
+                elif merge_approach == 'smaller':
+                    poly_merged = poly_2 if poly_1.area > poly_2.area else poly_1
+
+                elif merge_approach == 'intersection':
+                    poly_merged = poly_1.intersection(poly_2)
+
                 gdf_nc = add_or_merge_into_gdf_nc(gdf_nc=gdf_nc, poly=poly_merged, ioa_thresh=ioa_small_thresh)
         
         def get_largest_polygon(geometry):
@@ -410,9 +431,11 @@ if __name__ == '__main__':
     parser.add_argument('--intervals')
     parser.add_argument('--original_tile_polygons')
     parser.add_argument('--trimmed_tile_polygons')
+    parser.add_argument('--merge_approach')
     args = parser.parse_args()
 
     main(cell_outlines = args.cell_outlines,  
         intervals = args.intervals,
         original_tile_polygons = args.original_tile_polygons,
-        trimmed_tile_polygons = args.trimmed_tile_polygons)
+        trimmed_tile_polygons = args.trimmed_tile_polygons,
+        merge_approach = args.merge_approach)

@@ -1,11 +1,11 @@
 FROM python:3.9
 
 RUN apt-get update && \
+    apt-get install -y libgdal-dev && \
     apt-get install -y --no-install-recommends \
     gdal-bin \
     python3-gdal \
     libspatialindex-dev \
-    libgdal-dev \
     build-essential \
     python3-dev \
     libc6-dev \

@@ -6,6 +6,7 @@ task merge_segmentation_dfs {
         File intervals
         File original_tile_polygons
         File trimmed_tile_polygons
+        String merge_approach
     }
 
     Array[File] outline_files = flatten(outlines)
@@ -15,7 +16,8 @@ task merge_segmentation_dfs {
         python /opt/merge_polygons.py --cell_outlines ~{sep=',' outline_files} \
                                 --intervals ~{intervals} \
                                 --original_tile_polygons ~{original_tile_polygons} \
-                                --trimmed_tile_polygons ~{trimmed_tile_polygons}
+                                --trimmed_tile_polygons ~{trimmed_tile_polygons} \
+                                --merge_approach ~{merge_approach}
     >>>
 
     output {
@@ -24,7 +26,7 @@ task merge_segmentation_dfs {
     }
 
     runtime {
-        docker: "jishar7/merge_polygons_for_terra@sha256:1a9a5d8189083d28d6544a598de61a4ed5b0a989c87645bca198072b839c18b3"
+        docker: "jishar7/merge_polygons_for_terra@sha256:d8829daae5a8b9123e0f37b3629222ebe08823869f9a623f6a91884305b4e613"
         memory: "50GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
