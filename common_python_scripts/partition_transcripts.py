@@ -94,7 +94,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
 
     transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
 
-    partitioned_transcripts['y'], partitioned_transcripts['y'] = zip(*partitioned_transcripts.apply(lambda row: apply_affine_transform(row['x_image_coords'], 
+    partitioned_transcripts['x'], partitioned_transcripts['y'] = zip(*partitioned_transcripts.apply(lambda row: apply_affine_transform(row['x_image_coords'], 
                                                                                                     row['y_image_coords'], 
                                                                                                     transformation_matrix_inverse), axis=1))
 
@@ -126,7 +126,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
                                                                                            transformation_matrix_inverse[0, 2], 
                                                                                            transformation_matrix_inverse[1, 2]]))
     
-    cell_polygons_gdf.to_parquet('pre_merged_cell_polygons.parquet')
+    pre_merged_cell_polygons_gdf.to_parquet('pre_merged_cell_polygons.parquet')
 
 
 if __name__ == '__main__':
