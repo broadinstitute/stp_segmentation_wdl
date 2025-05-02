@@ -5,9 +5,11 @@ task partitioning_transcript_cell_by_gene {
         File transcript_file
         File cell_polygon_file
         File pre_merged_cell_polygons
-        Int transcript_chunk_size 
+        Int transcript_chunk_size
         String technology
         File transform_file
+        String algorithm
+        String dataset_name
     }
 
     command <<<
@@ -17,7 +19,9 @@ task partitioning_transcript_cell_by_gene {
                                 --transcript_chunk_size ~{transcript_chunk_size} \
                                 --technology ~{technology} \
                                 --transform_file ~{transform_file} \
-                                --pre_merged_cell_polygons ~{pre_merged_cell_polygons}
+                                --pre_merged_cell_polygons ~{pre_merged_cell_polygons} \
+                                --algorithm ~{algorithm} \
+                                --dataset_name ~{dataset_name}
 
     >>>
 
@@ -28,10 +32,11 @@ task partitioning_transcript_cell_by_gene {
         File partitioned_transcripts = "transcripts.parquet"
         File cell_by_gene_matrix_parquet = "cell_by_gene_matrix.parquet"
         File? moved_pre_merged_cell_polygons = "pre_merged_cell_polygons.parquet"
+        File segmentation_parameters = "segmentation_parameters.json"
     }
 
     runtime {
-        docker: "jishar7/partition_transcripts_for_terra@sha256:8ffb48ba2ab0bf46c3f00fad218fe155e38fb370feb93cb5e850dbffe9b32a4f"
+        docker: "jishar7/partition_transcripts_for_terra@sha256:df23b2f38c668c68a0b2a10dcf3d891720ad05c69d02884c622a82e068e9c4fd"
         memory: "100GB"
         preemptible: 10
         disks: "local-disk 200 HDD"
