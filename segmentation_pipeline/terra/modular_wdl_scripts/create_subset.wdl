@@ -1,7 +1,7 @@
 version 1.0
 task create_subset {
 
-	input {       
+	input {
     	Array[File] image_paths_list
         Array[Int] subset_data_y_x_interval
         File transform_file
@@ -9,7 +9,7 @@ task create_subset {
         String technology
         Float tiles_dimension
         Float overlap
-        Float amount_of_VMs 
+        Float amount_of_VMs
         Int transcript_plot_as_channel
         Int sigma
         Int trim_amount
@@ -45,7 +45,7 @@ task create_subset {
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:f931b77673c91fd8ae51300f6ff9bcf57ca72ff374c45020abdfefd1042e1355"
+        docker: "jishar7/subset_data_for_terra@sha256:e3b4d7fd3aacdd52b8a7fcd2afc766ef250b46f6d9c8660645f7035bfa1042f6"
         memory: "100GB"
         preemptible: 2
         disks: "local-disk 200 HDD"
