@@ -79,6 +79,8 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
     partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
     cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
 
+    cell_by_gene_matrix = cell_by_gene_matrix.drop(index="UNASSIGNED", errors='ignore')
+
     cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
 
