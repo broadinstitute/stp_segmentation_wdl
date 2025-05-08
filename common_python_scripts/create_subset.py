@@ -64,7 +64,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
             trx_subset = pd.concat([trx_subset, trx_subset_temp])
 
-    elif technology == 'XENIUM':
+    elif technology == 'Xenium':
         transformation_matrix = pd.read_csv(transform_file, sep=' ', header=None).values[:3,:3]
 
         inverse_transformation_matrix = np.linalg.inv(transformation_matrix)

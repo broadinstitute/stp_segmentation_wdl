@@ -31,7 +31,7 @@ workflow MAIN_WORKFLOW {
 
         Array[File] image_paths_list
 
-        String technology # XENIUM or MERSCOPE
+        String technology # Xenium or MERSCOPE
         String algorithm # CELLPOSE or INSTANSEG
         String dataset_name
 

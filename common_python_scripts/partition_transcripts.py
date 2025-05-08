@@ -38,7 +38,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
         gene = 'gene'
         transcript_id = 'Unnamed: 0'
 
-    elif technology == 'XENIUM':
+    elif technology == 'Xenium':
         x_col = 'x_location'
         y_col = 'y_location'
         gene = 'feature_name'
