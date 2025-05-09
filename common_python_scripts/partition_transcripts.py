@@ -109,8 +109,11 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
                                                                                            transformation_matrix_inverse[1, 2]]))
 
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
+    cell_polygons_gdf = cell_polygons_gdf[cell_polygons_gdf['area'] > 0]
+
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
     cell_polygons_gdf['technology'] = technology
+
     cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
     cell_polygons_gdf.set_geometry("geometry", inplace=True)
     cell_polygons_gdf.drop(['area', 'centroid'], axis=1, inplace=True)
