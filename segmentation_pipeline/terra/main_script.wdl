@@ -83,7 +83,7 @@ workflow MAIN_WORKFLOW {
 
     if (algorithm == "Proseg") {
 
-        call PROSEG.proseg as proseg {input:
+        call PROSEG.run_proseg as proseg {input:
                 detected_transcripts_file=detected_transcripts_file,
                 technology=technology
         }
