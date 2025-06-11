@@ -2,17 +2,17 @@ version 1.0
 task create_subset {
 
 	input {
-    	Array[File] image_paths_list
-        Array[Int] subset_data_y_x_interval
+    	Array[File]? image_paths_list
+        Array[Int]? subset_data_y_x_interval
         File transform_file
         File detected_transcripts_file
         String technology
-        Float tiles_dimension
-        Float overlap
-        Float amount_of_VMs
-        Int transcript_plot_as_channel
-        Int sigma
-        Int trim_amount
+        Float? tiles_dimension
+        Float? overlap
+        Float? amount_of_VMs
+        Int? transcript_plot_as_channel
+        Int? sigma
+        Int? trim_amount
         String algorithm
     }
 

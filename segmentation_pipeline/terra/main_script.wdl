@@ -20,7 +20,7 @@ workflow MAIN_WORKFLOW {
 
         Int? segment_channel # cellpose :  The first channel is the channel you want to segment. The second channel is an optional channel that is helpful in models trained with images with a nucleus channel. See more details in the models page.
         Int? optional_channel
-        Float amount_of_VMs
+        Float? amount_of_VMs
 
         Int? transcript_chunk_size
 
@@ -55,7 +55,7 @@ workflow MAIN_WORKFLOW {
                                         technology=technology,
                                         tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0,
                                         overlap=if defined(overlap) then select_first([overlap]) else 0.0,
-                                        amount_of_VMs=amount_of_VMs,
+                                        amount_of_VMs=if defined(amount_of_VMs) then select_first([amount_of_VMs]) else 1.0,
                                         transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
                                         algorithm=algorithm,
@@ -111,7 +111,7 @@ workflow MAIN_WORKFLOW {
                                         technology=technology,
                                         tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0,
                                         overlap=if defined(overlap) then select_first([overlap]) else 0.0,
-                                        amount_of_VMs=amount_of_VMs,
+                                        amount_of_VMs=if defined(amount_of_VMs) then select_first([amount_of_VMs]) else 1.0,
                                         transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
                                         sigma=if defined(sigma) then select_first([sigma]) else 0,
                                         trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0,
