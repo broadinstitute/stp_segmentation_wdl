@@ -22,7 +22,7 @@ workflow MAIN_WORKFLOW {
         Int? optional_channel
         Float amount_of_VMs
 
-        Int transcript_chunk_size
+        Int? transcript_chunk_size
 
         Array[Int]? subset_data_y_x_interval
         Float? image_pixel_size
@@ -70,7 +70,7 @@ workflow MAIN_WORKFLOW {
             input: transcript_file=create_subset_IS.subset_coordinates,
             cell_polygon_file=instanseg.processed_cell_polygons,
             pre_merged_cell_polygons=dummy_pre_merged_cell_polygons,
-            transcript_chunk_size=transcript_chunk_size,
+            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
             technology=technology,
             transform_file=transform_file,
             algorithm=algorithm,
@@ -152,7 +152,7 @@ workflow MAIN_WORKFLOW {
             input: transcript_file=create_subset.subset_coordinates,
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
-            transcript_chunk_size=transcript_chunk_size,
+            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0.0,
             technology=technology,
             transform_file=transform_file,
             algorithm=algorithm,
