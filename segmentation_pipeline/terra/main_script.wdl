@@ -5,6 +5,7 @@ import "./modular_wdl_scripts/merge.wdl" as MERGE
 import "./modular_wdl_scripts/partition_transcripts.wdl" as PARTITION
 import "./modular_wdl_scripts/create_subset.wdl" as SUBSET
 import "./modular_wdl_scripts/instanseg.wdl" as INSTANSEG
+import "./modular_wdl_scripts/proseg.wdl" as PROSEG
 
 workflow MAIN_WORKFLOW {
     input {
@@ -29,7 +30,7 @@ workflow MAIN_WORKFLOW {
         File transform_file
         File detected_transcripts_file
 
-        Array[File] image_paths_list
+        Array[File]? image_paths_list
 
         String technology # Xenium or MERSCOPE
         String algorithm # CELLPOSE or INSTANSEG
@@ -45,9 +46,9 @@ workflow MAIN_WORKFLOW {
     File dummy_pretrained_model = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/models/dummy_model"
     File dummy_pre_merged_cell_polygons = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_pre_merged_cell_polygons.parquet"
 
-    if (algorithm == "INSTANSEG") {
+    if (algorithm == "Instanseg") {
 
-        call SUBSET.create_subset as create_subset_IS {input: image_paths_list=image_paths_list,
+        call SUBSET.create_subset as create_subset_IS {input: image_paths_list=if defined(image_paths_list) then select_first([image_paths_list]) else [0],
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
                                         transform_file=transform_file,
                                         detected_transcripts_file=detected_transcripts_file,
@@ -73,11 +74,35 @@ workflow MAIN_WORKFLOW {
             technology=technology,
             transform_file=transform_file,
             algorithm=algorithm,
-            dataset_name=dataset_name
+            dataset_name=dataset_name,
+            proseg_trx_meta=dummy_pre_merged_cell_polygons,
+            proseg_cbg=dummy_pre_merged_cell_polygons
+
         }
     }
 
-    if (algorithm == "CELLPOSE") {
+    if (algorithm == "Proseg") {
+
+        call PROSEG.proseg as proseg {input:
+                detected_transcripts_file=detected_transcripts_file,
+                technology=technology
+        }
+
+        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_PS {
+            input: transcript_file=detected_transcripts_file,
+            proseg_trx_meta=proseg.trx_meta,
+            cell_polygon_file=proseg.cell_polygons,
+            pre_merged_cell_polygons=dummy_pre_merged_cell_polygons,
+            technology=technology,
+            transform_file=transform_file,
+            algorithm=algorithm,
+            dataset_name=dataset_name,
+            proseg_cbg=proseg.cbg,
+            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0.0
+        }
+    }
+
+    if (algorithm == "Cellpose") {
 
         call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
