@@ -98,7 +98,7 @@ workflow MAIN_WORKFLOW {
             algorithm=algorithm,
             dataset_name=dataset_name,
             proseg_cbg=proseg.cbg,
-            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0.0
+            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0
         }
     }
 
@@ -152,7 +152,7 @@ workflow MAIN_WORKFLOW {
             input: transcript_file=create_subset.subset_coordinates,
             cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
             pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
-            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0.0,
+            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
             technology=technology,
             transform_file=transform_file,
             algorithm=algorithm,
