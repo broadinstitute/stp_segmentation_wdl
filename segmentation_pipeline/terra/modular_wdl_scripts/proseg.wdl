@@ -11,7 +11,7 @@ task run_proseg {
         if [ ~{technology} == "Xenium" ]; then
             proseg ~{detected_transcripts_file} --xenium
         else
-            proseg ~{detected_transcripts_file} --merfish
+            proseg ~{detected_transcripts_file} --merscope
         fi
 
     >>>
