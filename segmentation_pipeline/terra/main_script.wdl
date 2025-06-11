@@ -156,7 +156,9 @@ workflow MAIN_WORKFLOW {
             technology=technology,
             transform_file=transform_file,
             algorithm=algorithm,
-            dataset_name=dataset_name
+            dataset_name=dataset_name,
+            proseg_trx_meta=dummy_pre_merged_cell_polygons,
+            proseg_cbg=dummy_pre_merged_cell_polygons
         }
     }
 
