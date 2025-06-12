@@ -213,6 +213,14 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
         cell_by_gene_matrix.index = ['c-' + str(idx) for idx in cell_by_gene_matrix.index]
         cell_by_gene_matrix = cell_by_gene_matrix.round(0).astype(int)
 
+        partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+        cbg_with_all_genes = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
+        cbg_with_all_genes = cbg_with_all_genes.drop(index="UNASSIGNED", errors='ignore')
+
+        missing_cols = cbg_with_all_genes.columns.difference(cell_by_gene_matrix.columns)
+        for col in missing_cols:
+            cell_by_gene_matrix[col] = 0
+
     cell_polygons_gdf['area'] = cell_polygons_gdf['geometry'].area
     cell_polygons_gdf = cell_polygons_gdf[cell_polygons_gdf['area'] > 0]
 
