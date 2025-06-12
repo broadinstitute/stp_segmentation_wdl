@@ -41,8 +41,8 @@ task partitioning_transcript_cell_by_gene {
 
     runtime {
         docker: "jishar7/partition_transcripts_for_terra@sha256:51addfae4bd19c79a60fc9366057d034c185d13edce27bfb02128f98814317c0"
-        memory: "100GB"
-        preemptible: 10
+        memory: "200GB"
+        preemptible: 5
         disks: "local-disk 200 HDD"
     }
 
