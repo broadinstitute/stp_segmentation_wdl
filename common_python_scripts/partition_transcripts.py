@@ -156,25 +156,18 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
 
     else:
 
-        default_trx = pd.read_csv(transcript_file)
         custom_trx = pd.read_csv(proseg_trx_meta)
 
-        custom_trx.rename(columns={"x":x_col, "y":y_col,
-                                   "assignment": cell_id, "gene":gene, "fov":fov}, inplace=True)
+        custom_trx.rename(columns={"assignment": "cell_index"}, inplace=True)
 
         custom_trx.drop(['observed_x', 'observed_y', 'z', 'observed_z', 'probability', 'background', 'confusion'], axis=1, inplace=True)
 
-        rows_to_add = default_trx[~default_trx[transcript_id].isin(custom_trx[transcript_id])]
-        rows_to_add[cell_id] = 'UNASSIGNED'
-        custom_trx_extended = pd.concat([custom_trx, rows_to_add], ignore_index=True)
-
-        custom_trx_extended.rename(columns={cell_id:"cell_index", gene:"gene"}, inplace=True)
-        custom_trx_extended['cell_index'] = custom_trx_extended['cell_index'].apply(
+        custom_trx['cell_index'] = custom_trx['cell_index'].apply(
             lambda x: 'UNASSIGNED' if x == 'UNASSIGNED' or x == 4294967295 else 'c-' + str(x)
         )
 
-        custom_trx_extended['geometry'] = custom_trx_extended.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
-        partitioned_transcripts = gpd.GeoDataFrame(custom_trx_extended, geometry='geometry')
+        custom_trx['geometry'] = custom_trx.apply(lambda row: Point(row["x"], row["y"]), axis=1)
+        partitioned_transcripts = gpd.GeoDataFrame(custom_trx, geometry='geometry')
 
         affine_params = matrix_to_affine_params(transformation_matrix)
 
@@ -186,6 +179,9 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
         partitioned_transcripts['y_image_coords'] = partitioned_transcripts['geometry_image_space'].apply(lambda p: p.y)
 
         partitioned_transcripts.drop(['geometry_image_space'], axis=1, inplace=True)
+
+        partitioned_transcripts.rename(columns={transcript_id: 'transcript_index'}, inplace=True)
+        partitioned_transcripts['transcript_index'] = partitioned_transcripts['transcript_index'].astype(str)
 
         with gzip.open(cell_polygon_file, "rb") as f:
             geojson_bytes = f.read()
