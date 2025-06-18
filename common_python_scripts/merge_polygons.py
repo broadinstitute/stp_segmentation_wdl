@@ -135,7 +135,8 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         gdf.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
         gdf.to_parquet('pre_merged_cell_polygons.parquet')
 
-        gdf.drop(['shard', 'job', 'color'], axis=1, inplace=True)
+        gdf.reset_index(inplace=True)
+        gdf.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
 
         gdf.to_parquet('cell_polygons.parquet')
 
