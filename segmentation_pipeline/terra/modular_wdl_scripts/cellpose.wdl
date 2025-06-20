@@ -3,7 +3,6 @@ task run_cellpose {
 
 	input {
     	Array[File] image_path
-        Int? diameter
         Float? flow_thresh
         Float? cell_prob_thresh
         File? pretrained_model
@@ -27,7 +26,6 @@ task run_cellpose {
                                     --save_txt \
                                     --verbose \
                                     --use_gpu \
-                                    --diameter ~{diameter} \
                                     --flow_threshold ~{flow_thresh} \
                                     --cellprob_threshold ~{cell_prob_thresh} \
                                     --chan ~{segment_channel} \
@@ -41,7 +39,6 @@ task run_cellpose {
                                 --save_txt \
                                 --verbose \
                                 --use_gpu \
-                                --diameter ~{diameter} \
                                 --flow_threshold ~{flow_thresh} \
                                 --cellprob_threshold ~{cell_prob_thresh} \
                                 --chan ~{segment_channel} \
