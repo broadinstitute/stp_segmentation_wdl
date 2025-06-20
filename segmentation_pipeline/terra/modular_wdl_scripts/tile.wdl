@@ -25,7 +25,7 @@ task get_tile_intervals {
         preemptible: 2
         disks: "local-disk 200 HDD"
     }
-    
+
 }
 
 
@@ -50,9 +50,9 @@ task create_tile {
 
     runtime {
         docker: "jishar7/tiling_for_terra@sha256:0fb461d55fac6ee72b29df2e8bbdf562a6701cc91fb86cc7ff20dfa208fe93d2"
-        memory: "20GB"
+        memory: "400GB"
         preemptible: 2
-        disks: "local-disk 200 HDD"
+        disks: "local-disk 400 HDD"
     }
-    
+
 }

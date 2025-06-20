@@ -1,7 +1,7 @@
 version 1.0
 task run_cellpose {
 
-	input {       
+	input {
     	Array[File] image_path
         Int? diameter
         Float? flow_thresh
@@ -17,7 +17,7 @@ task run_cellpose {
     command <<<
 
         IFS=', ' read -r -a combined_file_array <<< "$(echo "~{sep=', ' image_path}" | tr ', ' '\n' | grep "tiled_image_~{shard_index}_.*\.tiff" | tr '\n' ', ')"
-                
+
         for value in "${combined_file_array[@]}"; do
 
             if [ ~{pretrained_model} == ~{dummy_pretrained_model} ]; then
@@ -62,11 +62,11 @@ task run_cellpose {
     runtime {
         continueOnReturnCode: [0, 1]
         docker: "jishar7/cellpose_for_terra@sha256:3ac418181abd6d532112e405ffa7c2c002a27691048ecfadbedc41ea9376da7a"
-        memory: "100GB"
+        memory: "400GB"
         preemptible: 2
         maxRetries: 0
-        disks: "local-disk 200 HDD"
+        disks: "local-disk 300 HDD"
 
     }
-    
+
 }
