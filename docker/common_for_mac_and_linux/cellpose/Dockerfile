@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11.5
 
 RUN mv /etc/apt/apt.conf.d/docker-clean /etc/apt/apt.conf.d/docker-clean-disabled
 
@@ -22,8 +22,8 @@ RUN apt-get update --allow-insecure-repositories && \
 
 RUN mv /etc/apt/apt.conf.d/docker-clean-disabled /etc/apt/apt.conf.d/docker-clean
 
-RUN pip install --upgrade pip==24.0
-RUN pip install --verbose cellpose==3.0.9
+RUN pip install --upgrade pip
+RUN pip install --verbose cellpose==4.0.4
 RUN pip install scikit-image==0.23.2
 RUN pip install opencv-python==4.10.0.82
 RUN pip install matplotlib==3.9.0

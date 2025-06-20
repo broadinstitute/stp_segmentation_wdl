@@ -61,7 +61,7 @@ task run_cellpose {
 
     runtime {
         continueOnReturnCode: [0, 1]
-        docker: "jishar7/cellpose_for_terra@sha256:3ac418181abd6d532112e405ffa7c2c002a27691048ecfadbedc41ea9376da7a"
+        docker: "jishar7/cellpose_for_terra@sha256:b3b078a22485ebb301e5c04df36f4be011f70395f093bf7d63808658e2fa452f"
         memory: "400GB"
         preemptible: 2
         maxRetries: 0
