@@ -129,6 +129,7 @@ workflow MAIN_WORKFLOW {
 
             call CELLPOSE.run_cellpose as run_cellpose {input:
                             image_path=if defined(create_subset.tiled_image) then select_first([create_subset.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
+                            diameter= if defined(diameter) then select_first([diameter]) else 0,
                             flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0,
                             cell_prob_thresh= if defined(cell_prob_thresh) then select_first([cell_prob_thresh]) else 0.0,
                             dummy_pretrained_model=dummy_pretrained_model,
