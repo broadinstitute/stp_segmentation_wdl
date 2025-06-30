@@ -41,11 +41,11 @@ task create_subset {
         Array[File]? tiled_image = glob("tiled_image_*.tiff")
         File? original_tile_polygons = "original_tile_polygons.parquet"
         File? trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
-        File mean_intensity_of_channels = "mean_intensity_of_channels.csv"
+        File? mean_intensity_of_channels = "mean_intensity_of_channels.csv"
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:9503e3befa21a6bbc93076986c80570b0813368562ae3f320b7b94319e7dd709"
+        docker: "jishar7/subset_data_for_terra@sha256:0e35c7270402da0db45cee79860d1a81bedcd814a104140950abda6d59b6b9da"
         memory: "200GB"
         preemptible: 0
         disks: "local-disk 200 HDD"

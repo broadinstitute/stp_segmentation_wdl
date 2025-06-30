@@ -1,19 +1,15 @@
-import imagecodecs
 import tifffile
 from instanseg import InstanSeg
 import numpy as np
-from aicsimageio import AICSImage
 import torch
 import os
 import bioio
 from instanseg.utils.utils import labels_to_features
-import fastremap
 from skimage import io
 from pathlib import Path
 import json
 from shapely.geometry import Polygon
 import geopandas as gpd
-import glob
 import argparse
 
 def main(image_paths_list, image_pixel_size):
@@ -44,8 +40,8 @@ def main(image_paths_list, image_pixel_size):
 
             geojson = json.dumps(features)
             geojson_path = Path(image_path).parent / (new_stem + ".geojson")
-            
-            print("Saving geojson...")            
+
+            print("Saving geojson...")
             with open(geojson_path, "w") as outfile:
                 outfile.write(geojson)
 
@@ -60,10 +56,10 @@ def main(image_paths_list, image_pixel_size):
     InstanSeg.save_output = patched_save_output
 
     image_paths_list = image_paths_list.split(',')
-    image = tifffile.imread(image_paths_list[0])
+    image = tifffile.imread(image_paths_list[0], is_ome=False)
 
     instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader="bioio", verbosity=1)
-    instanseg_brightfield.medium_image_threshold = image.shape[1] * image.shape[2] * 10
+    instanseg_brightfield.medium_image_threshold = image.shape[0] * image.shape[1] * 10
 
     labeled_output = instanseg_brightfield.eval(
         image=image_paths_list[0],
