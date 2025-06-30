@@ -21,7 +21,10 @@ RUN pip install --no-cache-dir \
     numpy==1.26.4 \
     torch==2.5.1 \
     tifffile==2024.9.20 \
+    imagecodecs==2024.9.22 \
+    aicsimageio==4.11.0 \
     instanseg-torch[full]==0.0.5 \
+    fastremap==1.15.0 \
     scikit-image==0.22.0 \
     shapely==2.0.6 \
     geopandas==1.0.1 \
