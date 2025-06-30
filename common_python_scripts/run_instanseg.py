@@ -61,7 +61,10 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
     InstanSeg.save_output = patched_save_output
 
     image_paths_list = image_paths_list.split(',')
-    image = tifffile.imread(image_paths_list[0], is_ome=False)
+
+    subset_data_y_x_interval = subset_data_y_x_interval.split(',')
+
+    start_y, end_y, start_x, end_x = int(subset_data_y_x_interval[0]), int(subset_data_y_x_interval[1]), int(subset_data_y_x_interval[2]), int(subset_data_y_x_interval[3])
 
     if technology == "MERSCOPE":
         image_reader = 'tiffslide'
@@ -70,7 +73,7 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
         image_reader = 'bioio'
 
     instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader=image_reader, verbosity=1)
-    instanseg_brightfield.medium_image_threshold = image.shape[0] * image.shape[1] * 10
+    instanseg_brightfield.medium_image_threshold = end_x * end_y * 10
 
     labeled_output = instanseg_brightfield.eval(
         image=image_paths_list[0],
