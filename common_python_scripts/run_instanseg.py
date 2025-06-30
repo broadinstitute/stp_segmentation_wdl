@@ -1,6 +1,7 @@
 import imagecodecs
 import tifffile
 from instanseg import InstanSeg
+# from instanseg.inference_class import InstanSeg
 import numpy as np
 from aicsimageio import AICSImage
 import torch
@@ -16,7 +17,7 @@ import geopandas as gpd
 import glob
 import argparse
 
-def main(image_paths_list, image_pixel_size):
+def main(image_paths_list, image_pixel_size, technology):
 
     def patched_save_output(self, image_path: str, labels: torch.Tensor, image_array=None, save_overlay=False, save_geojson=False):
         if isinstance(image_path, str):
@@ -62,7 +63,13 @@ def main(image_paths_list, image_pixel_size):
     image_paths_list = image_paths_list.split(',')
     image = tifffile.imread(image_paths_list[0], is_ome=False)
 
-    instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader="bioio", verbosity=1)
+    if technology == "MERSCOPE":
+        image_reader = 'tiffslide'
+
+    elif technology == "Xenium":
+        image_reader = 'bioio'
+
+    instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader=image_reader, verbosity=1)
     instanseg_brightfield.medium_image_threshold = image.shape[0] * image.shape[1] * 10
 
     labeled_output = instanseg_brightfield.eval(
@@ -100,7 +107,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='instanseg_implementation')
     parser.add_argument('--image_paths_list')
     parser.add_argument('--image_pixel_size', type=float)
+    parser.add_argument('--technology')
     args = parser.parse_args()
 
     main(image_paths_list = args.image_paths_list,
-         image_pixel_size = args.image_pixel_size)
+         image_pixel_size = args.image_pixel_size,
+         technology = args.technology)

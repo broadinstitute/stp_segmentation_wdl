@@ -63,7 +63,8 @@ workflow MAIN_WORKFLOW {
 
         call INSTANSEG.instanseg as instanseg {input:
                 image_paths_list=image_paths_list,
-                image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0
+                image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0,
+                technology=if defined(technology) then select_first([technology]) else "",
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS {
