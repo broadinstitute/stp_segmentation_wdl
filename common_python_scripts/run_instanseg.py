@@ -17,7 +17,7 @@ import geopandas as gpd
 import glob
 import argparse
 
-def main(image_paths_list, image_pixel_size, technology):
+def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interval):
 
     def patched_save_output(self, image_path: str, labels: torch.Tensor, image_array=None, save_overlay=False, save_geojson=False):
         if isinstance(image_path, str):
@@ -108,8 +108,10 @@ if __name__ == '__main__':
     parser.add_argument('--image_paths_list')
     parser.add_argument('--image_pixel_size', type=float)
     parser.add_argument('--technology')
+    parser.add_argument('--subset_data_y_x_interval')
     args = parser.parse_args()
 
     main(image_paths_list = args.image_paths_list,
          image_pixel_size = args.image_pixel_size,
-         technology = args.technology)
+         technology = args.technology,
+         subset_data_y_x_interval = args.subset_data_y_x_interval)

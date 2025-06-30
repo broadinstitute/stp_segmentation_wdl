@@ -62,9 +62,10 @@ workflow MAIN_WORKFLOW {
                                         trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0}
 
         call INSTANSEG.instanseg as instanseg {input:
-                image_paths_list=image_paths_list,
+                image_paths_list=create_subset_IS.tiled_image,
                 image_pixel_size=if defined(image_pixel_size) then select_first([image_pixel_size]) else 1.0,
                 technology=if defined(technology) then select_first([technology]) else "",
+                subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0]
         }
 
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS {
