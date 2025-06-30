@@ -22,7 +22,7 @@ task instanseg {
         memory: "400GB"
         preemptible: 0
         cpu: 32
-        disks: "local-disk 400 HDD"
+        disks: "local-disk 200 HDD"
     }
 
 }

@@ -10,22 +10,22 @@ from io import BytesIO
 
 def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, transform_file, algorithm, dataset_name, pre_merged_cell_polygons, proseg_trx_meta=None, proseg_cbg=None):
 
-    def find_containing_polygon(transcript):
-        point = transcript.geometry
-        possible_matches_index = list(cell_polygons_sindex.query(point, predicate='intersects'))
+    # def find_containing_polygon(transcript):
+    #     point = transcript.geometry
+    #     possible_matches_index = list(cell_polygons_sindex.query(point, predicate='intersects'))
 
-        if len(possible_matches_index) == 0:
-            return None
+    #     if len(possible_matches_index) == 0:
+    #         return None
 
-        return cell_polygons_gdf.iloc[possible_matches_index[0]].name
+    #     return cell_polygons_gdf.iloc[possible_matches_index[0]].name
 
-    def process_chunk(transcript_chunk, cell_polygons_gdf, cell_polygons_sindex):
-        if not transcript_chunk.empty:
-            transcript_chunk['cell_index'] = transcript_chunk.apply(find_containing_polygon, axis=1)
-        else:
-            transcript_chunk['cell_index'] = 'UNASSIGNED'
+    # def process_chunk(transcript_chunk, cell_polygons_gdf, cell_polygons_sindex):
+    #     if not transcript_chunk.empty:
+    #         transcript_chunk['cell_index'] = transcript_chunk.apply(find_containing_polygon, axis=1)
+    #     else:
+    #         transcript_chunk['cell_index'] = 'UNASSIGNED'
 
-        return transcript_chunk
+    #     return transcript_chunk
 
     def apply_affine_transform(x, y, transformation_matrix_inverse):
         coords = np.array([x, y, 1])
@@ -86,42 +86,57 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
 
         cell_polygons_gdf.set_index('cell_index', inplace=True)
 
-        cell_polygons_sindex = cell_polygons_gdf.sindex
+        # cell_polygons_sindex = cell_polygons_gdf.sindex
 
-        partitioned_transcripts = gpd.GeoDataFrame()
+        gdf_transcripts = gpd.read_parquet(transcript_file)
 
-        for chunk in pd.read_csv(transcript_file, chunksize=transcript_chunk_size):
+        assigned_trx = gpd.sjoin(
+        gdf_transcripts, cell_polygons_gdf, how="left", predicate="within"
+        )
 
-            chunk['geometry'] = chunk.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
-            chunked_transcripts_gdf = gpd.GeoDataFrame(chunk, geometry='geometry')
+        assigned_trx['index_right'].fillna("UNASSIGNED", inplace=True)
 
-            chunk_result = process_chunk(transcript_chunk = chunked_transcripts_gdf,
-                                        cell_polygons_gdf = cell_polygons_gdf,
-                                        cell_polygons_sindex = cell_polygons_sindex)
+        assigned_trx_ = assigned_trx[~assigned_trx.index.duplicated(keep='first')]
 
-            partitioned_transcripts = pd.concat([partitioned_transcripts, chunk_result], ignore_index=True)
+        assigned_trx_.rename(columns={'index_right':'cell_index', transcript_id: 'transcript_index', gene: 'gene'}, inplace=True)
 
-        partitioned_transcripts = gpd.GeoDataFrame(partitioned_transcripts, geometry='geometry')
-
-        partitioned_transcripts['cell_index'].fillna("UNASSIGNED", inplace=True)
-        partitioned_transcripts = partitioned_transcripts.rename(columns={transcript_id: 'transcript_index', gene: 'gene'})
-
-        partitioned_transcripts.drop(['cell_id'], axis=1, inplace=True)
-
-        partitioned_transcripts.rename(columns={x_col: 'x_image_coords', y_col: 'y_image_coords'}, inplace=True)
-
-        partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
-        cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
+        assigned_trx_cleaned = assigned_trx_.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+        cell_by_gene_matrix = assigned_trx_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
         cell_by_gene_matrix = cell_by_gene_matrix.drop(index="UNASSIGNED", errors='ignore')
+
+        # cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
+
+        # for chunk in pd.read_csv(transcript_file, chunksize=transcript_chunk_size):
+
+        #     chunk['geometry'] = chunk.apply(lambda row: Point(row[x_col], row[y_col]), axis=1)
+        #     chunked_transcripts_gdf = gpd.GeoDataFrame(chunk, geometry='geometry')
+
+        #     chunk_result = process_chunk(transcript_chunk = chunked_transcripts_gdf,
+        #                                 cell_polygons_gdf = cell_polygons_gdf,
+        #                                 cell_polygons_sindex = cell_polygons_sindex)
+
+        #     partitioned_transcripts = pd.concat([partitioned_transcripts, chunk_result], ignore_index=True)
+
+        # partitioned_transcripts = gpd.GeoDataFrame(partitioned_transcripts, geometry='geometry')
+
+        # partitioned_transcripts['cell_index'].fillna("UNASSIGNED", inplace=True)
+
+
+
+        # partitioned_transcripts.drop(['cell_id'], axis=1, inplace=True)
+
+        # partitioned_transcripts_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+        # cell_by_gene_matrix = partitioned_transcripts_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
+        # cell_by_gene_matrix = cell_by_gene_matrix.drop(index="UNASSIGNED", errors='ignore')
 
         transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
 
-        partitioned_transcripts['x'], partitioned_transcripts['y'] = zip(*partitioned_transcripts.apply(lambda row: apply_affine_transform(row['x_image_coords'],
-                                                                                                        row['y_image_coords'],
-                                                                                                        transformation_matrix_inverse), axis=1))
+        # partitioned_transcripts['x'], partitioned_transcripts['y'] = zip(*partitioned_transcripts.apply(lambda row: apply_affine_transform(row['x_image_coords'],
+        #                                                                                                 row['y_image_coords'],
+        #                                                                                                 transformation_matrix_inverse), axis=1))
 
-        partitioned_transcripts.rename(columns={'geometry': 'geometry_image_space'}, inplace=True)
-        partitioned_transcripts['geometry'] = partitioned_transcripts.apply(lambda row: Point(row['x'], row['y']), axis=1)
+        # partitioned_transcripts.rename(columns={'geometry': 'geometry_image_space'}, inplace=True)
+        # partitioned_transcripts['geometry'] = partitioned_transcripts.apply(lambda row: Point(row['x'], row['y']), axis=1)
 
         cell_polygons_gdf['geometry'] = cell_polygons_gdf['geometry_image_space'].apply(lambda geom: affine_transform(geom, [transformation_matrix_inverse[0, 0],
                                                                                             transformation_matrix_inverse[0, 1],
@@ -223,9 +238,9 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
     cell_polygons_gdf['centroid'] = cell_polygons_gdf['geometry'].centroid
     cell_polygons_gdf['technology'] = technology
 
-    cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
+    # cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
-    partitioned_transcripts.to_parquet("transcripts.parquet")
+    assigned_trx_.to_parquet("transcripts.parquet")
 
     cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
     cell_polygons_gdf.set_geometry("geometry", inplace=True)
