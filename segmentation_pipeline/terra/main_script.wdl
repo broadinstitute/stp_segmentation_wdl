@@ -46,7 +46,7 @@ workflow MAIN_WORKFLOW {
     File dummy_pretrained_model = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/models/dummy_model"
     File dummy_pre_merged_cell_polygons = "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_pre_merged_cell_polygons.parquet"
 
-    if (algorithm == "INSTANSEG") {
+    if (algorithm == "Instanseg") {
 
         call SUBSET.create_subset as create_subset_IS {input: image_paths_list=if defined(image_paths_list) then select_first([image_paths_list]) else [0],
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],

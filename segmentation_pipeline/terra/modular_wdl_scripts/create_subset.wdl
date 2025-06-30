@@ -34,7 +34,7 @@ task create_subset {
     >>>
 
     output {
-        File subset_coordinates = "subset_coordinates.csv"
+        File subset_coordinates = "subset_coordinates.parquet"
         File subset_transformation_matrix = "subset_transformation_matrix.csv"
         File? intervals = "intervals.json"
         Array[File]? tile_metadata = glob("tile_metadata_*.csv")

@@ -30,7 +30,6 @@ task partitioning_transcript_cell_by_gene {
     >>>
 
     output {
-        File cell_by_gene_matrix_csv = "cell_by_gene_matrix.csv"
         File filtered_cell_polygon_file = "cell_polygons.parquet"
         File cell_polygons_metadata = "cell_metadata_micron_space.parquet"
         File partitioned_transcripts = "transcripts.parquet"
