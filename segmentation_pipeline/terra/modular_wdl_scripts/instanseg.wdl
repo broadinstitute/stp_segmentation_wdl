@@ -13,7 +13,7 @@ task instanseg {
         python /opt/run_instanseg.py --image_paths_list ~{sep=',' image_paths_list} \
                                 --image_pixel_size ~{image_pixel_size} \
                                 --technology ~{technology} \
-                                --subset_data_y_x_interval ~{subset_data_y_x_interval}
+                                --subset_data_y_x_interval ~{sep=',' subset_data_y_x_interval}
 
     >>>
 
