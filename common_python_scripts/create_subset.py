@@ -233,7 +233,6 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             plane = series.pages[0]
 
             cropped = plane.asarray(out='memmap')[start_y:end_y, start_x:end_x]
-            cropped = cropped.astype(np.float32, copy=False)
 
             subset_channel_image = equalize_adapthist(
                 cropped,
