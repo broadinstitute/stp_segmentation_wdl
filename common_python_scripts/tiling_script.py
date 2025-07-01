@@ -5,7 +5,14 @@ import pandas as pd
 def tiling_script(subset_multi_channel_image, out_path, algorithm, listed_intervals=None, shard_index=None):
 
     if algorithm == 'Instanseg':
-        cv.imwrite(out_path + "/tiled_image_whole.tiff", subset_multi_channel_image)
+
+        tf.imwrite(
+            f"{out_path}/tiled_image_whole.tiff",
+            subset_multi_channel_image,
+            dtype=np.float32,
+            photometric="minisblack",
+            bigtiff=True  # optional, safer for large files
+        )
 
     else:
         for index, value in enumerate(listed_intervals[str(shard_index)]):

@@ -10,6 +10,7 @@ import pyarrow.parquet as pq
 import imagecodecs
 from scipy.ndimage import gaussian_filter
 import geopandas as gpd
+import gc
 
 def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_transcripts_file, technology, tiles_dimension, overlap, amount_of_VMs, transcript_plot_as_channel, sigma, algorithm, trim_amount=50):
 
@@ -231,11 +232,21 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             series = image_file.series[0]
             plane = series.pages[0]
 
-            subset_channel_image = equalize_adapthist(plane.asarray()[start_y:end_y, start_x:end_x], kernel_size=[100, 100], clip_limit=0.01, nbins=256)
+            cropped = plane.asarray(out='memmap')[start_y:end_y, start_x:end_x]
+            cropped = cropped.astype(np.float32, copy=False)
+
+            subset_channel_image = equalize_adapthist(
+                cropped,
+                kernel_size=(100, 100),
+                clip_limit=0.01,
+                nbins=256)
 
             # mean_intensity_of_channels[f"{image_index}_indexed_image"] = np.mean(subset_channel_image)
 
             channel_images.append(subset_channel_image)
+
+            del subset_channel_image
+            gc.collect()
 
     # mean_intensity_of_channels_df = pd.DataFrame(mean_intensity_of_channels, index=[0])
     # mean_intensity_of_channels_df.to_csv('mean_intensity_of_channels.csv', index=False)
@@ -261,7 +272,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     #     blurred_transcript_image = gaussian_filter(transcript_image, sigma=sigma)
     #     channel_images.append(blurred_transcript_image)
 
-    subset_multi_channel_image = np.stack(channel_images, axis=0)
+    subset_multi_channel_image = np.stack(channel_images, axis=0).astype(np.float32)
 
     out_path=os.getcwd()
 
