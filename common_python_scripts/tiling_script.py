@@ -1,6 +1,7 @@
 import cv2 as cv
 import tifffile as tf
 import pandas as pd
+import numpy as np
 
 def tiling_script(subset_multi_channel_image, out_path, algorithm, listed_intervals=None, shard_index=None):
 
