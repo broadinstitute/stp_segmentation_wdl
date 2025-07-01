@@ -2,17 +2,17 @@ import cv2 as cv
 import tifffile as tf
 import pandas as pd
 import numpy as np
+from aicsimageio.writers import OmeTiffWriter
 
 def tiling_script(subset_multi_channel_image, out_path, algorithm, listed_intervals=None, shard_index=None):
 
     if algorithm == 'Instanseg':
 
-        tf.imwrite(
-            f"{out_path}/tiled_image_whole.tiff",
+       OmeTiffWriter.save(
             subset_multi_channel_image,
-            dtype=np.float32,
-            photometric="minisblack",
-            bigtiff=True  # optional, safer for large files
+            f"{out_path}/tiled_image_whole.tiff",
+            dim_order="CYX",
+            dtype=np.uint16
         )
 
     else:

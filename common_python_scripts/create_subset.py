@@ -277,7 +277,7 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
     #     blurred_transcript_image = gaussian_filter(transcript_image, sigma=sigma)
     #     channel_images.append(blurred_transcript_image)
 
-    subset_multi_channel_image = np.stack(channel_images, axis=0).astype(np.float32)
+    subset_multi_channel_image = np.stack(channel_images, axis=0).astype(np.uint16)
 
     out_path=os.getcwd()
 

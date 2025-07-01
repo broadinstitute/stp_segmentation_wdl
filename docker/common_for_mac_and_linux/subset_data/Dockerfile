@@ -23,9 +23,9 @@ RUN apt-get update && apt-get install -y \
     ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-    
+
 RUN pip install numpy==1.26.4
-RUN pip install tifffile==2024.5.22 
+RUN pip install tifffile==2024.5.22
 RUN pip install pandas==2.2.2
 RUN pip install argparse==1.4.0
 RUN pip install pyarrow==16.1.0
@@ -37,6 +37,7 @@ RUN pip install geopandas==0.14.4
 RUN pip install google-cloud-storage==2.17.0
 RUN pip install shapely==2.0.4
 RUN pip install fastparquet==2024.5.0
+RUN pip install aicsimageio[all]==4.12.0
 
 COPY common_python_scripts/create_subset.py /opt/create_subset.py
 COPY common_python_scripts/tiling_script.py /opt/tiling_script.py

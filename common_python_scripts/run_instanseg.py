@@ -72,7 +72,7 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
     elif technology == "Xenium":
         image_reader = 'bioio'
 
-    instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader=image_reader, verbosity=1)
+    instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader="bioio", verbosity=1)
     instanseg_brightfield.medium_image_threshold = end_x * end_y * 10
 
     labeled_output = instanseg_brightfield.eval(
