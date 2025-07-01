@@ -66,6 +66,12 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
 
         gdf_transcripts.to_parquet("subset_coordinates.parquet")
 
+        # Now delete the variable to free memory
+        del gdf_transcripts
+
+        # Run garbage collection to free memory immediately
+        gc.collect()
+
         # transform_df = pd.read_csv(transform_file, header=None, delimiter=" ")
         # df = pd.read_parquet("subset_coordinates.parquet", columns=["global_x", "global_y",'transcript_id', 'gene'])
 
@@ -232,13 +238,13 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
             series = image_file.series[0]
             plane = series.pages[0]
 
-            cropped = plane.asarray(out='memmap')[start_y:end_y, start_x:end_x]
+            subset_channel_image = plane.asarray()[start_y:end_y, start_x:end_x]
 
-            subset_channel_image = equalize_adapthist(
-                cropped,
-                kernel_size=(100, 100),
-                clip_limit=0.01,
-                nbins=256)
+            # subset_channel_image = equalize_adapthist(
+            #     subset_channel_image,
+            #     kernel_size=(100, 100),
+            #     clip_limit=0.01,
+            #     nbins=256)
 
             # mean_intensity_of_channels[f"{image_index}_indexed_image"] = np.mean(subset_channel_image)
 
