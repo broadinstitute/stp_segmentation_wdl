@@ -85,13 +85,13 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
         target = "cells"
     )
 
-    # directory_path = os.getcwd()
-    # geojson_files = []
+    directory_path = os.getcwd()
+    geojson_files = []
 
-    # for root, dirs, files in os.walk(directory_path):
-    #     for file in files:
-    #         if file.endswith('.geojson'):
-    #             geojson_files.append(os.path.join(root, file))
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+            if file.endswith('.geojson'):
+                geojson_files.append(os.path.join(root, file))
 
     # with open(geojson_files[0]) as file:
     #     data = json.load(file)
@@ -105,15 +105,15 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
     # polygons_geo_df = gpd.GeoDataFrame(geometry=polygons)
 
     # Efficient file finding
-    directory_path = os.getcwd()
-    geojson_path = next(
-        os.path.join(directory_path, f)
-        for f in os.listdir(directory_path)
-        if f.endswith(".geojson")
-    )
+    # directory_path = os.getcwd()
+    # geojson_path = next(
+    #     os.path.join(directory_path, f)
+    #     for f in os.listdir(directory_path)
+    #     if f.endswith(".geojson")
+    # )
 
     # Fast JSON loading
-    with open(geojson_path, "r") as f:
+    with open(geojson_path[0], "r") as f:
         data = ujson.load(f)
 
     # Vectorized geometry construction
