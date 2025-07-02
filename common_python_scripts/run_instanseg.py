@@ -113,7 +113,7 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
     # )
 
     # Fast JSON loading
-    with open(geojson_path[0], "r") as f:
+    with open(geojson_files[0], "r") as f:
         data = ujson.load(f)
 
     # Vectorized geometry construction
