@@ -71,7 +71,7 @@ workflow MAIN_WORKFLOW {
         call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_IS {
             input: transcript_file=create_subset_IS.subset_coordinates,
             cell_polygon_file=instanseg.processed_cell_polygons,
-            pre_merged_cell_polygons=dummy_pre_merged_cell_polygons,
+            pre_merged_cell_polygons=instanseg.processed_cell_polygons,
             transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
             technology=technology,
             transform_file=transform_file,
