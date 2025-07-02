@@ -45,7 +45,7 @@ task create_subset {
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:8c968c4d5f937308414778f448abbd02ca1dc3c5ea3f6eec717c6dbdf5c50e80"
+        docker: "jishar7/subset_data_for_terra@sha256:84a0d95a4ac9ee9755d28c2294fbe7c5bef01a4f1459e30f6d8a39dafb8bfac2"
         memory: "300GB"
         preemptible: 0
         disks: "local-disk 200 HDD"

@@ -163,47 +163,54 @@ def main(image_paths_list, subset_data_y_x_interval, transform_file, detected_tr
         # trx_subset = pd.concat(batch_list, ignore_index=True)
 
     elif technology == 'Xenium':
-        transformation_matrix = pd.read_csv(transform_file, sep=' ', header=None).values[:3,:3]
 
-        inverse_transformation_matrix = np.linalg.inv(transformation_matrix)
+        df_trx = pd.read_parquet(detected_transcripts_file, columns=["x_location", "y_location",
+                                                                     'transcript_id', 'feature_name', 'fov_name'])
 
-        pixel_bounds = np.array([[start_x, start_y, 1],
-                                    [end_x, end_y, 1]])
+        transformation_matrix = pd.read_csv(transform_file, header=None, delimiter=" ").values[:3,:3]
 
-        # Convert pixel bounds to micron coordinates
-        micron_coordinates = np.dot(inverse_transformation_matrix, pixel_bounds.T).T
+        coords = np.column_stack((df_trx["x_location"].values, df_trx["y_location"].values))
 
-        # Removing the homogeneous coordinate, if not necessary
-        micron_coordinates = micron_coordinates[:, :2]
+        coeffs = [
+            transformation_matrix[0, 0],  # a
+            transformation_matrix[0, 1],  # b
+            transformation_matrix[1, 0],  # d
+            transformation_matrix[1, 1],  # e
+            transformation_matrix[0, 2],  # xoff
+            transformation_matrix[1, 2]   # yoff
+        ]
 
-        x_min = micron_coordinates[0,0]
-        x_max = micron_coordinates[1,0]
+        # Step 2: Build affine matrix and apply
+        a, b, d, e, xoff, yoff = coeffs
+        affine_matrix = np.array([[a, b], [d, e]])
+        offset = np.array([xoff, yoff])
 
-        y_min = micron_coordinates[0,1]
-        y_max = micron_coordinates[1,1]
+        # Apply transformation
+        transformed_coords = coords @ affine_matrix.T + offset
 
-        x_col = 'x_location'
-        y_col = 'y_location'
+        # transformed_coords is Nx2 numpy array
+        x_coords = transformed_coords[:, 0]
+        y_coords = transformed_coords[:, 1]
 
-        batch_size = 100000
-        batch_list = []
-        trx_subset = pd.DataFrame()
+        # Create GeoSeries of points very efficiently
+        geometry = gpd.points_from_xy(x_coords, y_coords)
 
-        parquet_file = pq.ParquetFile(detected_transcripts_file)
+        df_trx["geometry_micron"] = gpd.points_from_xy(df_trx["x_location"], df_trx["y_location"])
 
-        for batch in parquet_file.iter_batches(batch_size=batch_size):
+        df_trx.drop(['x_location','y_location'], axis=1, inplace=True)
 
-            batch_df = batch.to_pandas()
+        gdf_transcripts = gpd.GeoDataFrame(df_trx, geometry=geometry)
 
-            trx_subset_temp = batch_df[
-                (batch_df[x_col] >= x_min) &
-                (batch_df[x_col] < x_max) &
-                (batch_df[y_col] >= y_min) &
-                (batch_df[y_col] < y_max)
-            ]
-            batch_list.append(trx_subset_temp)
+        gdf_transcripts.rename(columns={'geometry':'geometry_image_space', 'geometry_micron': 'geometry'}, inplace=True)
+        gdf_transcripts.set_geometry('geometry_image_space', inplace=True)
 
-        trx_subset = pd.concat(batch_list, ignore_index=True)
+        gdf_transcripts.to_parquet("subset_coordinates.parquet")
+
+        # Now delete the variable to free memory
+        del gdf_transcripts
+
+        # Run garbage collection to free memory immediately
+        gc.collect()
 
     # temp = trx_subset[[x_col, y_col]].values
     # transcript_positions = np.ones((temp.shape[0], temp.shape[1]+1))
