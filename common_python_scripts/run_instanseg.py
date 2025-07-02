@@ -74,7 +74,7 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
         image_reader = 'bioio'
 
     instanseg_brightfield = InstanSeg("fluorescence_nuclei_and_cells", image_reader="tiffslide", verbosity=1)
-    instanseg_brightfield.medium_image_threshold = end_x * end_y * 10
+    instanseg_brightfield.medium_image_threshold = (end_x-start_x) * (end_y-start_y) * 10
 
     labeled_output = instanseg_brightfield.eval(
         image=image_paths_list[0],
