@@ -22,8 +22,8 @@ task instanseg {
     }
 
     runtime {
-        docker: "jishar7/instanseg@sha256:44cc9b413dd46a46beb1ea8c890535c6f49c57271857d047a91e4eb287998b2d"
-        memory: "650GB"
+        docker: "jishar7/instanseg@sha256:b96e9fa64be6a11130a6634a1cfae50ab12455c57fe394ce41aab69f69db8821"
+        memory: "580GB"
         preemptible: 0
         cpu: 32
         disks: "local-disk 200 HDD"

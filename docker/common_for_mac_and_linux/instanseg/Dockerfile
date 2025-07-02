@@ -32,7 +32,8 @@ RUN pip install --no-cache-dir \
     bioio-ome-tiff \
     bioio-ome-zarr \
     pyarrow==16.1.0 \
-    fastparquet==2024.5.0
+    fastparquet==2024.5.0 \
+    ujson
 
 COPY common_python_scripts/run_instanseg.py /opt/run_instanseg.py
 RUN chmod +x /opt/run_instanseg.py

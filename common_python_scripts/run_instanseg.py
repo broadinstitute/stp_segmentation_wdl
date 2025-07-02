@@ -11,11 +11,12 @@ from instanseg.utils.utils import labels_to_features
 import fastremap
 from skimage import io
 from pathlib import Path
-import json
 from shapely.geometry import Polygon
 import geopandas as gpd
 import glob
 import argparse
+import ujson
+import json
 
 def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interval):
 
@@ -84,23 +85,41 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
         target = "cells"
     )
 
+    # directory_path = os.getcwd()
+    # geojson_files = []
+
+    # for root, dirs, files in os.walk(directory_path):
+    #     for file in files:
+    #         if file.endswith('.geojson'):
+    #             geojson_files.append(os.path.join(root, file))
+
+    # with open(geojson_files[0]) as file:
+    #     data = json.load(file)
+
+    # polygons = []
+
+    # for entry in data:
+    #     coordinates_list = entry['geometry']['coordinates'][0]
+    #     polygons.append(Polygon(coordinates_list))
+
+    # polygons_geo_df = gpd.GeoDataFrame(geometry=polygons)
+
+    # Efficient file finding
     directory_path = os.getcwd()
-    geojson_files = []
+    geojson_path = next(
+        os.path.join(directory_path, f)
+        for f in os.listdir(directory_path)
+        if f.endswith(".geojson")
+    )
 
-    for root, dirs, files in os.walk(directory_path):
-        for file in files:
-            if file.endswith('.geojson'):
-                geojson_files.append(os.path.join(root, file))
+    # Fast JSON loading
+    with open(geojson_path, "r") as f:
+        data = ujson.load(f)
 
-    with open(geojson_files[0]) as file:
-        data = json.load(file)
+    # Vectorized geometry construction
+    polygons = [Polygon(np.array(e['geometry']['coordinates'][0])) for e in data]
 
-    polygons = []
-
-    for entry in data:
-        coordinates_list = entry['geometry']['coordinates'][0]
-        polygons.append(Polygon(coordinates_list))
-
+    # Construct GeoDataFrame
     polygons_geo_df = gpd.GeoDataFrame(geometry=polygons)
 
     polygons_geo_df.to_parquet("cell_polygons.parquet")
