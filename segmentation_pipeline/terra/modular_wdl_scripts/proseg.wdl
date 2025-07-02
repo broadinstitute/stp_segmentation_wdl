@@ -11,7 +11,7 @@ task run_proseg {
         if [ ~{technology} == "Xenium" ]; then
             proseg ~{detected_transcripts_file} --xenium
         else
-            proseg ~{detected_transcripts_file} --merscope
+            proseg ~{detected_transcripts_file} --merscope --prior-seg-reassignment-prob 0.4 --cell_id_column "cell_id"
         fi
 
     >>>
