@@ -96,11 +96,11 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
 
         assigned_trx['index_right'].fillna("UNASSIGNED", inplace=True)
 
-        assigned_trx_ = assigned_trx[~assigned_trx.index.duplicated(keep='first')]
+        partitioned_transcripts = assigned_trx[~assigned_trx.index.duplicated(keep='first')]
 
-        assigned_trx_.rename(columns={'index_right':'cell_index', transcript_id: 'transcript_index', gene: 'gene'}, inplace=True)
+        partitioned_transcripts.rename(columns={'index_right':'cell_index', transcript_id: 'transcript_index', gene: 'gene'}, inplace=True)
 
-        assigned_trx_cleaned = assigned_trx_.groupby(['gene', 'cell_index']).size().reset_index(name='count')
+        assigned_trx_cleaned = partitioned_transcripts.groupby(['gene', 'cell_index']).size().reset_index(name='count')
         cell_by_gene_matrix = assigned_trx_cleaned.pivot_table(index='cell_index', columns='gene', values='count', fill_value=0)
         cell_by_gene_matrix = cell_by_gene_matrix.drop(index="UNASSIGNED", errors='ignore')
 
@@ -240,7 +240,7 @@ def main(transcript_file, cell_polygon_file, transcript_chunk_size, technology, 
 
     # cell_by_gene_matrix.to_csv('cell_by_gene_matrix.csv', index=True)
     cell_by_gene_matrix.to_parquet('cell_by_gene_matrix.parquet')
-    assigned_trx_.to_parquet("transcripts.parquet")
+    partitioned_transcripts.to_parquet("transcripts.parquet")
 
     cell_polygons_gdf[['area', 'centroid']].to_parquet("cell_metadata_micron_space.parquet")
     cell_polygons_gdf.set_geometry("geometry", inplace=True)
