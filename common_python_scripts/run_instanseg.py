@@ -17,6 +17,8 @@ import glob
 import argparse
 import ujson
 import json
+from instanseg.utils.tiling import _remove_edge_labels
+import instanseg.utils.tiling as tiling
 
 def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interval):
 
@@ -59,11 +61,42 @@ def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interva
             display = self.display(image_array, labels)
             io.imsave(out_path, display, check_contrast=False)
 
+    def modified_edge_mask(labels, ignore=[None]):
+        labels = labels.squeeze()
+        print(f"labels shape after squeeze: {labels.shape}")
+        print(f"Ignore list: {ignore}")
+
+        edges = []
+
+        if 'top' not in ignore and labels.shape[0] > 0:
+            edges.append(labels[0, :])
+        if 'bottom' not in ignore and labels.shape[0] > 0:
+            edges.append(labels[-1, :])
+        if 'left' not in ignore and labels.shape[1] > 0:
+            edges.append(labels[:, 0])
+        if 'right' not in ignore and labels.shape[1] > 0:
+            edges.append(labels[:, -1])
+
+        print(f"Number of edge tensors collected: {len(edges)}")
+        for i, e in enumerate(edges):
+            print(f"Edge {i} shape: {e.shape}")
+
+        if len(edges) == 0:
+            print("No edges collected — returning zero mask")
+            return torch.zeros_like(labels).bool()
+
+        edges = torch.cat(edges, dim=0)
+        return torch.isin(labels, edges[edges > 0])
+
+
     InstanSeg.save_output = patched_save_output
+    tiling._edge_mask = modified_edge_mask
 
     image_paths_list = image_paths_list.split(',')
 
     subset_data_y_x_interval = subset_data_y_x_interval.split(',')
+
+    img = tifffile.imread(image_paths_list[0])
 
     start_y, end_y, start_x, end_x = int(subset_data_y_x_interval[0]), int(subset_data_y_x_interval[1]), int(subset_data_y_x_interval[2]), int(subset_data_y_x_interval[3])
 
