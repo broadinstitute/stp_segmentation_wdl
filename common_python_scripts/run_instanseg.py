@@ -17,7 +17,6 @@ import glob
 import argparse
 import ujson
 import json
-from instanseg.utils.tiling import _remove_edge_labels
 import instanseg.utils.tiling as tiling
 
 def main(image_paths_list, image_pixel_size, technology, subset_data_y_x_interval):
