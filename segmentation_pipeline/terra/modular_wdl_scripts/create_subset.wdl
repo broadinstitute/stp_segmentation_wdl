@@ -34,11 +34,14 @@ task create_subset {
     >>>
 
     output {
+        File? subset_coordinates = "subset_coordinates.csv"
+        File? subset_transformation_matrix = "subset_transformation_matrix.csv"
         File? intervals = "intervals.json"
         Array[File]? tile_metadata = glob("tile_metadata_*.csv")
         Array[File]? tiled_image = glob("tiled_image_*.tiff")
         File? original_tile_polygons = "original_tile_polygons.parquet"
         File? trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
+        File? mean_intensity_of_channels = "mean_intensity_of_channels.csv"
     }
 
     runtime {
