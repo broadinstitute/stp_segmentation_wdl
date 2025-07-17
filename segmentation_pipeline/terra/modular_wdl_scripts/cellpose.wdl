@@ -3,7 +3,7 @@ task run_cellpose {
 
 	input {
     	Array[File] image_path
-        Int? diameter
+        Float? diameter
         Float? flow_thresh
         Float? cell_prob_thresh
         File? pretrained_model
