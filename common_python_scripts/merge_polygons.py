@@ -175,6 +175,18 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
 
         list_no_conflict_cells = sorted(list(set(all_cells).difference(set(list_conflict_cells))))
 
+        if len(list_conflict_ids) == 0:
+
+            gdf.index = [x for x in range(len(gdf))]
+
+            gdf.drop([0, 'shard', 'job', 'color'], axis=1, inplace=True)
+
+            gdf.columns = [str(col) for col in gdf.columns]
+
+            gdf.to_parquet('cell_polygons.parquet')
+
+            return None
+
         # Calculating Overlap Area Parameters
 
         for inst_row in df_intersect.index.tolist():
