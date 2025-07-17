@@ -34,19 +34,16 @@ task create_subset {
     >>>
 
     output {
-        File subset_coordinates = "subset_coordinates.csv"
-        File subset_transformation_matrix = "subset_transformation_matrix.csv"
         File? intervals = "intervals.json"
         Array[File]? tile_metadata = glob("tile_metadata_*.csv")
         Array[File]? tiled_image = glob("tiled_image_*.tiff")
         File? original_tile_polygons = "original_tile_polygons.parquet"
         File? trimmed_tile_polygons = "trimmed_tile_polygons.parquet"
-        File mean_intensity_of_channels = "mean_intensity_of_channels.csv"
     }
 
     runtime {
-        docker: "jishar7/subset_data_for_terra@sha256:9673e7ffb1af16cbe546717f110bd198bc4c1d67a9e50cb70d8d1c4c9f4a6418"
-        memory: "500GB"
+        docker: "jishar7/abeta_subset_data_for_terra@sha256:1d2cbb492249ce8e9fa65669901355db575e88d261b9aedd50e3d22a7726dae6"
+        memory: "300GB"
         preemptible: 0
         disks: "local-disk 400 HDD"
     }

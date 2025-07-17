@@ -145,19 +145,6 @@ workflow MAIN_WORKFLOW {
                     trimmed_tile_polygons=if defined(create_subset.trimmed_tile_polygons) then select_first([create_subset.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
                     merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
         }
-
-        call PARTITION.partitioning_transcript_cell_by_gene as partitioning_transcript_cell_by_gene_CP {
-            input: transcript_file=create_subset.subset_coordinates,
-            cell_polygon_file=merge_segmentation_dfs.processed_cell_polygons,
-            pre_merged_cell_polygons=merge_segmentation_dfs.pre_merged_cell_polygons,
-            transcript_chunk_size=if defined(transcript_chunk_size) then select_first([transcript_chunk_size]) else 0,
-            technology=technology,
-            transform_file=transform_file,
-            algorithm=algorithm,
-            dataset_name=dataset_name,
-            proseg_trx_meta=dummy_pre_merged_cell_polygons,
-            proseg_cbg=dummy_pre_merged_cell_polygons
-        }
     }
 
 }
