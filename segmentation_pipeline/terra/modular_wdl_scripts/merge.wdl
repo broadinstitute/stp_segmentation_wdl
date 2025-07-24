@@ -18,8 +18,8 @@ task merge_segmentation_dfs {
                                 --intervals ~{intervals} \
                                 --original_tile_polygons ~{original_tile_polygons} \
                                 --trimmed_tile_polygons ~{trimmed_tile_polygons} \
-                                --algorithm ~{algorithm} \
-                                --merge_approach ~{merge_approach}
+                                --merge_approach ~{merge_approach} \
+                                --algorithm ~{algorithm}
     >>>
 
     output {
