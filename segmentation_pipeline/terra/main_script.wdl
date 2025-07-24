@@ -147,7 +147,8 @@ workflow MAIN_WORKFLOW {
                     intervals=if defined(create_subset_CP.intervals) then select_first([create_subset_CP.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
                     original_tile_polygons=if defined(create_subset_CP.original_tile_polygons) then select_first([create_subset_CP.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
                     trimmed_tile_polygons=if defined(create_subset_CP.trimmed_tile_polygons) then select_first([create_subset_CP.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
-                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
+                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger",
+                    algorithm=algorithm
         }
     }
 
@@ -186,7 +187,8 @@ workflow MAIN_WORKFLOW {
                     intervals=if defined(create_subset_W.intervals) then select_first([create_subset_W.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
                     original_tile_polygons=if defined(create_subset_W.original_tile_polygons) then select_first([create_subset_W.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
                     trimmed_tile_polygons=if defined(create_subset_W.trimmed_tile_polygons) then select_first([create_subset_W.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
-                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
+                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger",
+                    algorithm=algorithm
         }
     }
 

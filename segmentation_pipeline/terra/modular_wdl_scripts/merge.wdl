@@ -6,8 +6,8 @@ task merge_segmentation_dfs {
         File intervals
         File original_tile_polygons
         File trimmed_tile_polygons
-        String algorithm
         String merge_approach
+        String algorithm
     }
 
     Array[File] outline_files = flatten(outlines)
