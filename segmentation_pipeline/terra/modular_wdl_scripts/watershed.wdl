@@ -8,9 +8,11 @@ task run_watershed {
 
     command <<<
 
-        IFS=', ' read -r -a image_paths <<< "$(echo "~{sep=', ' image_files_path}" | tr ', ' '\n' | grep "tiled_image_~{shard_index}_.*\.tiff" | tr '\n' ', ')"
+        image_paths=$(printf "%s\n" ~{sep=' ' image_files_path} | grep "tiled_image_~{shard_index}_.*\.tiff" | paste -sd "," -)
 
-        python /opt/watershed.py --image_paths ${sep=',' image_paths}
+        echo "Using image paths: $image_paths"
+
+        python /opt/watershed.py --image_paths "$image_paths"
 
     >>>
 
