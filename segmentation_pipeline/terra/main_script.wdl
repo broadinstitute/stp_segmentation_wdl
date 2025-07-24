@@ -178,7 +178,7 @@ workflow MAIN_WORKFLOW {
             String index_for_intervals_W = "~{i}"
 
             call WATERSHED.run_watershed as run_watershed {input:
-                            image_paths=if defined(create_subset_W.tiled_image) then select_first([create_subset_W.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
+                            image_files_path=if defined(create_subset_W.tiled_image) then select_first([create_subset_W.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
                             shard_index=index_for_intervals_W
                             }
         }
