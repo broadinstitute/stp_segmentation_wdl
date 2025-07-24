@@ -26,8 +26,9 @@ RUN apt-get update && \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Install Python dependencies with pinned versions
 RUN pip install --no-cache-dir \
+    numpy==1.26.4 \
     pandas==2.2.2 \
     geopandas==0.14.4 \
     shapely==2.0.4 \
@@ -36,10 +37,9 @@ RUN pip install --no-cache-dir \
     pyarrow==16.1.0 \
     fastparquet==2024.5.0 \
     opencv-python-headless==4.8.0.76 \
-    numpy \
-    scikit-image \
-    tifffile \
-    scipy
+    scikit-image==0.22.0 \
+    tifffile==2023.12.9 \
+    scipy==1.11.4
 
 # Copy your watershed segmentation script into the container
 COPY common_python_scripts/watershed.py /opt/watershed.py
