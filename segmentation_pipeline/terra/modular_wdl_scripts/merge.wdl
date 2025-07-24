@@ -6,6 +6,7 @@ task merge_segmentation_dfs {
         File intervals
         File original_tile_polygons
         File trimmed_tile_polygons
+        String algorithm
         String merge_approach
     }
 
@@ -17,6 +18,7 @@ task merge_segmentation_dfs {
                                 --intervals ~{intervals} \
                                 --original_tile_polygons ~{original_tile_polygons} \
                                 --trimmed_tile_polygons ~{trimmed_tile_polygons} \
+                                --algorithm ~{algorithm} \
                                 --merge_approach ~{merge_approach}
     >>>
 
@@ -26,7 +28,7 @@ task merge_segmentation_dfs {
     }
 
     runtime {
-        docker: "jishar7/merge_polygons_for_terra@sha256:4b08667aec8eaa68d288ecff16d8d02915b49d5ec4e558e57910251ae1eba1b5"
+        docker: "jishar7/merge_polygons_for_terra@sha256:06a5f12bbc3ec2544e130d7e4fafd96e5445a3913dbd7a57e5a87c68f1d46ede"
         memory: "200GB"
         preemptible: 0
         disks: "local-disk 400 HDD"

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons, merge_approach='larger'):
+def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons, algorithm, merge_approach='larger'):
 
     tolerance = 0.001
     cell_outlines = cell_outlines.split(",")
@@ -75,28 +75,47 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
 
     color_index = 0
 
+    columns_to_check = ['0', 0, 'index', 'point_within_trimmed_tile']
+
     for inst_path in cell_outlines:
 
-        inst_filename = inst_path.split('/')[-1]
-        shard_index = inst_filename.split('_')[2].split('_')[0]
-        job_id = inst_filename.split('_')[3].split('_')[0]
+        if algorithm == "Watershed":
 
-        shard_name = 'shard-' + str(shard_index)
-        tmp_job_name = 'job-' + job_id
-        job_name = shard_name + '_' + tmp_job_name
-
-        inst_df = pd.read_csv(inst_path, delimiter='\t', header=None)
-
-        inst_df.index = [job_name + '_' + str(x) for x in inst_df.index.tolist()]
-
-        # Apply the conversion to each cell in the DataFrame
-        inst_df['geometry'] = inst_df[0].apply(string_to_polygon)
-
-        inst_df['shard'] = pd.Series(shard_name, index=inst_df.index)
-        inst_df['job'] = pd.Series(job_name, index=inst_df.index)
-
-        # Create a GeoDataFrame
-        inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
+            inst_filename = os.path.basename(inst_path)
+            inst_gdf = gpd.read_parquet(inst_path)
+            parts = inst_filename.split('_')
+            shard_index = parts[2]
+            job_id = parts[3].split('.')[0]
+    
+            shard_name = f'shard-{shard_index}'
+            job_name = f'{shard_name}_job-{job_id}'
+            inst_gdf.index = [f'{job_name}_{i}' for i in range(len(inst_gdf))]
+    
+            inst_gdf['shard'] = shard_name
+            inst_gdf['job'] = job_name
+            
+        else:
+            
+            inst_filename = inst_path.split('/')[-1]
+            shard_index = inst_filename.split('_')[2].split('_')[0]
+            job_id = inst_filename.split('_')[3].split('_')[0]
+    
+            shard_name = 'shard-' + str(shard_index)
+            tmp_job_name = 'job-' + job_id
+            job_name = shard_name + '_' + tmp_job_name
+    
+            inst_df = pd.read_csv(inst_path, delimiter='\t', header=None)
+    
+            inst_df.index = [job_name + '_' + str(x) for x in inst_df.index.tolist()]
+    
+            # Apply the conversion to each cell in the DataFrame
+            inst_df['geometry'] = inst_df[0].apply(string_to_polygon)
+    
+            inst_df['shard'] = pd.Series(shard_name, index=inst_df.index)
+            inst_df['job'] = pd.Series(job_name, index=inst_df.index)
+    
+            # Create a GeoDataFrame
+            inst_gdf = gpd.GeoDataFrame(inst_df, geometry='geometry')
 
         trimmed_inst_coords = trimmed_data_json[str(shard_index)][int(job_id)]
 
@@ -132,7 +151,13 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         gdf.index = [str(x) for x in gdf.index.tolist()]
 
         gdf.columns = [str(col) for col in gdf.columns]
-        gdf.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
+        
+        # Intersect with actual columns present in the GeoDataFrame
+        columns_to_drop = [col for col in columns_to_check if col in gdf.columns]
+        
+        # Drop them safely
+        gdf.drop(columns=columns_to_drop, axis=1, inplace=True)
+
         gdf.to_parquet('pre_merged_cell_polygons.parquet')
 
         gdf.reset_index(inplace=True)
@@ -144,7 +169,10 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         gdf_copy = gdf.copy()
         gdf_copy.index = [str(x) for x in gdf_copy.index.tolist()]
         gdf_copy.columns = [str(col) for col in gdf_copy.columns]
-        gdf_copy.drop(['0', 'point_within_trimmed_tile'], axis=1, inplace=True)
+        
+        columns_to_drop = [col for col in columns_to_check if col in gdf_copy.columns]
+        gdf_copy.drop(columns=columns_to_drop, axis=1, inplace=True)
+        
         gdf_copy.to_parquet('pre_merged_cell_polygons.parquet')
 
         all_cells = gdf.index.tolist()
@@ -178,8 +206,11 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         if len(list_conflict_ids) == 0:
 
             gdf.index = [x for x in range(len(gdf))]
-
-            gdf.drop([0, 'shard', 'job', 'color'], axis=1, inplace=True)
+            
+            columns_to_drop = [col for col in columns_to_check if col in gdf.columns]
+            columns_to_drop = list(set(columns_to_drop + ['shard', 'job', 'color']))
+            
+            gdf.drop(columns=columns_to_drop, axis=1, inplace=True)
 
             gdf.columns = [str(col) for col in gdf.columns]
 
@@ -272,7 +303,9 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
         # initialize gdf_nc
         gdf_nc = gdf.loc[list_no_conflict_cells]
         gdf_nc.reset_index(inplace=True)
-        gdf_nc.drop([0, 'point_within_trimmed_tile'], axis=1, inplace=True)
+
+        columns_to_drop = [col for col in columns_to_check if col in gdf_nc.columns]
+        gdf_nc.drop(columns=columns_to_drop, axis=1, inplace=True)
 
         gdf_ = gdf.reset_index()
         ioa_small_thresh = 0.5
@@ -431,7 +464,10 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
 
         gdf_nc.index = [str(x) for x in gdf_nc.index.tolist()]
 
-        gdf_nc.drop(['index', 'shard', 'job', 'color'], axis=1, inplace=True)
+        columns_to_drop = [col for col in columns_to_check if col in gdf_nc.columns]
+        columns_to_drop = list(set(columns_to_drop + ['shard', 'job', 'color']))
+
+        gdf_nc.drop(columns=columns_to_drop, axis=1, inplace=True)
 
         gdf_nc.columns = [str(col) for col in gdf_nc.columns]
 
@@ -444,6 +480,7 @@ if __name__ == '__main__':
     parser.add_argument('--intervals')
     parser.add_argument('--original_tile_polygons')
     parser.add_argument('--trimmed_tile_polygons')
+    parser.add_argument('--algorithm')
     parser.add_argument('--merge_approach')
     args = parser.parse_args()
 
@@ -451,4 +488,5 @@ if __name__ == '__main__':
         intervals = args.intervals,
         original_tile_polygons = args.original_tile_polygons,
         trimmed_tile_polygons = args.trimmed_tile_polygons,
+        algorithm = args.algorithm,
         merge_approach = args.merge_approach)

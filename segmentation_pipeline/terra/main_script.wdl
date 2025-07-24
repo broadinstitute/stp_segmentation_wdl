@@ -6,6 +6,7 @@ import "./modular_wdl_scripts/partition_transcripts.wdl" as PARTITION
 import "./modular_wdl_scripts/create_subset.wdl" as SUBSET
 import "./modular_wdl_scripts/instanseg.wdl" as INSTANSEG
 import "./modular_wdl_scripts/proseg.wdl" as PROSEG
+import "./modular_wdl_scripts/watershed.wdl" as WATERSHED
 
 workflow MAIN_WORKFLOW {
     input {
@@ -105,7 +106,7 @@ workflow MAIN_WORKFLOW {
 
     if (algorithm == "Cellpose") {
 
-        call SUBSET.create_subset as create_subset {input: image_paths_list=image_paths_list,
+        call SUBSET.create_subset as create_subset_CP {input: image_paths_list=image_paths_list,
                                         subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
                                         transform_file=transform_file,
                                         detected_transcripts_file=detected_transcripts_file,
@@ -119,7 +120,7 @@ workflow MAIN_WORKFLOW {
                                         algorithm=algorithm}
 
 
-        File calling_intervals_file = if defined(create_subset.intervals) then select_first([create_subset.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
+        File calling_intervals_file = if defined(create_subset_CP.intervals) then select_first([create_subset_CP.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
         Map[String, Array[Array[Float]]] calling_intervals = read_json(calling_intervals_file)
 
         Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
@@ -129,7 +130,7 @@ workflow MAIN_WORKFLOW {
             String index_for_intervals = "~{i}"
 
             call CELLPOSE.run_cellpose as run_cellpose {input:
-                            image_path=if defined(create_subset.tiled_image) then select_first([create_subset.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
+                            image_path=if defined(create_subset_CP.tiled_image) then select_first([create_subset_CP.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
                             diameter= if defined(diameter) then select_first([diameter]) else 0,
                             flow_thresh= if defined(flow_thresh) then select_first([flow_thresh]) else 0.0,
                             cell_prob_thresh= if defined(cell_prob_thresh) then select_first([cell_prob_thresh]) else 0.0,
@@ -142,12 +143,52 @@ workflow MAIN_WORKFLOW {
                             }
         }
 
-        call MERGE.merge_segmentation_dfs as merge_segmentation_dfs { input: outlines=run_cellpose.outlines,
-                    intervals=if defined(create_subset.intervals) then select_first([create_subset.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
-                    original_tile_polygons=if defined(create_subset.original_tile_polygons) then select_first([create_subset.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
-                    trimmed_tile_polygons=if defined(create_subset.trimmed_tile_polygons) then select_first([create_subset.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
+        call MERGE.merge_segmentation_dfs as merge_segmentation_dfs_CP { input: outlines=run_cellpose.outlines,
+                    intervals=if defined(create_subset_CP.intervals) then select_first([create_subset_CP.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
+                    original_tile_polygons=if defined(create_subset_CP.original_tile_polygons) then select_first([create_subset_CP.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
+                    trimmed_tile_polygons=if defined(create_subset_CP.trimmed_tile_polygons) then select_first([create_subset_CP.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
                     merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
         }
     }
+
+    if (algorithm == "Watershed") {
+
+        call SUBSET.create_subset as create_subset_W {input: image_paths_list=image_paths_list,
+                                        subset_data_y_x_interval=if defined(subset_data_y_x_interval) then select_first([subset_data_y_x_interval]) else [0],
+                                        transform_file=transform_file,
+                                        detected_transcripts_file=detected_transcripts_file,
+                                        technology=technology,
+                                        tiles_dimension=if defined(tiles_dimension) then select_first([tiles_dimension]) else 0.0,
+                                        overlap=if defined(overlap) then select_first([overlap]) else 0.0,
+                                        amount_of_VMs=if defined(amount_of_VMs) then select_first([amount_of_VMs]) else 1.0,
+                                        transcript_plot_as_channel=if defined(transcript_plot_as_channel) then select_first([transcript_plot_as_channel]) else 0,
+                                        sigma=if defined(sigma) then select_first([sigma]) else 0,
+                                        trim_amount=if defined(trim_amount) then select_first([trim_amount]) else 0,
+                                        algorithm=algorithm}
+
+
+        File calling_intervals_file = if defined(create_subset_W.intervals) then select_first([create_subset_W.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
+        Map[String, Array[Array[Float]]] calling_intervals = read_json(calling_intervals_file)
+
+        Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
+
+        scatter (i in range(num_VMs_in_use)) {
+
+            String index_for_intervals = "~{i}"
+
+            call WATERSHED.run_watershed as run_watershed {input:
+                            image_paths=if defined(create_subset_W.tiled_image) then select_first([create_subset_W.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
+                            shard_index=index_for_intervals
+                            }
+        }
+
+        call MERGE.merge_segmentation_dfs as merge_segmentation_dfs_W { input: outlines=run_watershed.outlines,
+                    intervals=if defined(create_subset_W.intervals) then select_first([create_subset_W.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json",
+                    original_tile_polygons=if defined(create_subset_W.original_tile_polygons) then select_first([create_subset_W.original_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_original_tiles.parquet",
+                    trimmed_tile_polygons=if defined(create_subset_W.trimmed_tile_polygons) then select_first([create_subset_W.trimmed_tile_polygons]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_trimmed_tiles.parquet",
+                    merge_approach=if defined(merge_approach) then select_first([merge_approach]) else "larger"
+        }
+    }
+
 
 }
