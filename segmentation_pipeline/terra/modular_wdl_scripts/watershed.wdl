@@ -21,7 +21,7 @@ task run_watershed {
     }
 
     runtime {
-        docker: "jishar7/watershed_for_terra@sha256:116ee09b1cba36f7178e21d35c56a03dc0b19664c2d0412be9b6d9786563ddbc"
+        docker: "jishar7/watershed_for_terra@sha256:b512da9797202a103bd96cbbd7ee3ca9170777ed88267eebd61b16105fe3ec52"
         memory: "200GB"
         preemptible: 0
         disks: "local-disk 300 HDD"

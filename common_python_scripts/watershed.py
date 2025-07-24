@@ -13,6 +13,11 @@ import os
 def load_and_preprocess(image_path):
     image = io.imread(image_path)
 
+    # Handle (1, H, W) shape → squeeze to (H, W)
+    if image.ndim == 3 and image.shape[0] == 1:
+        image = image[0]
+
+    # Handle (H, W, 3) → RGB to Grayscale
     if image.ndim == 3:
         if image.shape[2] == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -21,7 +26,7 @@ def load_and_preprocess(image_path):
         else:
             raise ValueError(f"Unsupported channel count: {image.shape[2]}")
     else:
-        gray = image
+        gray = image  # Already (H, W)
 
     return gray
 
@@ -54,17 +59,17 @@ def extract_polygons_from_labels(labels):
 def main(image_paths):
 
     image_paths = image_paths.split(",")
-    
+
     for image_path in image_paths:
-        
+
         gray = load_and_preprocess(image_path)
         labels = generate_labels(gray)
         polygons = extract_polygons_from_labels(labels)
-    
+
         filename = os.path.basename(image_path)
         parts = filename.split(".")[0].split("_")
         suffix = f"{parts[2]}_{parts[3]}" if len(parts) >= 4 else "output"
-    
+
         gdf = gpd.GeoDataFrame(geometry=polygons)
         gdf.to_parquet(f'cell_polygons_{suffix}.parquet')
 
