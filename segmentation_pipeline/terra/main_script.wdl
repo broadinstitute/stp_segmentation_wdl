@@ -120,14 +120,14 @@ workflow MAIN_WORKFLOW {
                                         algorithm=algorithm}
 
 
-        File calling_intervals_file = if defined(create_subset_CP.intervals) then select_first([create_subset_CP.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
-        Map[String, Array[Array[Float]]] calling_intervals = read_json(calling_intervals_file)
+        File calling_intervals_file_CP = if defined(create_subset_CP.intervals) then select_first([create_subset_CP.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
+        Map[String, Array[Array[Float]]] calling_intervals_CP = read_json(calling_intervals_file_CP)
 
-        Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
+        Int num_VMs_in_use_CP = round(calling_intervals_CP['number_of_VMs'][0][0])
 
-        scatter (i in range(num_VMs_in_use)) {
+        scatter (i in range(num_VMs_in_use_CP)) {
 
-            String index_for_intervals = "~{i}"
+            String index_for_intervals_CP = "~{i}"
 
             call CELLPOSE.run_cellpose as run_cellpose {input:
                             image_path=if defined(create_subset_CP.tiled_image) then select_first([create_subset_CP.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
@@ -139,7 +139,7 @@ workflow MAIN_WORKFLOW {
                             model_type= if defined(model_type) then select_first([model_type]) else 'None',
                             segment_channel= if defined(segment_channel) then select_first([segment_channel]) else 0,
                             optional_channel = if defined(optional_channel) then select_first([optional_channel]) else 0,
-                            shard_index=index_for_intervals
+                            shard_index=index_for_intervals_CP
                             }
         }
 
@@ -167,18 +167,18 @@ workflow MAIN_WORKFLOW {
                                         algorithm=algorithm}
 
 
-        File calling_intervals_file = if defined(create_subset_W.intervals) then select_first([create_subset_W.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
-        Map[String, Array[Array[Float]]] calling_intervals = read_json(calling_intervals_file)
+        File calling_intervals_file_W = if defined(create_subset_W.intervals) then select_first([create_subset_W.intervals]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_json.json"
+        Map[String, Array[Array[Float]]] calling_intervals_W = read_json(calling_intervals_file_W)
 
-        Int num_VMs_in_use = round(calling_intervals['number_of_VMs'][0][0])
+        Int num_VMs_in_use_W = round(calling_intervals_W['number_of_VMs'][0][0])
 
-        scatter (i in range(num_VMs_in_use)) {
+        scatter (i in range(num_VMs_in_use_W)) {
 
-            String index_for_intervals = "~{i}"
+            String index_for_intervals_W = "~{i}"
 
             call WATERSHED.run_watershed as run_watershed {input:
                             image_paths=if defined(create_subset_W.tiled_image) then select_first([create_subset_W.tiled_image]) else "gs://fc-42006ad5-3f3e-4396-94d8-ffa1e45e4a81/datasets/dummy_tif.tif",
-                            shard_index=index_for_intervals
+                            shard_index=index_for_intervals_W
                             }
         }
 

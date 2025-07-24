@@ -3,11 +3,14 @@ task run_watershed {
 
     input {
         Array[File] image_paths
+        String? shard_index
     }
 
     command <<<
 
-            python /opt/watershed.py --image_paths ~{sep=',' image_paths}
+        IFS=', ' read -r -a combined_file_array <<< "$(echo "~{sep=', ' image_paths}" | tr ', ' '\n' | grep "tiled_image_~{shard_index}_.*\.tiff" | tr '\n' ', ')"
+
+        python /opt/watershed.py --image_paths ${sep=',' combined_file_array}
 
     >>>
 
