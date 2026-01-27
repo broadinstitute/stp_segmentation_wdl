@@ -10,6 +10,7 @@ from shapely.validation import make_valid
 from shapely.affinity import translate
 import matplotlib.pyplot as plt
 import warnings
+from pathlib import Path
 
 
 def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons, algorithm, merge_approach='larger'):
@@ -107,13 +108,15 @@ def main(cell_outlines, intervals, original_tile_polygons, trimmed_tile_polygons
 
             # inst_df = pd.read_csv(inst_path, delimiter='\t', header=None)
 
+            inst_path = Path(inst_path)
+
             # Skip truly empty files (fast path)
             if inst_path.stat().st_size == 0:
                 print(f"Skipping empty file: {inst_path}")
                 continue
 
             try:
-                inst_df = pd.read_csv(inst_path, delimiter=delimiter, header=None)
+                inst_df = pd.read_csv(inst_path, delimiter='\t', header=None)
             except EmptyDataError:
                 print(f"Skipping empty/invalid file: {inst_path}")
                 continue
